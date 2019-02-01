@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28306.52
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Syntax", "Syntax", "{CBFD46D8-4448-4CD6-B9EF-D9D7D6AD507E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Converter", "Converter", "{A9210F5A-9E37-4F93-B89D-DA347AE98029}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSharp", "CSharp", "{FA2C645A-8035-4B1A-B95A-1B01F06E90CC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp", "src\Converter\CSharp\GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp.csproj", "{F2537EF3-0813-4F92-9C08-ECB7EA1B2E93}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Startup", "Startup", "{C1BF44FB-F123-4459-9EFA-A0ABAE70D4C0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeScriptConverter", "src\Startup\TypeScriptConverter.csproj", "{F66EA55D-C726-4649-9BA2-934F739411B1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrapeCity.CodeAnalysis.TypeScript.Syntax", "src\Syntax\GrapeCity.CodeAnalysis.TypeScript.Syntax.csproj", "{E416CE28-6163-46BA-8078-01C0C93BF690}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F2537EF3-0813-4F92-9C08-ECB7EA1B2E93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2537EF3-0813-4F92-9C08-ECB7EA1B2E93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2537EF3-0813-4F92-9C08-ECB7EA1B2E93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2537EF3-0813-4F92-9C08-ECB7EA1B2E93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F66EA55D-C726-4649-9BA2-934F739411B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F66EA55D-C726-4649-9BA2-934F739411B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F66EA55D-C726-4649-9BA2-934F739411B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F66EA55D-C726-4649-9BA2-934F739411B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E416CE28-6163-46BA-8078-01C0C93BF690}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E416CE28-6163-46BA-8078-01C0C93BF690}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E416CE28-6163-46BA-8078-01C0C93BF690}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E416CE28-6163-46BA-8078-01C0C93BF690}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FA2C645A-8035-4B1A-B95A-1B01F06E90CC} = {A9210F5A-9E37-4F93-B89D-DA347AE98029}
+		{F2537EF3-0813-4F92-9C08-ECB7EA1B2E93} = {FA2C645A-8035-4B1A-B95A-1B01F06E90CC}
+		{F66EA55D-C726-4649-9BA2-934F739411B1} = {C1BF44FB-F123-4459-9EFA-A0ABAE70D4C0}
+		{E416CE28-6163-46BA-8078-01C0C93BF690} = {CBFD46D8-4448-4CD6-B9EF-D9D7D6AD507E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {35DD1E7B-8F32-42A4-A4FB-B5730DF57701}
+	EndGlobalSection
+EndGlobal

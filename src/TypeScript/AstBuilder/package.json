@@ -1,0 +1,21 @@
+{
+  "name": "ts2ast",
+  "version": "0.1.0",
+  "description": "GrapeCity Tools",
+  "private": true,
+  "author": "GrapeCity",
+  "license": "ISC",
+  "keywords": [
+    "GrapeCity",
+    "Tools"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "typescript": "^3.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.0"
+  }
+}
