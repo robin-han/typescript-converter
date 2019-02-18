@@ -1,16 +1,16 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
 namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
-    public class PublicKeyword : Node
+    public class OverrideKeyword : Node
     {
         #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.PublicKeyword; }
+            get { return NodeKind.OverrideKeyword; }
         }
         #endregion
 
@@ -34,7 +34,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         internal override string GetText()
         {
-            return "public";
+            return "override";
         }
     }
 }

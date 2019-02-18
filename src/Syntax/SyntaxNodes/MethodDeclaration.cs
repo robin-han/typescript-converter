@@ -132,6 +132,27 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             {
                 this.Modifiers.Add(this.CreateNode(NodeKind.PublicKeyword));
             }
+
+            JSDocComment docComment = this.JsDoc.Count > 0 ? this.JsDoc[0] as JSDocComment : null;
+            if (docComment != null)
+            {
+                foreach (Node tag in docComment.Tags)
+                {
+                    if (tag.Kind != NodeKind.JSDocTag)
+                    {
+                        continue;
+                    }
+                    JSDocTag docTag = tag as JSDocTag;
+                    if (docTag.TagName.Text == "csoverride" && !this.Modifiers.Exists(n => n.Kind == NodeKind.OverrideKeyword))
+                    {
+                        this.Modifiers.Add(this.CreateNode(NodeKind.OverrideKeyword));
+                    }
+                    if (docTag.TagName.Text == "csnew" && !this.Modifiers.Exists(n => n.Kind == NodeKind.NewKeyword))
+                    {
+                        this.Modifiers.Add(this.CreateNode(NodeKind.NewKeyword));
+                    }
+                }
+            }
         }
 
     }

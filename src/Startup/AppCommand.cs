@@ -101,8 +101,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
             if (unSupportedNodes.Count > 0)
             {
-                this.Log("Find unsupported node kinds" + string.Join(",", unSupportedNodes));
-                this.Log("Do you want continue to convert? (yes|no) ");
+                this.Log("Find unsupported node kinds: " + string.Join(",", unSupportedNodes) + ". Do you want continue to convert? (yes|no) ");
                 string confirm = Console.ReadLine().ToLower();
                 if (confirm != "y" && confirm != "yes")
                 {
@@ -120,7 +119,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
                 DateTime startTime = DateTime.Now;
                 this.Log(string.Format("Starting convert '{0}'", doc.FileName));
 
-                CSharpConverter converter = new CSharpConverter();
+                LangConverter converter = new LangConverter(this.CreateConverterContext(arg.Config));
                 string savePath = arg.GetSavePath(doc.Path);
                 string code = converter.Convert(doc.RootNode);
 
@@ -174,6 +173,22 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
         private void PrintCode(string code)
         {
             Console.WriteLine(code);
+        }
+
+        private ConverterContext CreateConverterContext(Config config)
+        {
+            ConverterContext context = new ConverterContext();
+
+            context.Namespace = config.Namespace;
+            context.Usings = config.Usings;
+            context.NamespaceMappings = new Dictionary<string, string>();
+            foreach (string item in config.NamespaceMappings)
+            {
+                string[] ms = item.Split(':');
+                context.NamespaceMappings[ms[0]] = ms[1];
+            }
+
+            return context;
         }
 
         private CommandLineApplication CreateCommand()

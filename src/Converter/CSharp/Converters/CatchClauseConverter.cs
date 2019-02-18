@@ -14,13 +14,20 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(CatchClause node)
         {
-            CatchDeclarationSyntax csCatchDeclaration = SyntaxFactory.CatchDeclaration(
-                SyntaxFactory.IdentifierName(node.VariableDeclaration.Type.Text),
-                SyntaxFactory.Identifier(node.VariableDeclaration.Name.Text));
-
             BlockSyntax csCatchBlock = node.Block.ToCsNode<BlockSyntax>();
 
-            return SyntaxFactory.CatchClause().WithDeclaration(csCatchDeclaration).WithBlock(csCatchBlock);
+            if (node.VariableDeclaration == null)
+            {
+                return SyntaxFactory.CatchClause().WithBlock(csCatchBlock);
+            }
+            else
+            {
+                CatchDeclarationSyntax csCatchDeclaration = SyntaxFactory.CatchDeclaration(
+                   SyntaxFactory.IdentifierName(node.VariableDeclaration.Type.Text),
+                   SyntaxFactory.Identifier(node.VariableDeclaration.Name.Text));
+
+                return SyntaxFactory.CatchClause().WithDeclaration(csCatchDeclaration).WithBlock(csCatchBlock);
+            }
         }
     }
 }

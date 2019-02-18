@@ -30,6 +30,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             get;
             private set;
         }
+
+        public Config Config
+        {
+            get;
+            private set;
+        }
         #endregion
 
         public string GetSavePath(string sourcePath)
@@ -133,7 +139,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             {
                 Files = files,
                 Output = output,
-                BasePath = basePath
+                BasePath = basePath,
+
+                Config = config
             };
         }
     }

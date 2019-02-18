@@ -121,7 +121,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.Path = jsonObj.Path;
 
             JToken jsonText = jsonObj["text"];
-            this.Text = jsonText == null ? null: jsonText.ToObject<string>();
+            this.Text = jsonText?.ToObject<string>();
 
             JToken jsonPos = jsonObj["pos"];
             this.Pos = jsonPos == null ? 0 : jsonPos.ToObject<int>();

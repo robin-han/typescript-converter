@@ -13,7 +13,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public static T ToCsNode<T>(this Node tsNode)
         {
-            Type converter = CSharpConverter.GetConverter(tsNode);
+            Type converter = LangConverter.GetConverter(tsNode);
             if (converter == null)
             {
                 Log(string.Format("Cannot find {0} Converter", tsNode.Kind));

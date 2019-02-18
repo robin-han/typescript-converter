@@ -1,0 +1,21 @@
+{
+  "name": "tslintrules",
+  "version": "1.0.0",
+  "description": "GrapeCiyt Tools",
+  "private": true,
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "Robin",
+  "license": "ISC",
+  "devDependencies": {
+    "tslint": "^5.12.0",
+    "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "@types/node": "^10.12.18"
+  }
+}

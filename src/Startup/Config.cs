@@ -21,6 +21,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             this.Exclude = new List<string>();
             this.Output = string.Empty;
             this.FlatOutput = false;
+
+            this.Namespace = string.Empty;
+            this.Usings = new List<string>();
+            this.NamespaceMappings = new List<string>();
         }
 
         public List<string> Include
@@ -29,7 +33,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             private set;
         }
 
-      
+
         public List<string> Exclude
         {
             get;
@@ -43,6 +47,24 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
         }
 
         public bool FlatOutput
+        {
+            get;
+            private set;
+        }
+
+        public string Namespace
+        {
+            get;
+            private set;
+        }
+
+        public List<string> Usings
+        {
+            get;
+            private set;
+        }
+
+        public List<string> NamespaceMappings
         {
             get;
             private set;
@@ -66,7 +88,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
             JObject jsonConfig = JObject.Parse(File.ReadAllText(configFile));
             this.Init();
-        
+
             //output
             JToken jsonOutput = jsonConfig["output"];
             if (jsonOutput != null)
@@ -81,24 +103,57 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
                 this.FlatOutput = jsonFlatten.ToObject<bool>();
             }
 
+            //namesapce
+            JToken jsonNamespace = jsonConfig["namespace"];
+            if (jsonNamespace != null)
+            {
+                this.Namespace = jsonNamespace.ToObject<string>();
+            }
+
+            //usings
+            JToken jsonUsings = jsonConfig["usings"];
+            if (jsonUsings != null)
+            {
+                foreach (JToken item in jsonUsings)
+                {
+                    this.Usings.Add(item.ToObject<string>());
+                }
+            }
+
+            //namesapce mappings
+            JToken jsonNSMappings = jsonConfig["namespaceMappings"];
+            if (jsonNSMappings != null)
+            {
+                foreach (JToken item in jsonNSMappings)
+                {
+                    this.NamespaceMappings.Add(item.ToObject<string>());
+                }
+            }
+
             //exclude
             JToken jsonExclude = jsonConfig["exclude"];
-            foreach (JToken item in jsonExclude)
+            if (jsonExclude != null)
             {
-                this.Exclude.Add(item.ToObject<string>());
+                foreach (JToken item in jsonExclude)
+                {
+                    this.Exclude.Add(item.ToObject<string>());
+                }
             }
 
             //include
             JToken jsonInclude = jsonConfig["include"];
-            foreach (JToken item in jsonInclude)
+            if (jsonInclude != null)
             {
-                string include = item.ToObject<string>();
-                List<string> files = Utils.GetTsJsonFiles(include);
-                if (files == null)
+                foreach (JToken item in jsonInclude)
                 {
-                    return string.Format("Cannot find include file or directory {0}", include);
+                    string include = item.ToObject<string>();
+                    List<string> files = Utils.GetTsJsonFiles(include);
+                    if (files == null)
+                    {
+                        return string.Format("Cannot find include file or directory {0}", include);
+                    }
+                    this.Include.AddRange(files);
                 }
-                this.Include.AddRange(files);
             }
 
             return string.Empty;

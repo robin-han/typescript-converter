@@ -8,10 +8,22 @@ using System.Text;
 
 namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 {
-    public class CSharpConverter
+    public class LangConverter
     {
+        private ConverterContext _context;
+        public LangConverter() : this(new ConverterContext())
+        {
+        }
+
+        public LangConverter(ConverterContext context)
+        {
+            this._context = context ?? throw new ArgumentNullException();
+        }
+
         public string Convert(Node tsNode)
         {
+            CurrentContext = this.Context;
+
             var csNode = tsNode?.ToCsNode<CSharpSyntaxNode>();
             if (csNode != null)
             {
@@ -20,6 +32,19 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             return string.Empty;
         }
 
+        public ConverterContext Context
+        {
+            get
+            {
+                return this._context;
+            }
+        }
+
+        internal static ConverterContext CurrentContext
+        {
+            get;
+            set;
+        }
 
         internal static Type GetConverter(Node tsNode)
         {

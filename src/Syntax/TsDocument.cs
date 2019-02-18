@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Text;
 
@@ -40,14 +41,24 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public List<string> GetNodeKinds()
         {
             List<string> kinds = new List<string>();
-            List<Node> nodes = this.RootNode.DescendantsAndSelf();
 
-            foreach (Node node in nodes)
+            JObject jsonObject = JObject.Parse(File.ReadAllText(this.Path));
+            Queue<JToken> queue = new Queue<JToken>(jsonObject);
+            while (queue.Count > 0)
             {
-                string kind = node.Kind.ToString();
-                if (!kinds.Contains(kind))
+                JToken jsonToken = queue.Dequeue();
+                if (jsonToken.HasValues && jsonToken.Type == JTokenType.Object)
                 {
-                    kinds.Add(kind);
+                    string syntaxKind = TsAstBuilder.GetSyntaxNodeKey(jsonToken as JObject);
+                    if (!kinds.Contains(syntaxKind))
+                    {
+                        kinds.Add(syntaxKind);
+                    }
+                }
+
+                foreach (var token in jsonToken)
+                {
+                    queue.Enqueue(token);
                 }
             }
 

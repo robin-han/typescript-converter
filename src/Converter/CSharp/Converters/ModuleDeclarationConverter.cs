@@ -14,7 +14,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ModuleDeclaration node)
         {
-            NamespaceDeclarationSyntax csNS = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(node.Name.Text));
+            ConverterContext context = LangConverter.CurrentContext;
+
+            string ns = node.Name.Text;
+            if (context.NamespaceMappings.ContainsKey(ns))
+            {
+                ns = context.NamespaceMappings[ns];
+            }
+            else if (!string.IsNullOrEmpty(context.Namespace))
+            {
+                ns = context.Namespace;
+            }
+            NamespaceDeclarationSyntax csNS = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(ns));
 
             if (node.Body is ModuleBlock mb)
             {

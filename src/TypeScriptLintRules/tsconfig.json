@@ -1,0 +1,11 @@
+{
+    "include": ["src/**/*.ts"],
+    "compilerOptions": {
+        "target": "es5",
+        "lib": ["es5", "es6", "dom"],
+        "noImplicitAny": true,
+        "removeComments": true,
+        "declaration": false,
+        "outDir": "lib"
+    }
+}

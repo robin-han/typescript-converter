@@ -1,18 +1,16 @@
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json.Linq;
 
 namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
-    public class PublicKeyword : Node
+    public class BarToken : Node
     {
-        #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.PublicKeyword; }
+            get { return NodeKind.BarToken; }
         }
-        #endregion
 
         public override void Init(JObject jsonObj)
         {
@@ -31,11 +29,5 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-
-        internal override string GetText()
-        {
-            return "public";
-        }
     }
 }
-

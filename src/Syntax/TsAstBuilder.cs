@@ -77,7 +77,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         private Node CreateNode(JObject obj)
         {
-            string syntaxKind = this.GetSyntaxNodeKey(obj);
+            string syntaxKind = GetSyntaxNodeKey(obj);
             var nodeTypes = AllNodeTypes;
 
             if (nodeTypes.ContainsKey(syntaxKind))
@@ -96,7 +96,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             return null;
         }
 
-        private string GetSyntaxNodeKey(JObject node)
+        internal static string GetSyntaxNodeKey(JObject node)
         {
             string kind = node["kind"].ToString();
             if (Enum.TryParse(typeof(NodeKind), kind, out object result))
