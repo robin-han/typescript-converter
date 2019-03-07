@@ -32,7 +32,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 
             DelegateDeclarationSyntax csDelegateDeclaration = SyntaxFactory
                 .DelegateDeclaration(fn.Type.ToCsNode<TypeSyntax>(), node.Name.Text)
-                .AddParameterListParameters(fn.Parameters.ToCsNodes<ParameterSyntax>());
+                .AddParameterListParameters(fn.Parameters.ToCsNodes<ParameterSyntax>())
+                .AddModifiers(node.Modifiers.ToCsNodes<SyntaxToken>()); ;
 
             if (node.TypeParameters.Count > 0)
             {

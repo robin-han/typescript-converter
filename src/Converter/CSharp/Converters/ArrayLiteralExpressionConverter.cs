@@ -14,15 +14,22 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ArrayLiteralExpression node)
         {
-            InitializerExpressionSyntax csInitilizerExprs = SyntaxFactory
-                .InitializerExpression(SyntaxKind.CollectionInitializerExpression)
-                .AddExpressions(node.Elements.ToCsNodes<ExpressionSyntax>());
-
-            return SyntaxFactory
-                .ObjectCreationExpression(SyntaxFactory
-                    .GenericName("Array")
-                    .AddTypeArgumentListArguments(node.Type.ToCsNode<TypeSyntax>()))
-                .WithInitializer(csInitilizerExprs);
+            TypeSyntax csType = node.Type.ToCsNode<TypeSyntax>();
+            if (node.Elements.Count == 0)
+            {
+                return SyntaxFactory
+                    .ObjectCreationExpression(csType)
+                    .AddArgumentListArguments();
+            }
+            else
+            {
+                InitializerExpressionSyntax csInitilizerExprs = SyntaxFactory
+                    .InitializerExpression(SyntaxKind.CollectionInitializerExpression)
+                    .AddExpressions(node.Elements.ToCsNodes<ExpressionSyntax>());
+                return SyntaxFactory
+                    .ObjectCreationExpression(csType)
+                    .WithInitializer(csInitilizerExprs);
+            }
         }
     }
 

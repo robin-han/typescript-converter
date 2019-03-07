@@ -43,6 +43,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return this._type;
             }
+            private set
+            {
+                this._type = value;
+            }
         }
         #endregion
 
@@ -53,8 +57,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.Expression = null;
             this.Arguments = new List<Node>();
             this.TypeArguments = new List<Node>();
-            this._type = null;
-
+            this.Type = null;
         }
 
         public override void AddNode(Node childNode)

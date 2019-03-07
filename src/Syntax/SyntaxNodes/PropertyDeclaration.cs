@@ -43,6 +43,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return this._type;
             }
+            private set
+            {
+                this._type = value;
+            }
         }
 
         public Node Initializer
@@ -50,6 +54,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             get;
             private set;
         }
+
+        private Node QuestionToken { get; set; }
         #endregion
 
         public override void Init(JObject jsonObj)
@@ -59,7 +65,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.JsDoc = new List<Node>();
             this.Modifiers = new List<Node>();
             this.Name = null;
-            this._type = null;
+            this.Type = null;
         }
 
         public override void AddNode(Node childNode)
@@ -82,7 +88,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
 
                 case "type":
-                    this._type = childNode;
+                    this.Type = childNode;
                     break;
 
                 case "initializer":
@@ -97,7 +103,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         protected override Node InferType()
         {
-            return this.CreateNode(NodeKind.AnyKeyword);
+            Node type = null;
+            if (this.Initializer != null)
+            {
+                type = this.GetNodeType(this.Initializer);
+            }
+            return type ?? this.CreateNode(NodeKind.AnyKeyword);
         }
 
         protected override void NormalizeImp()

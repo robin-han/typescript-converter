@@ -7,7 +7,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class ArrayType : Node
     {
-        private bool _isList = true;
+        private bool _isParams = false;
 
         #region Properties
         public override NodeKind Kind
@@ -21,18 +21,17 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             private set;
         }
 
-        public bool IsList
+        public bool IsParams
         {
             get
             {
-                return this._isList;
+                return this._isParams;
             }
             set
             {
-                this._isList = value;
+                this._isParams = value;
             }
         }
-
         #endregion
 
         public override void Init(JObject jsonObj)

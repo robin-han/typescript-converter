@@ -17,6 +17,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             JObject jsonObject = JObject.Parse(File.ReadAllText(path));
             Node rootNode = this.Build(jsonObject);
+            rootNode.Normalize();
 
             TsDocument document = new TsDocument()
             {
@@ -29,10 +30,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public Node Build(JToken jsonToken)
         {
-            Node node = this.Build(jsonToken, null);
-            node.Normalize();
-
-            return node;
+            return this.Build(jsonToken, null);
         }
 
         private Node Build(JToken jsonToken, Node parent)

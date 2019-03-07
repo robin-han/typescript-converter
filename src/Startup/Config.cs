@@ -25,6 +25,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             this.Namespace = string.Empty;
             this.Usings = new List<string>();
             this.NamespaceMappings = new List<string>();
+            this.OmittedQualifiedNames = new List<string>();
         }
 
         public List<string> Include
@@ -65,6 +66,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
         }
 
         public List<string> NamespaceMappings
+        {
+            get;
+            private set;
+        }
+
+        public List<string> OmittedQualifiedNames
         {
             get;
             private set;
@@ -127,6 +134,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
                 foreach (JToken item in jsonNSMappings)
                 {
                     this.NamespaceMappings.Add(item.ToObject<string>());
+                }
+            }
+
+            //omitted qualified names
+            JToken jsonOmittedNames = jsonConfig["omittedQualifiedNames"];
+            if (jsonOmittedNames != null)
+            {
+                foreach (JToken item in jsonOmittedNames)
+                {
+                    this.OmittedQualifiedNames.Add(item.ToObject<string>());
                 }
             }
 

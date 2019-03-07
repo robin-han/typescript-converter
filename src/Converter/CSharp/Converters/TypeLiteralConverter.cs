@@ -18,37 +18,37 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 
             if (members.Count == 0)
             {
-                return null;
+                //TODO: NOT SUPPORT
+                return SyntaxFactory.ParseExpression(this.CommentText(node.Text));
             }
-
-            switch (members[0].Kind)
+            else if (members.Count == 1)
             {
-                //
-                case NodeKind.PropertySignature:
-                    if (members.Count == 1)
-                    {
-                        PropertySignature member = members[0] as PropertySignature;
-                        return SyntaxFactory.GenericName("Hashtable").AddTypeArgumentListArguments(SyntaxFactory.PredefinedType(
-                            SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
-                            member.Type.ToCsNode<TypeSyntax>());
-                    }
+                Node member = members[0];
+                switch (member.Kind)
+                {
+                    case NodeKind.PropertySignature:
+                        return SyntaxFactory.GenericName("Hashtable").AddTypeArgumentListArguments(
+                            SyntaxFactory.IdentifierName("String"),
+                            (member as PropertySignature).Type.ToCsNode<TypeSyntax>());
 
-                    List<TupleElementSyntax> csTupleElements = new List<TupleElementSyntax>();
-                    foreach (PropertySignature member in members)
-                    {
-                        csTupleElements.Add(SyntaxFactory.TupleElement(member.Type.ToCsNode<TypeSyntax>(), SyntaxFactory.Identifier(member.Name.Text)));
-                    }
+                    case NodeKind.IndexSignature:
+                        return member.ToCsNode<TypeSyntax>();
 
-                    return SyntaxFactory.TupleType().WithElements(SyntaxFactory.SeparatedList(csTupleElements));
-
-                //
-                case NodeKind.IndexSignature:
-                    return members[0].ToCsNode<TypeSyntax>();
-
-                default:
-                    return null;
+                    default:
+                        //TODO: NOT SUPPORT
+                        return SyntaxFactory.ParseExpression(this.CommentText(node.Text));
+                }
             }
+            else
+            {
+                List<TupleElementSyntax> csTupleElements = new List<TupleElementSyntax>();
+                foreach (PropertySignature member in members)
+                {
+                    csTupleElements.Add(SyntaxFactory.TupleElement(member.Type.ToCsNode<TypeSyntax>(), SyntaxFactory.Identifier(member.Name.Text)));
+                }
 
+                return SyntaxFactory.TupleType().WithElements(SyntaxFactory.SeparatedList(csTupleElements));
+            }
         }
     }
 }

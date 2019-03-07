@@ -14,14 +14,34 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(Identifier node)
         {
+            NameSyntax csNameSyntax = null;
             List<Node> typeArguments = node.Parent == null ? null : node.Parent.GetValue("TypeArguments") as List<Node>;
             if (typeArguments != null && typeArguments.Count > 0)
             {
-                return SyntaxFactory
+                csNameSyntax = SyntaxFactory
                    .GenericName(node.Text)
                    .AddTypeArgumentListArguments(typeArguments.ToCsNodes<TypeSyntax>());
             }
-            return SyntaxFactory.IdentifierName(node.Text);
+            else
+            {
+                csNameSyntax = SyntaxFactory.IdentifierName(node.Text);
+            }
+
+            //
+            string asType = node.As;
+            if (string.IsNullOrEmpty(asType))
+            {
+                return csNameSyntax;
+            }
+            else
+            {
+                asType = this.StripType(asType);
+                BinaryExpressionSyntax csAs = SyntaxFactory.BinaryExpression(
+                    SyntaxKind.AsExpression,
+                    csNameSyntax,
+                    SyntaxFactory.ParseName(asType));
+                return SyntaxFactory.ParenthesizedExpression(csAs);
+            }
         }
     }
 }

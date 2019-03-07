@@ -96,8 +96,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         {
             switch (tsNode.Kind)
             {
-                case NodeKind.ExportKeyword:
-                    return true;
+                //case NodeKind.ExportKeyword:
+                //    return true;
 
                 default:
                     return false;

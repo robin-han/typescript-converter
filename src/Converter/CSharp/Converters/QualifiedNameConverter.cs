@@ -14,9 +14,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(QualifiedName node)
         {
-            NameSyntax csLeft = node.Left.ToCsNode<NameSyntax>();
             SimpleNameSyntax csRight = null;
-
             List<Node> typeArguments = node.Parent == null ? null : node.Parent.GetValue("TypeArguments") as List<Node>;
             if (typeArguments != null && typeArguments.Count > 0)
             {
@@ -29,7 +27,14 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 csRight = node.Right.ToCsNode<SimpleNameSyntax>();
             }
 
-            return SyntaxFactory.QualifiedName(csLeft, csRight);
+            // omit names(dv. core.)
+            List<string> omittedNames = LangConverter.CurrentContext.OmittedQualifiedNames;
+            if (omittedNames.Count > 0 && omittedNames.Contains(node.Left.Text.Trim()))
+            {
+                return csRight;
+            }
+            // 
+            return SyntaxFactory.QualifiedName(node.Left.ToCsNode<NameSyntax>(), csRight);
         }
     }
 }

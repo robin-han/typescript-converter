@@ -43,6 +43,40 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
+
+        protected override void NormalizeImp()
+        {
+            base.NormalizeImp();
+
+            if (this.IsArrayClearStatement()) // change array.length = 0 to array.clear
+            {
+                BinaryExpression binaryExpr = this.Expression as BinaryExpression;
+                CallExpression callExpr = this.CreateNode(NodeKind.CallExpression) as CallExpression;
+                callExpr.Pos = binaryExpr.Pos;
+                callExpr.End = binaryExpr.End;
+                callExpr.Expression = binaryExpr.Left;
+                (callExpr.Expression as PropertyAccessExpression).Name.Text = "clear";
+
+                this.Expression = callExpr;
+            }
+        }
+
+        private bool IsArrayClearStatement()
+        {
+            if (this.Expression.Kind != NodeKind.BinaryExpression)
+            {
+                return false;
+            }
+
+            BinaryExpression binaryExpr = this.Expression as BinaryExpression;
+            if (binaryExpr.Left.Kind != NodeKind.PropertyAccessExpression)
+            {
+                return false;
+            }
+
+            PropertyAccessExpression left = binaryExpr.Left as PropertyAccessExpression;
+            return (left.Name.Text == "length" && binaryExpr.OperatorToken.Kind == NodeKind.EqualsToken && binaryExpr.Right.Text == "0");
+        }
     }
 }
 

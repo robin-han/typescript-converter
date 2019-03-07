@@ -31,6 +31,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return this._type;
             }
+            private set
+            {
+                this._type = value;
+            }
         }
         #endregion
 
@@ -40,7 +44,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             base.Init(jsonObj);
 
             this.Declarations = new List<Node>();
-            this._type = null;
+            this.Type = null;
         }
 
         public override void AddNode(Node childNode)
@@ -55,7 +59,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
 
                 case "type":
-                    this._type = childNode;
+                    this.Type = childNode;
                     break;
 
                 default:
@@ -66,14 +70,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         protected override Node InferType()
         {
-            VariableDeclarationNode variableDeclaration = this.Declarations.Count > 0 ? this.Declarations[0] as VariableDeclarationNode : null;
-            Node variableType = variableDeclaration == null ? null : variableDeclaration.Type;
-
-            if (variableType == null)
+            if (this.Declarations.Count > 0)
             {
-                variableType = this.CreateNode(NodeKind.AnyKeyword);
+                return (this.Declarations[0] as VariableDeclarationNode).Type;
             }
-            return variableType;
+            return this.CreateNode(NodeKind.AnyKeyword);
         }
 
     }

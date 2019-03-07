@@ -37,6 +37,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return this._type;
             }
+            private set
+            {
+                this._type = value;
+            }
         }
 
         public Node QuestionToken
@@ -58,6 +62,51 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 return this.QuestionToken != null;
             }
         }
+
+        public bool IsVariable
+        {
+            get
+            {
+                if (this.DotDotDotToken == null)
+                {
+                    return false;
+                }
+
+                Node type = this.Type;
+                if (type.Kind == NodeKind.ArrayType)
+                {
+                    ArrayType arrayType = type as ArrayType;
+                    if (arrayType.ElementType.Kind == NodeKind.ArrayType)
+                    {
+                        return false;
+                    }
+                }
+
+                if (type.Kind == NodeKind.TypeReference)
+                {
+                    TypeReference typeReference = type as TypeReference;
+                    if (typeReference.TypeName.Text == "Array" && typeReference.TypeArguments.Count > 0)
+                    {
+                        Node typeArgument = typeReference.TypeArguments[0];
+                        if (typeArgument.Kind == NodeKind.ArrayType)
+                        {
+                            return false;
+                        }
+                        if (typeArgument.Kind == NodeKind.TypeReference && (typeArgument as TypeReference).TypeName.Text == "Array")
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+        }
+
+        public bool IgnoreType
+        {
+            get;
+            internal set;
+        }
         #endregion
 
 
@@ -67,9 +116,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
             this.DotDotDotToken = null;
             this.Name = null;
-            this._type = null;
+            this.Type = null;
             this.QuestionToken = null;
             this.Initializer = null;
+            this.IgnoreType = false;
         }
 
         public override void AddNode(Node childNode)
@@ -88,7 +138,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
 
                 case "type":
-                    this._type = childNode;
+                    this.Type = childNode;
                     break;
 
                 case "questionToken":
@@ -109,31 +159,21 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             Node type = this.Type;
 
-            if (this.QuestionToken != null)
+            if (this.QuestionToken != null && this.Initializer == null)
             {
-                switch (type.Kind)
-                {
-                    case NodeKind.NumberKeyword:
-                        (type as NumberKeyword).Nullable = true;
-                        break;
-
-                    case NodeKind.BooleanKeyword:
-                        (type as BooleanKeyword).Nullable = true;
-                        break;
-
-                    //TODO: enum  NodeKind.TypeReference
-                    default:
-                        break;
-                }
-                if (this.Initializer == null)
-                {
-                    this.Initializer = this.CreateNode(NodeKind.NullKeyword);
-                }
+                this.Initializer = this.CreateNode(NodeKind.NullKeyword);
             }
 
-            if (this.DotDotDotToken != null && type.Kind == NodeKind.ArrayType)
+            if (this.IsVariable)
             {
-                (type as ArrayType).IsList = false;
+                if (type.Kind == NodeKind.ArrayType)
+                {
+                    (type as ArrayType).IsParams = true;
+                }
+                else if (type.Kind == NodeKind.TypeReference)
+                {
+                    (type as TypeReference).IsParams = true;
+                }
             }
         }
 

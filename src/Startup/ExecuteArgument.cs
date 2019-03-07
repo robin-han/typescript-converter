@@ -55,7 +55,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             }
             else
             {
-                path = Path.Combine(output, Path.GetRelativePath(basePath, sourcePath).Split('.')[0] + ".cs");
+                string relativePath = Path.GetRelativePath(basePath, sourcePath);
+                if (string.IsNullOrEmpty(relativePath) || relativePath == ".")
+                {
+                    relativePath = Path.GetFileName(sourcePath);
+                }
+                path = Path.Combine(output, relativePath.Split('.')[0] + ".cs");
             }
 
             string dirName = Path.GetDirectoryName(path);

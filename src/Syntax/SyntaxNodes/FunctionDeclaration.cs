@@ -61,6 +61,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return this._type;
             }
+            private set
+            {
+                this._type = value;
+            }
         }
         #endregion
 
@@ -73,7 +77,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.Name = null;
             this.TypeParameters = new List<Node>();
             this.Parameters = new List<Node>();
-            this._type = null;
+            this.Type = null;
             this.Body = null;
         }
 
@@ -105,7 +109,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
 
                 case "type":
-                    this._type = childNode;
+                    this.Type = childNode;
                     break;
 
                 case "body":

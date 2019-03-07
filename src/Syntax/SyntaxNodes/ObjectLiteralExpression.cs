@@ -7,6 +7,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class ObjectLiteralExpression : Expression
     {
+        private Node _type;
+
         #region Properties
         public override NodeKind Kind
         {
@@ -23,6 +25,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             get;
             private set;
+        }
+
+        public Node Type
+        {
+            get
+            {
+                if (this._type == null)
+                {
+                    this._type = this.InferType();
+                }
+                return this._type;
+            }
         }
         #endregion
 
@@ -51,6 +65,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     this.ProcessUnknownNode(childNode);
                     break;
             }
+        }
+
+        protected override Node InferType()
+        {
+            return this.GetNodeType(this);
         }
 
     }

@@ -76,6 +76,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return this._type;
             }
+            private set
+            {
+                this._type = value;
+            }
         }
         #endregion
 
@@ -85,7 +89,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
             this.GetAccessor = null;
             this.SetAccessor = null;
-            this._type = null;
+            this.Type = null;
         }
 
         public override void AddNode(Node childNode)

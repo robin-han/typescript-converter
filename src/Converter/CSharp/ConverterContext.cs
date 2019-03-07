@@ -10,6 +10,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         private string _ns;
         private List<string> _usings;
         private Dictionary<string, string> _nsMappings;
+        private List<string> _omittedQualifiedNames;
         #endregion
 
         #region Constructor
@@ -18,6 +19,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             this._ns = "";
             this._usings = new List<string>();
             this._nsMappings = new Dictionary<string, string>();
+            this._omittedQualifiedNames = new List<string>();
         }
         #endregion
 
@@ -63,6 +65,22 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                     value = new Dictionary<string, string>();
                 }
                 this._nsMappings = value;
+            }
+        }
+
+        public List<string> OmittedQualifiedNames
+        {
+            get
+            {
+                return this._omittedQualifiedNames;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    value = new List<string>();
+                }
+                this._omittedQualifiedNames = value;
             }
         }
         #endregion

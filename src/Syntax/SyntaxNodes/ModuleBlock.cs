@@ -62,36 +62,22 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             for (int i = 0; i < this.Statements.Count; i++)
             {
                 Node statement = this.Statements[i];
-                if (statement is Statement) // 'use strict', ;
+                if (statement.Kind == NodeKind.ExpressionStatement && statement.Text.IndexOf("use strict") >= 0) // 'use strict', ;
                 {
                     this.Statements.RemoveAt(i--);
                 }
                 else if (statement.Kind == NodeKind.TypeAliasDeclaration)
                 {
-                    this.Statements.RemoveAt(i--);
-
-                    if (this.IsValidTypeAlias(statement as TypeAliasDeclaration))
+                    TypeAliasDeclaration alias = statement as TypeAliasDeclaration;
+                    if (alias.Type.Kind != NodeKind.FunctionType)
                     {
+                        this.Statements.RemoveAt(i--);
                         this.TypeAliases.Add(statement);
                     }
                 }
             }
         }
 
-        private bool IsValidTypeAlias(TypeAliasDeclaration typeAlias)
-        {
-            Node type = typeAlias.Type;
-            switch (type.Kind)
-            {
-                case NodeKind.NumberKeyword:
-                case NodeKind.BooleanKeyword:
-                case NodeKind.StringKeyword:
-                    return false;
-
-                default:
-                    return true;
-            }
-        }
     }
 }
 

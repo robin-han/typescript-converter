@@ -14,33 +14,32 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ObjectLiteralExpression node)
         {
-            List<Node> objLiteralProps = node.Properties;
+            List<Node> properties = node.Properties;
 
-            Node type = node.Parent != null ? node.Parent.GetValue("Type") as Node : null;
-            if (type != null && objLiteralProps.Count <= 1)
+            List<ExpressionSyntax> initItemExprs = new List<ExpressionSyntax>();
+            foreach (PropertyAssignment prop in properties)
             {
-                ObjectCreationExpressionSyntax dic = SyntaxFactory.ObjectCreationExpression(type.ToCsNode<TypeSyntax>()).AddArgumentListArguments();
+                InitializerExpressionSyntax itemInitExpr = SyntaxFactory
+                    .InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
+                    .AddExpressions(prop.Name.ToCsNode<ExpressionSyntax>(), prop.Initializer.ToCsNode<ExpressionSyntax>());
 
-                if (objLiteralProps.Count > 0)
-                {
-                    List<ExpressionSyntax> initItemExprs = new List<ExpressionSyntax>();
-                    foreach (PropertyAssignment prop in objLiteralProps)
-                    {
-                        InitializerExpressionSyntax itemInitExpr = SyntaxFactory
-                            .InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
-                            .AddExpressions(prop.Name.ToCsNode<ExpressionSyntax>(), prop.Initializer.ToCsNode<ExpressionSyntax>());
-
-                        initItemExprs.Add(itemInitExpr);
-                    }
-
-                    dic = dic.WithInitializer(SyntaxFactory.InitializerExpression(
-                        SyntaxKind.CollectionInitializerExpression,
-                        SyntaxFactory.SeparatedList(initItemExprs)));
-                }
-                return dic;
+                initItemExprs.Add(itemInitExpr);
             }
-            return SyntaxFactory.TupleExpression().AddArguments(objLiteralProps.ToCsNodes<ArgumentSyntax>());
+
+            Node type = node.Type;
+            if (type.Kind == NodeKind.TypeLiteral && properties.Count >= 2)
+            {
+                return SyntaxFactory.TupleExpression().AddArguments(properties.ToCsNodes<ArgumentSyntax>());
+            }
+
+            return SyntaxFactory.ObjectCreationExpression(
+                SyntaxFactory.GenericName("Hashtable").AddTypeArgumentListArguments(
+                    SyntaxFactory.IdentifierName("String"),
+                    type.ToCsNode<TypeSyntax>()))
+                .AddArgumentListArguments()
+                .WithInitializer(SyntaxFactory.InitializerExpression(SyntaxKind.CollectionInitializerExpression, SyntaxFactory.SeparatedList(initItemExprs)));
         }
+
     }
 }
 

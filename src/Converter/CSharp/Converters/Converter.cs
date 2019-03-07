@@ -23,6 +23,26 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             return csArgumetns.ToArray();
         }
 
+        protected string StripType(string type)
+        {
+            List<string> omittedNames = LangConverter.CurrentContext.OmittedQualifiedNames;
+            foreach (string omitted in omittedNames)
+            {
+                int index = type.IndexOf(omitted);
+                if (index < 0)
+                {
+                    continue;
+                }
+
+                index = index + omitted.Length;
+                if (index < type.Length && type[index] == '.')
+                {
+                    type = type.Substring(index + 1);
+                }
+            }
+            return type;
+        }
+
         protected string CommentText(string text)
         {
             return "AAA___" + text + "___AAA";

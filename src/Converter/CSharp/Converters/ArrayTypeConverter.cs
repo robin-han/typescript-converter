@@ -14,17 +14,17 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ArrayType node)
         {
-            if (node.IsList)
-            {
-                return SyntaxFactory
-                    .GenericName("Array")
-                    .AddTypeArgumentListArguments(node.ElementType.ToCsNode<TypeSyntax>());
-            }
-            else
+            if (node.IsParams)
             {
                 return SyntaxFactory
                     .ArrayType(node.ElementType.ToCsNode<TypeSyntax>())
                     .AddRankSpecifiers(SyntaxFactory.ArrayRankSpecifier());
+            }
+            else
+            {
+                return SyntaxFactory
+                    .GenericName("Array")
+                    .AddTypeArgumentListArguments(node.ElementType.ToCsNode<TypeSyntax>());
             }
         }
     }

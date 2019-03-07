@@ -31,6 +31,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return this._type;
             }
+            private set
+            {
+                this._type = value;
+            }
         }
 
         public Node KeyType
@@ -47,7 +51,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             base.Init(jsonObj);
 
             this.Parameters = new List<Node>();
-            this._type = null;
+            this.Type = null;
         }
 
         public override void AddNode(Node childNode)
@@ -62,7 +66,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
 
                 case "type":
-                    this._type = childNode;
+                    this.Type = childNode;
                     break;
 
                 default:

@@ -19,6 +19,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             private set;
         }
 
+        public string As
+        {
+            get;
+            internal set;
+        }
+
         #region Ignored Properties
         private int OriginalKeywordKind { get; set; }
         #endregion
@@ -31,6 +37,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
             JToken jsonEscapedText = jsonObj["escapedText"];
             this.EscapedText = jsonEscapedText == null ? string.Empty : jsonEscapedText.ToObject<string>();
+            this.As = string.Empty;
         }
 
         public override void AddNode(Node childNode)

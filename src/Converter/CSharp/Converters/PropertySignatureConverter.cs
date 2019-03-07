@@ -18,9 +18,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 
             if (node.Parent != null && node.Parent.Kind == NodeKind.InterfaceDeclaration)
             {
-                csProperty = csProperty.AddAccessorListAccessors(
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
+                csProperty = csProperty.AddAccessorListAccessors(SyntaxFactory
+                    .AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
+
+                if (!node.Modifiers.Exists(n => n.Kind == NodeKind.ReadonlyKeyword))
+                {
+                    csProperty = csProperty.AddAccessorListAccessors(SyntaxFactory
+                        .AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
+                }
             }
             if (node.JsDoc.Count > 0)
             {

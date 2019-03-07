@@ -7,6 +7,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class TypeReference : Node
     {
+        private bool _isParams = false;
+
         #region Properties
         public override NodeKind Kind
         {
@@ -23,6 +25,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             get;
             private set;
+        }
+
+        public bool IsParams
+        {
+            get
+            {
+                return this._isParams;
+            }
+            set
+            {
+                this._isParams = value;
+            }
         }
         #endregion
 

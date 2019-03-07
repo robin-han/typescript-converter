@@ -70,32 +70,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         protected override Node InferType()
         {
-            Node parent = this.Parent;
-            switch (this.Parent.Kind)
-            {
-                case NodeKind.VariableDeclaration:
-                    return (parent as VariableDeclarationNode).Type;
-
-                case NodeKind.PropertyDeclaration:
-                    return (parent as PropertyDeclaration).Type;
-
-                case NodeKind.Parameter:
-                    return (parent as Parameter).Type;
-
-                case NodeKind.BinaryExpression:
-                    BinaryExpression binaryExpr = parent as BinaryExpression;
-                    if (binaryExpr.OperatorToken.Kind == NodeKind.EqualsToken) //assign
-                    {
-                        //TODO: find left(propertyAccess.Type)
-                    }
-                    return this.CreateNode(NodeKind.ObjectKeyword);
-
-                default:
-                    //TODO:
-                    return this.CreateNode(NodeKind.ObjectKeyword);
-            }
+            return this.GetNodeType(this);
         }
-
     }
 }
 

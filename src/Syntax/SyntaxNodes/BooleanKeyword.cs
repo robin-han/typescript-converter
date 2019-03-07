@@ -12,19 +12,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             get { return NodeKind.BooleanKeyword; }
         }
-
-        public bool Nullable
-        {
-            get;
-            internal set;
-        }
         #endregion
 
         public override void Init(JObject jsonObj)
         {
             base.Init(jsonObj);
-
-            this.Nullable = false;
         }
 
         public override void AddNode(Node childNode)

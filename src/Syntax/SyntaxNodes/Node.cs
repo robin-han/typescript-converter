@@ -37,10 +37,46 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             }
         }
 
-        public List<Node> Children
+        public List<Node> OriginalChildren
         {
             get;
             private set;
+        }
+
+        public List<Node> Children
+        {
+            get
+            {
+                List<Node> children = new List<Node>();
+
+                PropertyInfo[] properties = this.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
+                foreach (PropertyInfo prop in properties)
+                {
+                    if (!prop.CanWrite || this.IsIgnoredProperty(prop.Name))
+                    {
+                        continue;
+                    }
+
+                    Type propType = prop.PropertyType;
+                    if (this.IsNodeType(propType))
+                    {
+                        Node node = prop.GetValue(this) as Node;
+                        if (node != null)
+                        {
+                            children.Add(node);
+                        }
+                    }
+                    else if (this.IsNodeListType(propType))
+                    {
+                        List<Node> nodes = prop.GetValue(this) as List<Node>;
+                        if (nodes != null && nodes.Count > 0)
+                        {
+                            children.AddRange(nodes);
+                        }
+                    }
+                }
+                return children;
+            }
         }
 
         public string Path
@@ -110,12 +146,13 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         }
         #endregion
 
+        #region Public Methods
         public virtual void Init(JObject jsonObj)
         {
             this.TsNode = jsonObj;
 
             this.Parent = null;
-            this.Children = new List<Node>();
+            this.OriginalChildren = new List<Node>();
 
             this.Pocket = new Dictionary<string, object>();
             this.Path = jsonObj.Path;
@@ -160,7 +197,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public virtual void AddNode(Node childNode)
         {
             childNode.Parent = this;
-            this.Children.Add(childNode);
+            this.OriginalChildren.Add(childNode);
         }
 
         internal void AddNode(JObject tsNode)
@@ -171,45 +208,34 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public void Remove(Node childNode)
         {
             PropertyInfo[] properties = this.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            Type NodeType = typeof(Node);
-            Type removeType = childNode.GetType();
-
             foreach (PropertyInfo prop in properties)
             {
-                if (!prop.CanWrite)
+                if (!prop.CanWrite || this.IsIgnoredProperty(prop.Name))
                 {
                     continue;
                 }
 
                 Type propType = prop.PropertyType;
-                Type itemType = propType;
-                bool isNodeType = propType.Equals(NodeType) || propType.IsSubclassOf(NodeType);
-                bool isNodeListType = false;
-
-                if (propType.IsGenericType)
-                {
-                    itemType = propType.GetGenericArguments()[0];
-                    isNodeListType = itemType.Equals(NodeType) || itemType.IsSubclassOf(NodeType);
-                }
-
+                bool isNodeType = this.IsNodeType(propType);
+                bool isNodeListType = this.IsNodeListType(propType);
                 if (!isNodeType && !isNodeListType)
                 {
                     continue;
                 }
-                if (prop.Name == "Parent" || prop.Name == "Children")
-                {
-                    continue;
-                }
 
-                object propValue = prop.GetValue(this);
-                if (isNodeType && object.Equals(propValue, childNode))
+                if (isNodeType && object.Equals(prop.GetValue(this), childNode))
                 {
                     prop.SetValue(this, null);
                 }
-                if (isNodeListType && (removeType.Equals(itemType) || removeType.IsSubclassOf(itemType)))
+                if (isNodeListType)
                 {
-                    MethodInfo removeMethod = propType.GetMethod("Remove");
-                    removeMethod.Invoke(propValue, new object[] { childNode });
+                    Type itemType = propType.GetGenericArguments()[0];
+                    Type removeType = childNode.GetType();
+                    if (removeType.Equals(itemType) || removeType.IsSubclassOf(itemType))
+                    {
+                        MethodInfo removeMethod = propType.GetMethod("Remove");
+                        removeMethod.Invoke(prop.GetValue(this), new object[] { childNode });
+                    }
                 }
             }
         }
@@ -237,7 +263,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public List<Node> DescendantsAndSelf(Predicate<Node> match = null)
         {
-            List<Node> nodes = new List<Node> { this };
+            List<Node> nodes = new List<Node>();
+            if (match == null || match.Invoke(this))
+            {
+                nodes.Add(this);
+            }
             nodes.AddRange(this.Descendants(match));
 
             return nodes;
@@ -245,16 +275,20 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public void Normalize(bool onlySelf = false)
         {
-            List<Node> nodes = onlySelf ? new List<Node> { this } : this.DescendantsAndSelf();
-            foreach (Node node in nodes)
+            this.NormalizeImp();
+
+            foreach (Node node in this.Children)
             {
-                node.NormalizeImp();
+                node.Normalize();
             }
         }
+
         protected virtual void NormalizeImp()
         {
         }
+        #endregion
 
+        #region Internal and Private Methods
         protected virtual Node InferType()
         {
             return null;
@@ -274,7 +308,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             return string.Empty;
         }
 
-        protected Node CreateNode(NodeKind kind, string text = "")
+        public Node CreateNode(NodeKind kind, string text = "")
         {
             return this.CreateNode(
                 "{ " +
@@ -282,11 +316,13 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     "text: \"" + text + "\" " +
                 "}");
         }
-        protected Node CreateNode(string json)
+
+        public Node CreateNode(string json)
         {
             return this.CreateNode(JObject.Parse(json));
         }
-        protected Node CreateNode(JObject nodeJson)
+
+        public Node CreateNode(JObject nodeJson)
         {
             Node node = new TsAstBuilder().Build(nodeJson);
             node.Parent = this;
@@ -311,6 +347,303 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             return this.CreateNode(jsonString);
         }
 
+        public Node GetNodeType(Node node)
+        {
+            switch (node.Kind)
+            {
+                case NodeKind.StringLiteral:
+                    return this.CreateNode(NodeKind.StringKeyword);
+
+                case NodeKind.NumericLiteral:
+                    return this.CreateNode(NodeKind.NumberKeyword);
+
+                case NodeKind.PrefixUnaryExpression:
+                    PrefixUnaryExpression prefixExpr = node as PrefixUnaryExpression;
+                    if (prefixExpr.Operand.Kind == NodeKind.NumericLiteral)
+                    {
+                        return this.CreateNode(NodeKind.NumberKeyword);
+                    }
+                    return this.CreateNode(NodeKind.ObjectKeyword);
+
+                case NodeKind.TrueKeyword:
+                case NodeKind.FalseKeyword:
+                    return this.CreateNode(NodeKind.BooleanKeyword);
+
+                case NodeKind.NewExpression:
+                    return this.CreateNode((node as NewExpression).Type.TsNode);
+
+                case NodeKind.Identifier:
+                    Node identifierType = this.GetIndentifierType(node as Identifier);
+                    return identifierType ?? this.CreateNode(NodeKind.ObjectKeyword);
+
+                case NodeKind.PropertyAccessExpression:
+                    Node propertyAccessType = this.GetPropertyAccessType(node as PropertyAccessExpression);
+                    return propertyAccessType ?? this.CreateNode(NodeKind.ObjectKeyword);
+
+                //case NodeKind.CallExpression:
+                //    //TODO: find global method's type
+                //    return null;
+
+                case NodeKind.ArrayLiteralExpression:
+                    return this.GetArrayLiteralType(node as ArrayLiteralExpression);
+
+                case NodeKind.ObjectLiteralExpression:
+                    return this.GetObjectLiteralType(node as ObjectLiteralExpression);
+
+                default:
+                    return node.GetValue("Type") as Node;
+            }
+        }
+
+        protected Node GetIndentifierType(Identifier identifier)
+        {
+            string name = identifier.Text;
+
+            Block block = this.GetBlockParent(identifier);
+            while (block != null)
+            {
+                foreach (var statement in block.Statements)
+                {
+                    if (statement.Kind != NodeKind.VariableStatement)
+                    {
+                        continue;
+                    }
+
+                    VariableDeclarationList declarationList = (statement as VariableStatement).DeclarationList as VariableDeclarationList;
+                    VariableDeclarationNode declarationNode = declarationList.Declarations[0] as VariableDeclarationNode;
+                    if (declarationNode.Name.Text == name)
+                    {
+                        return declarationNode.Type;
+                    }
+                }
+                block = GetBlockParent(block);
+            }
+
+            MethodDeclaration methodDeclaration = this.GetMethodDeclarationParent(identifier);
+            if (methodDeclaration != null && (methodDeclaration.Parameters.Find(p => (p as Parameter).Name.Text == name) is Parameter methodParameter))
+            {
+                return methodParameter.Type;
+            }
+
+            Constructor ctor = this.GetConstructorParent(identifier);
+            if (ctor != null && (ctor.Parameters.Find(p => (p as Parameter).Name.Text == name) is Parameter ctorParameter))
+            {
+                return ctorParameter.Type;
+            }
+
+            return null;
+        }
+
+        protected Node GetPropertyAccessType(PropertyAccessExpression propertyAccess)
+        {
+            ClassDeclaration classDeclaration = this.GetClassDeclarationParent(propertyAccess);
+            if (classDeclaration != null)
+            {
+                string name = propertyAccess.Name.Text;
+                foreach (var memeber in classDeclaration.Members)
+                {
+                    if (memeber.Kind != NodeKind.PropertyDeclaration)
+                    {
+                        continue;
+                    }
+
+                    PropertyDeclaration propertyDeclaration = memeber as PropertyDeclaration;
+                    if (propertyDeclaration.Name.Text == name)
+                    {
+                        return propertyDeclaration.Type;
+                    }
+                }
+            }
+            return null;
+        }
+
+        protected Node GetArrayLiteralType(ArrayLiteralExpression arrayLiteral)
+        {
+            Node type = this.GetDeclarationType(arrayLiteral);
+            return type ?? this.GetValueType(arrayLiteral);
+        }
+
+        protected Node GetObjectLiteralType(ObjectLiteralExpression objectLiteral)
+        {
+            Node type = this.GetDeclarationType(objectLiteral);
+            return type ?? this.GetValueType(objectLiteral);
+        }
+
+        protected Node GetValueType(ArrayLiteralExpression value)
+        {
+            Node arrayType = this.CreateNode(NodeKind.ArrayType);
+            Node elementType = null;
+
+            List<Node> elements = value.Elements;
+            if (elements.Find(n => n.Kind == NodeKind.StringLiteral) != null)
+            {
+                elementType = this.CreateNode(NodeKind.StringKeyword);
+            }
+            else if (elements.Find(n => n.Kind == NodeKind.NumericLiteral || (n.Kind == NodeKind.PrefixUnaryExpression && (n as PrefixUnaryExpression).Operand.Kind == NodeKind.NumericLiteral)) != null)
+            {
+                elementType = this.CreateNode(NodeKind.NumberKeyword);
+            }
+            else
+            {
+                foreach (Node element in elements)
+                {
+                    if (element.Kind == NodeKind.Identifier || element.Kind == NodeKind.PropertyAccessExpression)
+                    {
+                        elementType = this.GetNodeType(element);
+                        break;
+                    }
+                }
+            }
+
+            elementType = elementType ?? this.CreateNode(NodeKind.ObjectKeyword);
+            elementType.Path = "elementType";
+            arrayType.AddNode(elementType);//only check first element
+            return arrayType;
+        }
+
+        protected Node GetValueType(ObjectLiteralExpression value)
+        {
+            List<Node> properties = value.Properties;
+            if (properties.Count == 0)
+            {
+                return this.CreateNode(NodeKind.ObjectKeyword);
+            }
+
+            TypeLiteral typeLiteral = this.CreateNode(NodeKind.TypeLiteral) as TypeLiteral;
+            foreach (PropertyAssignment prop in properties)
+            {
+                Node type = this.GetNodeType(prop.Initializer);
+                type = type ?? this.CreateNode(NodeKind.ObjectKeyword);
+                type.Path = "type";
+
+                Node propSignature = this.CreateNode(NodeKind.PropertySignature);
+                propSignature.AddNode(prop.Name.TsNode);
+                propSignature.AddNode(type);
+
+                typeLiteral.Members.Add(propSignature);
+            }
+            return typeLiteral;
+        }
+
+        private Node GetDeclarationType(Node node)
+        {
+            VariableDeclarationNode variableParent = node.Parent as VariableDeclarationNode;
+            if (variableParent != null)
+            {
+                return variableParent.Type;
+            }
+            //
+            Parameter paramterParent = node.Parent as Parameter;
+            if (paramterParent != null)
+            {
+                return paramterParent.Type;
+            }
+            //
+            PropertyDeclaration propertyParent = node.Parent as PropertyDeclaration;
+            if (propertyParent != null)
+            {
+                return propertyParent.Type;
+            }
+            //
+            BinaryExpression binaryParent = node.Parent as BinaryExpression;
+            if (binaryParent != null && binaryParent.OperatorToken.Kind == NodeKind.EqualsToken) //assign
+            {
+                switch (binaryParent.Left.Kind)
+                {
+                    case NodeKind.Identifier:
+                        return this.GetIndentifierType(binaryParent.Left as Identifier);
+
+                    case NodeKind.PropertyAccessExpression:
+                        return this.GetPropertyAccessType(binaryParent.Left as PropertyAccessExpression);
+
+                    default:
+                        return null;
+                }
+            }
+            return null;
+        }
+
+        protected ClassDeclaration GetClassDeclarationParent(Node node)
+        {
+            Node parent = node.Parent;
+            while (parent != null && parent.Kind != NodeKind.ClassDeclaration)
+            {
+                if (parent.Kind == NodeKind.ModuleBlock)
+                {
+                    break;
+                }
+
+                parent = parent.Parent;
+            }
+            return parent as ClassDeclaration;
+        }
+
+        protected MethodDeclaration GetMethodDeclarationParent(Node node)
+        {
+            Node parent = node.Parent;
+            while (parent != null && parent.Kind != NodeKind.MethodDeclaration)
+            {
+                if (parent.Kind == NodeKind.ClassDeclaration)
+                {
+                    break;
+                }
+
+                parent = parent.Parent;
+            }
+            return parent as MethodDeclaration;
+        }
+
+        protected Constructor GetConstructorParent(Node node)
+        {
+            Node parent = node.Parent;
+            while (parent != null && parent.Kind != NodeKind.Constructor)
+            {
+                if (parent.Kind == NodeKind.ClassDeclaration)
+                {
+                    break;
+                }
+
+                parent = parent.Parent;
+            }
+            return parent as Constructor;
+        }
+
+        protected Block GetBlockParent(Node node)
+        {
+            Node parent = node.Parent;
+            while (parent != null && parent.Kind != NodeKind.Block)
+            {
+                if (parent.Kind == NodeKind.MethodDeclaration)
+                {
+                    break;
+                }
+                parent = parent.Parent;
+            }
+            return parent as Block;
+        }
+
+        private bool IsNodeType(Type type)
+        {
+            Type nodeType = typeof(Node);
+            return type.Equals(nodeType) || type.IsSubclassOf(nodeType);
+        }
+
+        private bool IsNodeListType(Type type)
+        {
+            if (type.IsGenericType)
+            {
+                Type nodeType = typeof(Node);
+                Type itemType = type.GetGenericArguments()[0];
+                return itemType.Equals(nodeType) || itemType.IsSubclassOf(nodeType);
+            }
+            return false;
+        }
+
+        private bool IsIgnoredProperty(string propName)
+        {
+            return (propName == "Parent" || propName == "OriginalChildren");
+        }
+        #endregion
 
         [Conditional("DEBUG")]
         protected void ProcessUnknownNode(Node child)

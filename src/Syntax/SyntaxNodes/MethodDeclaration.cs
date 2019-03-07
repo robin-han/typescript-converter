@@ -55,12 +55,24 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return this._type;
             }
+            private set
+            {
+                this._type = value;
+            }
         }
 
         public Block Body
         {
             get;
             private set;
+        }
+
+        public bool IsStatic
+        {
+            get
+            {
+                return this.Modifiers.Exists(m => m.Kind == NodeKind.StaticKeyword);
+            }
         }
         #endregion
 
@@ -74,7 +86,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.Parameters = new List<Node>();
 
             this.Name = null;
-            this._type = null;
+            this.Type = null;
             this.Body = null;
         }
 
@@ -106,7 +118,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
 
                 case "type":
-                    this._type = childNode;
+                    this.Type = childNode;
                     break;
 
                 case "body":

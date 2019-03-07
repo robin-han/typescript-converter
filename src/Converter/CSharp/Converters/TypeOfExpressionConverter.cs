@@ -14,13 +14,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(TypeOfExpression node)
         {
-            return SyntaxFactory.MemberAccessExpression(
-                 SyntaxKind.SimpleMemberAccessExpression,
-                 SyntaxFactory.InvocationExpression(SyntaxFactory.MemberAccessExpression(
-                     SyntaxKind.SimpleMemberAccessExpression,
-                     node.Expression.ToCsNode<ExpressionSyntax>(),
-                     SyntaxFactory.IdentifierName("GetType"))),
-                 SyntaxFactory.IdentifierName("Name"));
+            return SyntaxFactory.InvocationExpression(SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                node.Expression.ToCsNode<ExpressionSyntax>(),
+                SyntaxFactory.IdentifierName("GetTypeName")));
         }
     }
 }

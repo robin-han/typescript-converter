@@ -49,6 +49,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return this._type;
             }
+            private set
+            {
+                this._type = value;
+            }
         }
 
         public Node Body
@@ -68,7 +72,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
             this.Name = null;
             this.Body = null;
-            this._type = null;
+            this.Type = null;
         }
 
         public override void AddNode(Node childNode)
@@ -95,7 +99,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
 
                 case "type":
-                    this._type = childNode;
+                    this.Type = childNode;
                     break;
 
                 case "body":

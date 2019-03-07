@@ -34,7 +34,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                     return SyntaxFactory.IdentifierName("Number");
 
                 case "Array":
-                    return SyntaxFactory.GenericName("Array").AddTypeArgumentListArguments(node.TypeArguments[0].ToCsNode<TypeSyntax>());
+                    if (node.IsParams)
+                    {
+                        return SyntaxFactory
+                            .ArrayType(node.TypeArguments[0].ToCsNode<TypeSyntax>())
+                            .AddRankSpecifiers(SyntaxFactory.ArrayRankSpecifier());
+                    }
+                    else
+                    {
+                        return SyntaxFactory
+                            .GenericName("Array")
+                            .AddTypeArgumentListArguments(node.TypeArguments[0].ToCsNode<TypeSyntax>());
+                    }
 
                 default:
                     return node.TypeName.ToCsNode<TypeSyntax>();

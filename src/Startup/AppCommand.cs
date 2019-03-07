@@ -181,6 +181,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
             context.Namespace = config.Namespace;
             context.Usings = config.Usings;
+            context.OmittedQualifiedNames = config.OmittedQualifiedNames;
             context.NamespaceMappings = new Dictionary<string, string>();
             foreach (string item in config.NamespaceMappings)
             {

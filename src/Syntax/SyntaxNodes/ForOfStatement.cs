@@ -43,6 +43,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return this._type;
             }
+            private set
+            {
+                this._type = value;
+            }
         }
 
         public Node Identifier
@@ -95,16 +99,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         protected override Node InferType()
         {
-            VariableDeclarationNode variableDeclaration = this.GetVariableDeclaration();
-            Node type = variableDeclaration == null ? null : variableDeclaration.Type;
-
-            if (type == null)
-            {
-                //TODO: get statement's type
-                type = this.CreateNode(NodeKind.ObjectKeyword);
-            }
-
-            return type;
+            //TODO: get statement's type
+            return this.CreateNode(NodeKind.AnyKeyword);
         }
 
         private VariableDeclarationNode GetVariableDeclaration()

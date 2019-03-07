@@ -60,14 +60,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     if (heritage.Text.Contains("extends"))
                     {
                         hasBaseClass = true;
+                        types.InsertRange(0, heritage.Types);
                     }
-                    types.AddRange(heritage.Types);
+                    else
+                    {
+                        types.AddRange(heritage.Types);
+                    }
                 }
 
                 //make all class has the base object
                 if (!hasBaseClass)
                 {
-                    types.Add(this.CreateNode("{ " +
+                    types.Insert(0, this.CreateNode("{ " +
                         "kind: \"ExpressionWithTypeArguments \", " +
                         "expression: { " +
                            "kind: \"Identifier\", " +
@@ -133,11 +137,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         protected override void NormalizeImp()
         {
             base.NormalizeImp();
-
-            if (!this.Modifiers.Exists(n => n.Kind == NodeKind.PublicKeyword || n.Kind == NodeKind.PrivateKeyword || n.Kind == NodeKind.ProtectedKeyword))
-            {
-                this.Modifiers.Add(this.CreateNode(NodeKind.PublicKeyword));
-            }
 
             this.RemoveUnnecessaryMembers();
             this.CombineGetSetAccess();
@@ -251,12 +250,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             }
 
             IfStatement ifStatement = body.Statements[0] as IfStatement;
-            if (ifStatement.ElseStatement == null || ifStatement.Expression.Text.Replace(" ", "") != "arguments.length<=0")
+            if (ifStatement.ElseStatement == null)
             {
                 return false;
             }
-
-            return true;
+            string exprText = ifStatement.Expression.Text.Replace(" ", "");
+            return (exprText == "arguments.length<=0" || exprText == "arguments.length==0" || exprText == "arguments.length===0");
         }
 
     }

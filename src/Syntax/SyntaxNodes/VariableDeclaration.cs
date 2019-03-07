@@ -15,12 +15,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             get { return NodeKind.VariableDeclaration; }
         }
 
-        public Node VariableDeclaration
-        {
-            get;
-            private set;
-        }
-
         public Node Name
         {
             get;
@@ -36,6 +30,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     this._type = this.InferType();
                 }
                 return this._type;
+            }
+            private set
+            {
+                this._type = value;
             }
         }
 
@@ -53,7 +51,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.Name = null;
             this.Initializer = null;
 
-            this._type = null;
+            this.Type = null;
         }
 
         public override void AddNode(Node childNode)
@@ -68,7 +66,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
 
                 case "type":
-                    this._type = childNode;
+                    this.Type = childNode;
                     break;
 
                 case "initializer":
@@ -83,91 +81,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         protected override Node InferType()
         {
-            Node initValue = this.Initializer;
-            if (initValue != null)
-            {
-                return this.GetValueType(initValue);
-            }
-
             if (this.Parent.Kind == NodeKind.CatchClause)
             {
                 return this.CreateNode(NodeKind.Identifier, "Exception");
             }
-            return this.CreateNode(NodeKind.AnyKeyword);
-        }
 
-        private Node GetValueType(Node value)
-        {
-            switch (value.Kind)
+            Node type = null;
+            Node initValue = this.Initializer;
+            if (initValue != null)
             {
-                case NodeKind.StringLiteral:
-                    return this.CreateNode(NodeKind.StringKeyword);
-
-                case NodeKind.NumericLiteral:
-                    NumberKeyword numNode = this.CreateNode(NodeKind.NumberKeyword) as NumberKeyword;
-                    string originalText = value.GetText();
-                    if (originalText.IndexOf('.') == 0)
-                    {
-                        numNode.Integer = true;
-                    }
-                    return numNode;
-
-                case NodeKind.TrueKeyword:
-                case NodeKind.FalseKeyword:
-                    return this.CreateNode(NodeKind.BooleanKeyword);
-
-                case NodeKind.NewExpression:
-                    return this.CreateNode((value as NewExpression).Type.TsNode);
-
-                //case NodeKind.Identifier:
-                //    //TODO: find the variablelist
-                //    return null;
-
-                //case NodeKind.PropertyAccessExpression:
-                //    //TODO: find the method defined Utils.Const = 'abc';
-                //    return null;
-
-                //case NodeKind.CallExpression:
-                //    //TODO: find global method's type
-                //    return null;
-
-                case NodeKind.ArrayLiteralExpression:
-                    List<Node> elements = (value as ArrayLiteralExpression).Elements;
-                    if (elements.Count == 0)
-                    {
-                        return this.CreateNode(NodeKind.ObjectKeyword);
-                    }
-
-                    Node arrayType = this.CreateNode(NodeKind.ArrayType);
-                    Node elementType = this.GetValueType(elements[0]);
-                    elementType.Path = "elementType";
-                    arrayType.AddNode(elementType);//only check first element
-                    return arrayType;
-
-                case NodeKind.ObjectLiteralExpression:
-                    List<Node> properties = (value as ObjectLiteralExpression).Properties;
-                    if (properties.Count == 0)
-                    {
-                        return this.CreateNode(NodeKind.ObjectKeyword);
-                    }
-
-                    TypeLiteral typeLiteral = this.CreateNode(NodeKind.TypeLiteral) as TypeLiteral;
-                    foreach (PropertyAssignment prop in properties)
-                    {
-                        Node type = this.GetValueType(prop.Initializer);
-                        type.Path = "type";
-
-                        Node propSignature = this.CreateNode(NodeKind.PropertySignature);
-                        propSignature.AddNode(prop.Name.TsNode);
-                        propSignature.AddNode(type);
-
-                        typeLiteral.Members.Add(propSignature);
-                    }
-                    return typeLiteral;
-
-                default:
-                    return this.CreateNode(NodeKind.ObjectKeyword);
+                type = this.GetNodeType(initValue);
             }
+            return type ?? this.CreateNode(NodeKind.AnyKeyword);
         }
 
     }

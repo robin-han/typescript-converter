@@ -14,6 +14,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(SpreadElement node)
         {
+            if (node.Parent != null && node.Parent.Kind == NodeKind.CallExpression)
+            {
+                return node.Expression.ToCsNode<ExpressionSyntax>();
+            }
+
             //TODO: NOT SUPPORT
             return SyntaxFactory.ParseExpression(this.CommentText(node.Text));
         }

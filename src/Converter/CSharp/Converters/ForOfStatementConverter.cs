@@ -14,8 +14,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ForOfStatement node)
         {
+            Node type = node.CreateNode(NodeKind.Identifier, "var");
             return SyntaxFactory.ForEachStatement(
-                node.Type.ToCsNode<TypeSyntax>(),
+                type.ToCsNode<TypeSyntax>(),
                 node.Identifier.Text,
                 node.Expression.ToCsNode<ExpressionSyntax>(),
                 node.Statement.ToCsNode<StatementSyntax>());

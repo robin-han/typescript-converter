@@ -12,9 +12,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 {
     public class ExportKeywordConverter : Converter
     {
-        public SyntaxToken? Convert(ExportKeyword node)
+        public SyntaxToken Convert(ExportKeyword node)
         {
-            return null;
+            //use public instead
+            return SyntaxFactory.Token(SyntaxKind.PublicKeyword);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public Node Expression
         {
             get;
-            private set;
+            internal set;
         }
 
         public List<Node> TypeArguments

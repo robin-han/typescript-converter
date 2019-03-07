@@ -166,18 +166,19 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             }
 
             //
+            bool hasWildcard = HasWildcard(pathSegment);
             string pattern = ToRegexPattern(pathSegment);
             List<string> files = new List<string>();
             foreach (FileInfo fs in dirInfo.GetFiles(pathSegment, SearchOption.TopDirectoryOnly))
             {
-                if (Regex.IsMatch(fs.Name, pattern, RegexOptions.IgnoreCase))
+                if ((hasWildcard && Regex.IsMatch(fs.Name, pattern, RegexOptions.IgnoreCase)) || (!hasWildcard && fs.Name == pattern))
                 {
                     files.Add(fs.FullName);
                 }
             }
             foreach (DirectoryInfo subDirInfo in dirInfo.GetDirectories())
             {
-                if (Regex.IsMatch(subDirInfo.Name, pattern, RegexOptions.IgnoreCase))
+                if ((hasWildcard && Regex.IsMatch(subDirInfo.Name, pattern, RegexOptions.IgnoreCase)) || (!hasWildcard && subDirInfo.Name == pattern))
                 {
                     files.AddRange(GetWildcardFiles(nextPath, subDirInfo));
                 }
@@ -215,10 +216,14 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
         private static string ToRegexPattern(string path)
         {
-            string ret = string.Empty;
+            if(!HasWildcard(path))
+            {
+                return path;
+            }
 
-            path = path.Replace(".", "\\.");
-            foreach (string pathSegment in path.Split(directorySeparator))
+            string ret = string.Empty;
+            string path2 = path.Replace(".", "\\.");
+            foreach (string pathSegment in path2.Split(directorySeparator))
             {
                 if (pathSegment == "**")
                 {
@@ -229,9 +234,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
                     ret += pathSegment.Replace("*", ".*").Replace("?", ".") + directorySeparator;
                 }
             }
-
             return ret.TrimEnd(directorySeparator.ToCharArray());
         }
+
 
     }
 }
