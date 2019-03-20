@@ -14,16 +14,26 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ArrayType node)
         {
+            ConverterContext context = LangConverter.CurrentContext;
+
             if (node.IsParams)
             {
                 return SyntaxFactory
                     .ArrayType(node.ElementType.ToCsNode<TypeSyntax>())
                     .AddRankSpecifiers(SyntaxFactory.ArrayRankSpecifier());
             }
-            else
+
+
+            if (context.PreferTypeScriptType)
             {
                 return SyntaxFactory
                     .GenericName("Array")
+                    .AddTypeArgumentListArguments(node.ElementType.ToCsNode<TypeSyntax>());
+            }
+            else
+            {
+                return SyntaxFactory
+                    .GenericName("List")
                     .AddTypeArgumentListArguments(node.ElementType.ToCsNode<TypeSyntax>());
             }
         }

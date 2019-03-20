@@ -41,6 +41,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             get
             {
+                if (Parameters.Count == 0)
+                {
+                    return this.CreateNode(NodeKind.StringKeyword);
+                }
                 return (this.Parameters[0] as Parameter).Type;
             }
         }

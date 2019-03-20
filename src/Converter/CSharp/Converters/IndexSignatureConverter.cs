@@ -14,9 +14,20 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(IndexSignature node)
         {
-            return SyntaxFactory
-                .GenericName("Hashtable")
-                .AddTypeArgumentListArguments(node.KeyType.ToCsNode<TypeSyntax>(), node.Type.ToCsNode<TypeSyntax>());
+            ConverterContext context = LangConverter.CurrentContext;
+
+            if (context.PreferTypeScriptType)
+            {
+                return SyntaxFactory
+                    .GenericName("Hashtable")
+                    .AddTypeArgumentListArguments(node.KeyType.ToCsNode<TypeSyntax>(), node.Type.ToCsNode<TypeSyntax>());
+            }
+            else
+            {
+                return SyntaxFactory
+                    .GenericName("Dictionary")
+                    .AddTypeArgumentListArguments(node.KeyType.ToCsNode<TypeSyntax>(), node.Type.ToCsNode<TypeSyntax>());
+            }
         }
     }
 }

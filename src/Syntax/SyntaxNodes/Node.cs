@@ -457,21 +457,55 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             return null;
         }
 
-        protected Node GetArrayLiteralType(ArrayLiteralExpression arrayLiteral)
+        private Node GetArrayLiteralType(ArrayLiteralExpression arrayLiteral)
         {
             Node type = this.GetDeclarationType(arrayLiteral);
-            return type ?? this.GetValueType(arrayLiteral);
+            if (type != null)
+            {
+                return type;
+            }
+            Node valueType = this.GetItemType(arrayLiteral);
+            Node arrayType = this.CreateNode(NodeKind.ArrayType);
+            arrayType.AddNode(valueType);
+            return arrayType;
         }
 
-        protected Node GetObjectLiteralType(ObjectLiteralExpression objectLiteral)
+        private Node GetObjectLiteralType(ObjectLiteralExpression objectLiteral)
         {
             Node type = this.GetDeclarationType(objectLiteral);
-            return type ?? this.GetValueType(objectLiteral);
+            if (type != null)
+            {
+                return type;
+            }
+
+            List<Node> properties = objectLiteral.Properties;
+            if (properties.Count == 0)
+            {
+                TypeLiteral typeLiteral = this.CreateNode(NodeKind.TypeLiteral) as TypeLiteral;
+                typeLiteral.Members.Add(this.CreateNode(NodeKind.IndexSignature));
+                return typeLiteral;
+            }
+            else
+            {
+                TypeLiteral typeLiteral = this.CreateNode(NodeKind.TypeLiteral) as TypeLiteral;
+                foreach (PropertyAssignment prop in properties)
+                {
+                    Node elementType = this.GetNodeType(prop.Initializer);
+                    elementType = elementType ?? this.CreateNode(NodeKind.ObjectKeyword);
+                    elementType.Path = "type";
+
+                    Node propSignature = this.CreateNode(NodeKind.PropertySignature);
+                    propSignature.AddNode(prop.Name.TsNode);
+                    propSignature.AddNode(elementType);
+
+                    typeLiteral.Members.Add(propSignature);
+                }
+                return typeLiteral;
+            }
         }
 
-        protected Node GetValueType(ArrayLiteralExpression value)
+        private Node GetItemType(ArrayLiteralExpression value)
         {
-            Node arrayType = this.CreateNode(NodeKind.ArrayType);
             Node elementType = null;
 
             List<Node> elements = value.Elements;
@@ -497,32 +531,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
             elementType = elementType ?? this.CreateNode(NodeKind.ObjectKeyword);
             elementType.Path = "elementType";
-            arrayType.AddNode(elementType);//only check first element
-            return arrayType;
-        }
-
-        protected Node GetValueType(ObjectLiteralExpression value)
-        {
-            List<Node> properties = value.Properties;
-            if (properties.Count == 0)
-            {
-                return this.CreateNode(NodeKind.ObjectKeyword);
-            }
-
-            TypeLiteral typeLiteral = this.CreateNode(NodeKind.TypeLiteral) as TypeLiteral;
-            foreach (PropertyAssignment prop in properties)
-            {
-                Node type = this.GetNodeType(prop.Initializer);
-                type = type ?? this.CreateNode(NodeKind.ObjectKeyword);
-                type.Path = "type";
-
-                Node propSignature = this.CreateNode(NodeKind.PropertySignature);
-                propSignature.AddNode(prop.Name.TsNode);
-                propSignature.AddNode(type);
-
-                typeLiteral.Members.Add(propSignature);
-            }
-            return typeLiteral;
+            return elementType;
         }
 
         private Node GetDeclarationType(Node node)
@@ -563,7 +572,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             return null;
         }
 
-        protected ClassDeclaration GetClassDeclarationParent(Node node)
+        private ClassDeclaration GetClassDeclarationParent(Node node)
         {
             Node parent = node.Parent;
             while (parent != null && parent.Kind != NodeKind.ClassDeclaration)
@@ -578,7 +587,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             return parent as ClassDeclaration;
         }
 
-        protected MethodDeclaration GetMethodDeclarationParent(Node node)
+        private MethodDeclaration GetMethodDeclarationParent(Node node)
         {
             Node parent = node.Parent;
             while (parent != null && parent.Kind != NodeKind.MethodDeclaration)
@@ -593,7 +602,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             return parent as MethodDeclaration;
         }
 
-        protected Constructor GetConstructorParent(Node node)
+        private Constructor GetConstructorParent(Node node)
         {
             Node parent = node.Parent;
             while (parent != null && parent.Kind != NodeKind.Constructor)
@@ -608,7 +617,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             return parent as Constructor;
         }
 
-        protected Block GetBlockParent(Node node)
+        private Block GetBlockParent(Node node)
         {
             Node parent = node.Parent;
             while (parent != null && parent.Kind != NodeKind.Block)

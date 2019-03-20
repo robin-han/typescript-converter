@@ -8,6 +8,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         #region Fields
         private string _ns;
+        private bool _preferTsType;
         private List<string> _usings;
         private Dictionary<string, string> _nsMappings;
         private List<string> _omittedQualifiedNames;
@@ -17,6 +18,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         public ConverterContext()
         {
             this._ns = "";
+            this._preferTsType = true;
             this._usings = new List<string>();
             this._nsMappings = new Dictionary<string, string>();
             this._omittedQualifiedNames = new List<string>();
@@ -33,6 +35,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             set
             {
                 this._ns = value;
+            }
+        }
+
+        public bool PreferTypeScriptType
+        {
+            get
+            {
+                return _preferTsType;
+            }
+            set
+            {
+                this._preferTsType = value;
             }
         }
 

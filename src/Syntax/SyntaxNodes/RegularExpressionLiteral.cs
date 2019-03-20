@@ -18,11 +18,27 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             get;
             private set;
         }
+
+        public bool IgnoreCase
+        {
+            get;
+            private set;
+        }
+
+        public bool Multiline
+        {
+            get;
+            private set;
+        }
         #endregion
 
         public override void Init(JObject jsonObj)
         {
             base.Init(jsonObj);
+
+            this.Pattern = "";
+            this.IgnoreCase = false;
+            this.Multiline = false;
         }
 
         public override void AddNode(Node childNode)
@@ -40,7 +56,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         protected override void NormalizeImp()
         {
-            this.Pattern = this.Text.Substring(1, this.Text.LastIndexOf('/') - 1);
+            int lastIndex = this.Text.LastIndexOf('/');
+            this.Pattern = this.Text.Substring(1, lastIndex - 1);
+
+            string regOption = this.Text.Substring(lastIndex);
+            if (regOption.Contains('i'))
+            {
+                this.IgnoreCase = true;
+            }
+            if (regOption.Contains('m'))
+            {
+                this.Multiline = true;
+            }
         }
 
     }

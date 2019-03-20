@@ -14,9 +14,20 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(TupleType node) // let a: [number, string] = [1, "hello"];
         {
-            return SyntaxFactory
-                .GenericName("Array")
-                .AddTypeArgumentListArguments(SyntaxFactory.IdentifierName("Object"));
+            ConverterContext context = LangConverter.CurrentContext;
+
+            if (context.PreferTypeScriptType)
+            {
+                return SyntaxFactory
+                    .GenericName("Array")
+                    .AddTypeArgumentListArguments(SyntaxFactory.IdentifierName("Object"));
+            }
+            else
+            {
+                return SyntaxFactory
+                    .GenericName("List")
+                    .AddTypeArgumentListArguments(SyntaxFactory.IdentifierName("object"));
+            }
         }
     }
 

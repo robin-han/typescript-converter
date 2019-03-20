@@ -2,9 +2,24 @@
 {
     public class Object
     {
+        #region Public Static Fields
+        /// <summary>
+        /// 
+        /// </summary>
         public static readonly Undefined undefined = Undefined.Value;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public static readonly Number NaN = Number.NaN;
+        #endregion
+
+        #region Fields
+        /// <summary>
+        /// 
+        /// </summary>
         protected object _value;
+        #endregion
 
 
         #region Operator Implicit
@@ -102,10 +117,57 @@
             return base.GetHashCode();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public override string ToString()
+        {
+            this.CheckUndefined();
+
+            if (!IsNull(this._value))
+            {
+                return this._value.ToString();
+            }
+            return base.ToString();
+        }
 
         #endregion
 
-        #region Methods
+        #region Public Methods
+        /// <summary>
+        /// 
+        /// </summary>
+        public static bool isNaN(Number num)
+        {
+            return Number.isNaN(num);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static bool isFinite(Number num)
+        {
+            return Number.isFinite(num);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static Number parseInt(String value, Number fromBase = null)
+        {
+            return Number.parseInt(value, fromBase);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static Number parseFloat(String value)
+        {
+            return Number.parseFloat(value);
+        }
+        #endregion
+
+        #region Internal Methods
         /// <summary>
         /// 
         /// </summary>

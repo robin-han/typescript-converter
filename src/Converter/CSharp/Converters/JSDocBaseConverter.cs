@@ -65,7 +65,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         {
             return SyntaxFactory.XmlText(SyntaxFactory.XmlTextNewLine(
                 SyntaxFactory.TriviaList(),
-                "\n",
+                "\r\n",
                 "",
                 SyntaxFactory.TriviaList()));
         }

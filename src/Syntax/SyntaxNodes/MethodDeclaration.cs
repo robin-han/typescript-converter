@@ -140,33 +140,25 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             base.NormalizeImp();
 
-            if (!this.Modifiers.Exists(n => n.Kind == NodeKind.PublicKeyword || n.Kind == NodeKind.PrivateKeyword || n.Kind == NodeKind.ProtectedKeyword))
+            if (!this.HasModify(NodeKind.PublicKeyword) && !this.HasModify(NodeKind.PrivateKeyword) && !this.HasModify(NodeKind.ProtectedKeyword))
             {
                 this.Modifiers.Add(this.CreateNode(NodeKind.PublicKeyword));
             }
 
-            JSDocComment docComment = this.JsDoc.Count > 0 ? this.JsDoc[0] as JSDocComment : null;
-            if (docComment != null)
+            if (this.HasJsDocTag("csoverride") && !this.HasModify(NodeKind.OverrideKeyword))
             {
-                foreach (Node tag in docComment.Tags)
-                {
-                    if (tag.Kind != NodeKind.JSDocTag)
-                    {
-                        continue;
-                    }
-                    JSDocTag docTag = tag as JSDocTag;
-                    if (docTag.TagName.Text == "csoverride" && !this.Modifiers.Exists(n => n.Kind == NodeKind.OverrideKeyword))
-                    {
-                        this.Modifiers.Add(this.CreateNode(NodeKind.OverrideKeyword));
-                    }
-                    if (docTag.TagName.Text == "csnew" && !this.Modifiers.Exists(n => n.Kind == NodeKind.NewKeyword))
-                    {
-                        this.Modifiers.Add(this.CreateNode(NodeKind.NewKeyword));
-                    }
-                }
+                this.Modifiers.Add(this.CreateNode(NodeKind.OverrideKeyword));
+            }
+            if (this.HasJsDocTag("csnew") && !this.HasModify(NodeKind.NewKeyword))
+            {
+                this.Modifiers.Add(this.CreateNode(NodeKind.NewKeyword));
             }
         }
 
+        private bool HasModify(NodeKind modify)
+        {
+            return this.Modifiers.Exists(n => n.Kind == modify);
+        }
     }
 }
 

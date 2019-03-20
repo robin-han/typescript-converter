@@ -43,14 +43,21 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             List<string> ret = new List<string>();
             foreach (string file in files)
             {
+                bool excluded = false;
                 string path = NormalizeSlashes(file);
+
                 foreach (string exclude in excludes)
                 {
                     string excludePattern = ToRegexPattern(NormalizeSlashes(exclude));
-                    if (!Regex.IsMatch(path, excludePattern))
+                    if (Regex.IsMatch(path, excludePattern))
                     {
-                        ret.Add(file);
+                        excluded = true;
+                        break;
                     }
+                }
+                if (!excluded)
+                {
+                    ret.Add(file);
                 }
             }
             return ret;
@@ -216,7 +223,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
         private static string ToRegexPattern(string path)
         {
-            if(!HasWildcard(path))
+            if (!HasWildcard(path))
             {
                 return path;
             }
@@ -225,16 +232,21 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             string path2 = path.Replace(".", "\\.");
             foreach (string pathSegment in path2.Split(directorySeparator))
             {
+                if (!string.IsNullOrEmpty(ret))
+                {
+                    ret += directorySeparator;
+                }
+
                 if (pathSegment == "**")
                 {
-                    ret += "(.*)*";
+                    ret += ".*";
                 }
                 else
                 {
-                    ret += pathSegment.Replace("*", ".*").Replace("?", ".") + directorySeparator;
+                    ret += pathSegment.Replace("*", ".*").Replace("?", ".{1}");
                 }
             }
-            return ret.TrimEnd(directorySeparator.ToCharArray());
+            return ret;
         }
 
 

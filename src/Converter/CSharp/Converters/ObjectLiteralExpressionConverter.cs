@@ -15,13 +15,14 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         public CSharpSyntaxNode Convert(ObjectLiteralExpression node)
         {
             List<Node> properties = node.Properties;
-
             List<ExpressionSyntax> initItemExprs = new List<ExpressionSyntax>();
+
             foreach (PropertyAssignment prop in properties)
             {
+                ExpressionSyntax csNameExpression = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(prop.Name.Text));
                 InitializerExpressionSyntax itemInitExpr = SyntaxFactory
                     .InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
-                    .AddExpressions(prop.Name.ToCsNode<ExpressionSyntax>(), prop.Initializer.ToCsNode<ExpressionSyntax>());
+                    .AddExpressions(csNameExpression, prop.Initializer.ToCsNode<ExpressionSyntax>());
 
                 initItemExprs.Add(itemInitExpr);
             }
@@ -32,12 +33,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 return SyntaxFactory.TupleExpression().AddArguments(properties.ToCsNodes<ArgumentSyntax>());
             }
 
-            return SyntaxFactory.ObjectCreationExpression(
-                SyntaxFactory.GenericName("Hashtable").AddTypeArgumentListArguments(
-                    SyntaxFactory.IdentifierName("String"),
-                    type.ToCsNode<TypeSyntax>()))
-                .AddArgumentListArguments()
-                .WithInitializer(SyntaxFactory.InitializerExpression(SyntaxKind.CollectionInitializerExpression, SyntaxFactory.SeparatedList(initItemExprs)));
+            ObjectCreationExpressionSyntax csObjLiteral = SyntaxFactory.ObjectCreationExpression(type.ToCsNode<TypeSyntax>()).AddArgumentListArguments();
+            if (initItemExprs.Count > 0)
+            {
+                csObjLiteral = csObjLiteral.WithInitializer(SyntaxFactory.InitializerExpression(SyntaxKind.CollectionInitializerExpression, SyntaxFactory.SeparatedList(initItemExprs)));
+            }
+            return csObjLiteral;
         }
 
     }

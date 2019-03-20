@@ -14,8 +14,15 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(StringKeyword node)
         {
-            //return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword));
-            return SyntaxFactory.IdentifierName("String");
+            ConverterContext context = LangConverter.CurrentContext;
+            if (context.PreferTypeScriptType)
+            {
+                return SyntaxFactory.IdentifierName("String");
+            }
+            else
+            {
+                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword));
+            }
         }
     }
 }

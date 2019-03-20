@@ -28,6 +28,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             {
                 csGetAccess = csGetAccess.WithBody(node.Body.ToCsNode<BlockSyntax>());
             }
+            else
+            {
+                csGetAccess = csGetAccess.WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+            }
 
             return csProperty.AddAccessorListAccessors(csGetAccess);
         }

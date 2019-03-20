@@ -14,23 +14,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(NumberKeyword node)
         {
-            //PredefinedTypeSyntax csType;
-            //if (node.Integer)
-            //{
-            //    csType = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword));
-            //}
-            //else
-            //{
-            //    csType = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.DoubleKeyword));
-            //}
+            ConverterContext context = LangConverter.CurrentContext;
 
-            //if (node.Nullable)
-            //{
-            //    return SyntaxFactory.NullableType(csType);
-            //}
-            //return csType;
-
-            return SyntaxFactory.IdentifierName("Number");
+            if (context.PreferTypeScriptType)
+            {
+                return SyntaxFactory.IdentifierName("Number");
+            }
+            else
+            {
+                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.DoubleKeyword));
+            }
         }
 
     }

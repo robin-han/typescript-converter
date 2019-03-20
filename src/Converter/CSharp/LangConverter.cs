@@ -10,7 +10,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 {
     public class LangConverter
     {
-        private ConverterContext _context;
+        private readonly ConverterContext _context;
         public LangConverter() : this(new ConverterContext())
         {
         }

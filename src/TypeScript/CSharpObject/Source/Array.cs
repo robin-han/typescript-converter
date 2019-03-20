@@ -103,6 +103,13 @@ namespace GrapeCity.DataVisualization.TypeScript
         {
             return array._list;
         }
+
+        /// 
+        /// </summary>
+        public static implicit operator T[] (Array<T> array)
+        {
+            return array._list.ToArray();
+        }
         #endregion
 
         #region Implements Interfaces
@@ -146,6 +153,16 @@ namespace GrapeCity.DataVisualization.TypeScript
             this.CheckUndefined();
 
             _list.AddRange(items);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void clear()
+        {
+            this.CheckUndefined();
+
+            this._list.Clear();
         }
 
         /// <summary>
@@ -314,11 +331,11 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// <summary>
         /// 
         /// </summary>
-        public Array<T> map(Func<T, T> func)
+        public Array<U> map<U>(Func<T, U> func)
         {
             this.CheckUndefined();
 
-            Array<T> ret = new Array<T>();
+            Array<U> ret = new Array<U>();
             foreach (var item in this._list)
             {
                 ret.Add(func(item));
@@ -329,11 +346,11 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// <summary>
         /// 
         /// </summary>
-        public Array<T> map(Func<T, Number, T> func)
+        public Array<U> map<U>(Func<T, Number, U> func)
         {
             this.CheckUndefined();
 
-            Array<T> ret = new Array<T>();
+            Array<U> ret = new Array<U>();
             for (int i = 0; i < this._list.Count; i++)
             {
                 ret.Add(func(this._list[i], i));
@@ -423,6 +440,27 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// <summary>
         /// 
         /// </summary>
+        public U reduce<U>(Func<U, T, Number, U> func, U initialValue = default(U))
+        {
+            this.CheckUndefined();
+
+            List<T> items = this._list;
+            if (initialValue == null && items.Count == 0)
+            {
+                throw new InvalidOperationException("Reduce of empty array with no initial value");
+            }
+
+            U result = initialValue;
+            for (int i = 0; i < items.Count; i++)
+            {
+                result = func(result, items[i], i);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public T reduceRight(Func<T, T, T> func, T initialValue = default(T))
         {
             this.CheckUndefined();
@@ -463,6 +501,27 @@ namespace GrapeCity.DataVisualization.TypeScript
             }
 
             T result = initialValue;
+            for (int i = items.Count - 1; i >= 0; i--)
+            {
+                result = func(result, items[i], i);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public U reduceRight<U>(Func<U, T, Number, U> func, U initialValue = default(U))
+        {
+            this.CheckUndefined();
+
+            List<T> items = this._list;
+            if (initialValue == null && items.Count == 0)
+            {
+                throw new InvalidOperationException("Reduce of empty array with no initial value");
+            }
+
+            U result = initialValue;
             for (int i = items.Count - 1; i >= 0; i--)
             {
                 result = func(result, items[i], i);
@@ -599,6 +658,15 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// <summary>
         /// 
         /// </summary>
+        public Array<T> sort(Func<T, T, Number> fn)
+        {
+            ArrayCompare<T> compare = new ArrayCompare<T>(fn);
+            return this.sort(compare);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public Array<T> splice(Number start, Number deleteCount = null, params T[] addItems)
         {
             this.CheckUndefined();
@@ -636,5 +704,32 @@ namespace GrapeCity.DataVisualization.TypeScript
             return this._list.Count;
         }
         #endregion
+    }
+
+    class ArrayCompare<T> : IComparer<T>
+    {
+        private Func<T, T, Number> _fn;
+
+        public ArrayCompare(Func<T, T, Number> fn)
+        {
+            this._fn = fn;
+        }
+
+        public int Compare(T x, T y)
+        {
+            return (int)_fn(x, y);
+        }
+    }
+
+    public class Array
+    {
+        public static bool isArray(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+            return obj.GetType().Name == "Array`1";
+        }
     }
 }

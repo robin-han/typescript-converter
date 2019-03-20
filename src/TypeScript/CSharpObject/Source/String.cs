@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace GrapeCity.DataVisualization.TypeScript
 {
@@ -94,6 +95,27 @@ namespace GrapeCity.DataVisualization.TypeScript
         }
         #endregion
 
+        #region Properties
+        public String this[Number index]
+        {
+            get
+            {
+                this.CheckUndefined();
+                return GetText(this)[(int)index].ToString();
+            }
+        }
+
+        public Number length
+        {
+            get
+            {
+                this.CheckUndefined();
+
+                return GetText(this).Length;
+            }
+        }
+        #endregion
+
         #region Methods
         /// <summary>
         /// 
@@ -179,6 +201,14 @@ namespace GrapeCity.DataVisualization.TypeScript
             }
 
             return text.Replace(GetText(substr), GetText(newSubStr));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public String replace(Regex pattern, String newSubStr)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

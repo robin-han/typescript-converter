@@ -14,7 +14,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(TypeReference node)
         {
+            ConverterContext context = LangConverter.CurrentContext;
             string typeText = node.TypeName.Text;
+
             switch (typeText)
             {
                 //case "String":
@@ -29,10 +31,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 //case "Object":
                 //    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
 
-                case "Integer":
-                    //return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword));
-                    return SyntaxFactory.IdentifierName("Number");
-
                 case "Array":
                     if (node.IsParams)
                     {
@@ -40,10 +38,17 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                             .ArrayType(node.TypeArguments[0].ToCsNode<TypeSyntax>())
                             .AddRankSpecifiers(SyntaxFactory.ArrayRankSpecifier());
                     }
-                    else
+
+                    if (context.PreferTypeScriptType)
                     {
                         return SyntaxFactory
                             .GenericName("Array")
+                            .AddTypeArgumentListArguments(node.TypeArguments[0].ToCsNode<TypeSyntax>());
+                    }
+                    else
+                    {
+                        return SyntaxFactory
+                            .GenericName("List")
                             .AddTypeArgumentListArguments(node.TypeArguments[0].ToCsNode<TypeSyntax>());
                     }
 

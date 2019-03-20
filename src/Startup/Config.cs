@@ -21,6 +21,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             this.Exclude = new List<string>();
             this.Output = string.Empty;
             this.FlatOutput = false;
+            this.PreferTypeScriptType = true;
 
             this.Namespace = string.Empty;
             this.Usings = new List<string>();
@@ -48,6 +49,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
         }
 
         public bool FlatOutput
+        {
+            get;
+            private set;
+        }
+
+        public bool PreferTypeScriptType
         {
             get;
             private set;
@@ -108,6 +115,13 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             if (jsonFlatten != null)
             {
                 this.FlatOutput = jsonFlatten.ToObject<bool>();
+            }
+
+            //perfer typescript type
+            JToken jsonPerferType = jsonConfig["preferTypeScriptType"];
+            if (jsonPerferType != null)
+            {
+                this.PreferTypeScriptType = jsonPerferType.ToObject<bool>();
             }
 
             //namesapce

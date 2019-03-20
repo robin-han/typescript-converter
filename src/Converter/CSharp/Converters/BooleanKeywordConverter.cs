@@ -14,13 +14,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(BooleanKeyword node)
         {
-            //if (node.Nullable)
-            //{
-            //    return SyntaxFactory.NullableType(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.BoolKeyword)));
-            //}
-            //return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.BoolKeyword));
+            ConverterContext context = LangConverter.CurrentContext;
 
-            return SyntaxFactory.IdentifierName("Boolean");
+            if (context.PreferTypeScriptType)
+            {
+                return SyntaxFactory.IdentifierName("Boolean");
+            }
+            else
+            {
+                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.BoolKeyword));
+            }
         }
     }
 }

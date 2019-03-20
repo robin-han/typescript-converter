@@ -20,7 +20,7 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// <summary>
         /// 
         /// </summary>
-        public static readonly Number NaN = new Number(double.NaN);
+        public new static readonly Number NaN = new Number(double.NaN);
 
         /// <summary>
         /// 
@@ -56,7 +56,7 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// <summary>
         /// 
         /// </summary>
-        public static bool isNaN(Number num)
+        public new static bool isNaN(Number num)
         {
             return IsNaN(num);
         }
@@ -64,7 +64,7 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// <summary>
         /// 
         /// </summary>
-        public static bool isFinite(Number num)
+        public new static bool isFinite(Number num)
         {
             return num != POSITIVE_INFINITY && num != NEGATIVE_INFINITY;
         }
@@ -72,10 +72,14 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// <summary>
         /// 
         /// </summary>
-        public static Number parseInt(String value)
+        public new static Number parseInt(String value, Number fromBase = null)
         {
             if (int.TryParse(value, out int result))
             {
+                if (fromBase != null && fromBase != 10)
+                {
+                    result = Convert.ToInt32(result.ToString(), (int)fromBase);
+                }
                 return new Number(result);
             }
             return NaN;
@@ -84,7 +88,7 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// <summary>
         /// 
         /// </summary>
-        public static Number parseFloat(String value)
+        public new static Number parseFloat(String value)
         {
             if (double.TryParse(value, out double result))
             {
@@ -371,6 +375,32 @@ namespace GrapeCity.DataVisualization.TypeScript
         {
             return !Equals(num1, num2);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static Number operator <<(Number num1, int num2)
+        {
+            if (IsInvalid(num1) || IsInvalid(num2))
+            {
+                return NaN;
+            }
+
+            return ((int)num1 << num2);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static Number operator >>(Number num1, int num2)
+        {
+            if (IsInvalid(num1) || IsInvalid(num2))
+            {
+                return NaN;
+            }
+
+            return ((int)num1 >> num2);
+        }
         #endregion
 
         #region Override Methods
@@ -413,11 +443,32 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// </summary>
         public override int GetHashCode()
         {
+            this.CheckUndefined();
+
             if (!IsNull(this._value))
             {
                 return this._value.GetHashCode();
             }
             return base.GetHashCode();
+        }
+
+        #endregion
+
+        #region Public Methods
+        public String toString(Number fromBase = null)
+        {
+            this.CheckUndefined();
+
+            if (!IsNull(this._value))
+            {
+                throw new NullReferenceException();
+            }
+
+            if (fromBase != null && fromBase != 10)
+            {
+                return Convert.ToInt32(this._value.ToString(), (int)fromBase).ToString();
+            }
+            return this._value.ToString();
         }
         #endregion
 

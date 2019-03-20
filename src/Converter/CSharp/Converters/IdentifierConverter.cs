@@ -14,17 +14,24 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(Identifier node)
         {
+            //RegExp
+            string text = node.Text;
+            if (text == "RegExp")
+            {
+                text = "Regex";
+            }
+
             NameSyntax csNameSyntax = null;
             List<Node> typeArguments = node.Parent == null ? null : node.Parent.GetValue("TypeArguments") as List<Node>;
             if (typeArguments != null && typeArguments.Count > 0)
             {
                 csNameSyntax = SyntaxFactory
-                   .GenericName(node.Text)
+                   .GenericName(text)
                    .AddTypeArgumentListArguments(typeArguments.ToCsNodes<TypeSyntax>());
             }
             else
             {
-                csNameSyntax = SyntaxFactory.IdentifierName(node.Text);
+                csNameSyntax = SyntaxFactory.IdentifierName(text);
             }
 
             //

@@ -11,7 +11,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 {
     class AppCommand
     {
-        private CommandLineApplication _appCmd;
+        private readonly CommandLineApplication _appCmd;
 
         public AppCommand()
         {
@@ -62,7 +62,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             List<TsDocument> tsDocs = new List<TsDocument>();
 
             DateTime startTime = DateTime.Now;
-            this.Log("Starting build ast");
+            this.Log(string.Format("Starting build ast({0})", files.Count));
 
             foreach (string file in files)
             {
@@ -177,12 +177,14 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
         private ConverterContext CreateConverterContext(Config config)
         {
-            ConverterContext context = new ConverterContext();
-
-            context.Namespace = config.Namespace;
-            context.Usings = config.Usings;
-            context.OmittedQualifiedNames = config.OmittedQualifiedNames;
-            context.NamespaceMappings = new Dictionary<string, string>();
+            ConverterContext context = new ConverterContext
+            {
+                Namespace = config.Namespace,
+                PreferTypeScriptType = config.PreferTypeScriptType,
+                Usings = config.Usings,
+                OmittedQualifiedNames = config.OmittedQualifiedNames,
+                NamespaceMappings = new Dictionary<string, string>()
+            };
             foreach (string item in config.NamespaceMappings)
             {
                 string[] ms = item.Split(':');

@@ -16,9 +16,16 @@ namespace GrapeCity.DataVisualization.TypeScript
         /// <summary>
         /// Initializes a new instance of the <see cref="Date"/> class.
         /// </summary>
-        public Date()
+        public Date() : this(DateTime.Now)
         {
-            this._value = this._dt = DateTime.Now;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Date"/> class.
+        /// </summary>
+        public Date(DateTime dateTime)
+        {
+            this._value = this._dt = dateTime;
         }
 
         /// <summary>
@@ -106,6 +113,14 @@ namespace GrapeCity.DataVisualization.TypeScript
         #endregion
 
         #region Methods
+        /// <summary>
+        /// 
+        /// </summary>
+        public static Number now()
+        {
+            return (DateTime.Now.ToUniversalTime() - BASE_UTC_DATETIME).TotalMilliseconds;
+        }
+
         /// <summary>
         /// 
         /// </summary>

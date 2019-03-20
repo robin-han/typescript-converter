@@ -12,11 +12,22 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 {
     public class RegularExpressionLiteralConverter : Converter
     {
-		public CSharpSyntaxNode Convert(RegularExpressionLiteral node)
+        public CSharpSyntaxNode Convert(RegularExpressionLiteral node)
         {
-            return SyntaxFactory.ObjectCreationExpression(
+            ExpressionSyntax csPattern = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(node.Pattern));
+
+            ObjectCreationExpressionSyntax csObj = SyntaxFactory.ObjectCreationExpression(
                 SyntaxFactory.IdentifierName("Regex"))
-                .AddArgumentListArguments(SyntaxFactory.Argument(SyntaxFactory.IdentifierName(node.Pattern))); 
+                .AddArgumentListArguments(SyntaxFactory.Argument(csPattern));
+            if (node.IgnoreCase)
+            {
+                ExpressionSyntax csRegOption = SyntaxFactory.MemberAccessExpression(
+                      SyntaxKind.SimpleMemberAccessExpression,
+                      SyntaxFactory.IdentifierName("RegexOptions"),
+                      SyntaxFactory.IdentifierName("IgnoreCase"));
+                csObj = csObj.AddArgumentListArguments(SyntaxFactory.Argument(csRegOption));
+            }
+            return csObj;
         }
     }
 }
