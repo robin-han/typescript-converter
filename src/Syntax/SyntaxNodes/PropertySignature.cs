@@ -7,8 +7,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class PropertySignature : Node
     {
-        private Node _type;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -41,18 +39,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public Node Type
         {
-            get
-            {
-                if (this._type == null)
-                {
-                    this._type = this.InferType();
-                }
-                return this._type;
-            }
-            private set
-            {
-                this._type = value;
-            }
+            get;
+            internal set;
         }
         #endregion
 
@@ -99,11 +87,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-
-        protected override Node InferType()
-        {
-            return this.CreateNode(NodeKind.AnyKeyword);
-        }
+       
     }
 }
 

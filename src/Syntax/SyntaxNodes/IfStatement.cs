@@ -64,43 +64,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             }
         }
 
-        protected override void NormalizeImp()
-        {
-            base.NormalizeImp();
-
-            this.NormalizeInstanceOf();
-        }
-
-        private void NormalizeInstanceOf()
-        {
-            List<Node> instanceofs = this.Expression.DescendantsAndSelf(n =>
-                n.Kind == NodeKind.BinaryExpression &&
-                (n as BinaryExpression).OperatorToken.Kind == NodeKind.InstanceOfKeyword);
-            if (instanceofs.Count == 0)
-            {
-                return;
-            }
-
-            BinaryExpression instanceof = instanceofs[0] as BinaryExpression;
-            string variableName = instanceof.Left.Text;
-            string typeName = instanceof.Right.Text;
-            List<Node> asNodes = this.ThenStatement.Descendants(n => n.Kind == NodeKind.Identifier && n.Text == variableName);
-            foreach (Identifier asNode in asNodes)
-            {
-                if (asNode.Parent.Kind == NodeKind.PropertyAccessExpression)
-                {
-                    if (asNode == (asNode.Parent as PropertyAccessExpression).Expression)
-                    {
-                        asNode.As = typeName;
-                    }
-                }
-                else
-                {
-                    asNode.As = typeName;
-                }
-            }
-        }
-
     }
 }
 

@@ -7,8 +7,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class MethodDeclaration : Declaration
     {
-        private Node _type;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -47,18 +45,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public Node Type
         {
-            get
-            {
-                if (this._type == null)
-                {
-                    this._type = this.InferType();
-                }
-                return this._type;
-            }
-            private set
-            {
-                this._type = value;
-            }
+            get;
+            internal set;
         }
 
         public Block Body
@@ -129,35 +117,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     this.ProcessUnknownNode(childNode);
                     break;
             }
-        }
-
-        protected override Node InferType()
-        {
-            return this.CreateNode(NodeKind.VoidKeyword);
-        }
-
-        protected override void NormalizeImp()
-        {
-            base.NormalizeImp();
-
-            if (!this.HasModify(NodeKind.PublicKeyword) && !this.HasModify(NodeKind.PrivateKeyword) && !this.HasModify(NodeKind.ProtectedKeyword))
-            {
-                this.Modifiers.Add(this.CreateNode(NodeKind.PublicKeyword));
-            }
-
-            if (this.HasJsDocTag("csoverride") && !this.HasModify(NodeKind.OverrideKeyword))
-            {
-                this.Modifiers.Add(this.CreateNode(NodeKind.OverrideKeyword));
-            }
-            if (this.HasJsDocTag("csnew") && !this.HasModify(NodeKind.NewKeyword))
-            {
-                this.Modifiers.Add(this.CreateNode(NodeKind.NewKeyword));
-            }
-        }
-
-        private bool HasModify(NodeKind modify)
-        {
-            return this.Modifiers.Exists(n => n.Kind == modify);
         }
     }
 }

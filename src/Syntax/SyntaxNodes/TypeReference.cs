@@ -7,8 +7,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class TypeReference : Node
     {
-        private bool _isParams = false;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -29,14 +27,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public bool IsParams
         {
-            get
-            {
-                return this._isParams;
-            }
-            set
-            {
-                this._isParams = value;
-            }
+            get;
+            set;
+           
         }
         #endregion
 
@@ -46,6 +39,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
             this.TypeName = null;
             this.TypeArguments = new List<Node>();
+            this.IsParams = false;
         }
 
         public override void AddNode(Node childNode)
@@ -67,13 +61,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     this.ProcessUnknownNode(childNode);
                     break;
             }
-        }
-
-        protected override void NormalizeImp()
-        {
-            base.NormalizeImp();
-
-            this.Text = this.TypeName.Text;
         }
 
     }

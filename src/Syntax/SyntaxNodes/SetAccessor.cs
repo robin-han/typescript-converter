@@ -87,27 +87,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-
-        protected override void NormalizeImp()
-        {
-            base.NormalizeImp();
-
-            if (!this.Modifiers.Exists(n => n.Kind == NodeKind.PublicKeyword || n.Kind == NodeKind.PrivateKeyword || n.Kind == NodeKind.ProtectedKeyword))
-            {
-                this.Modifiers.Add(this.CreateNode(NodeKind.PublicKeyword));
-            }
-
-            string paramName = this.Parameters[0].Name.Text;
-            if (paramName != "value")
-            {
-                List<Node> referencedNode = this.Body.Descendants(n => n.Kind == NodeKind.Identifier && n.Text == paramName);
-                foreach (Node node in referencedNode)
-                {
-                    node.Text = "value";
-                }
-            }
-        }
-
     }
 }
 

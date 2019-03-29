@@ -16,7 +16,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         {
             CompilationUnitSyntax csCompilationUnit = SyntaxFactory.CompilationUnit();
 
-            foreach (string us in LangConverter.CurrentContext.Usings)
+            foreach (string us in this.Context.Config.Usings)
             {
                 csCompilationUnit = csCompilationUnit.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(us)));
             }

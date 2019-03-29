@@ -28,7 +28,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             }
 
             // omit names(dv. core.)
-            List<string> omittedNames = LangConverter.CurrentContext.OmittedQualifiedNames;
+            List<string> omittedNames = this.Context.Config.OmittedQualifiedNames;
             if (omittedNames.Count > 0 && omittedNames.Contains(node.Left.Text.Trim()))
             {
                 return csRight;

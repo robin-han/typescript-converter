@@ -61,7 +61,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     if (this.IsNodeType(propType))
                     {
                         Node node = prop.GetValue(this) as Node;
-                        if (node != null)
+                        if (node != null && !children.Contains(node))
                         {
                             children.Add(node);
                         }
@@ -142,7 +142,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public JObject TsNode
         {
             get;
-            private set;
+            internal set;
         }
         #endregion
 
@@ -272,28 +272,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
             return nodes;
         }
-
-        public void Normalize(bool onlySelf = false)
-        {
-            this.NormalizeImp();
-
-            foreach (Node node in this.Children)
-            {
-                node.Normalize();
-            }
-        }
-
-        protected virtual void NormalizeImp()
-        {
-        }
         #endregion
 
         #region Internal and Private Methods
-        protected virtual Node InferType()
-        {
-            return null;
-        }
-
         /// <summary>
         /// Get node's original text.
         /// </summary>
@@ -324,19 +305,14 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public Node CreateNode(JObject nodeJson)
         {
-            Node node = new TsAstBuilder().Build(nodeJson);
+            Node node = new AstBuilder().Build(nodeJson);
             node.Parent = this;
 
             return node;
         }
 
-        protected Node PropertyAccessExpressionToQualifiedName(Node expression)
+        protected Node ToQualifiedName(PropertyAccessExpression expression)
         {
-            if (expression.Kind != NodeKind.PropertyAccessExpression)
-            {
-                return expression;
-            }
-
             string jsonString = expression.TsNode.ToString();
 
             jsonString = jsonString
@@ -345,6 +321,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 .Replace("\"name\":", "\"right\":");
 
             return this.CreateNode(jsonString);
+        }
+
+        public Node GetNodeType()
+        {
+            return this.GetNodeType(this);
         }
 
         public Node GetNodeType(Node node)
@@ -370,7 +351,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     return this.CreateNode(NodeKind.BooleanKeyword);
 
                 case NodeKind.NewExpression:
-                    return this.CreateNode((node as NewExpression).Type.TsNode);
+                    return (node as NewExpression).Type;
 
                 case NodeKind.Identifier:
                     Node identifierType = this.GetIndentifierType(node as Identifier);
@@ -653,6 +634,22 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             return (propName == "Parent" || propName == "OriginalChildren");
         }
         #endregion
+
+
+        internal bool HasJsDocTag(string tagName)
+        {
+            List<Node> jsDoc = this.GetValue("JsDoc") as List<Node>;
+            if (jsDoc != null && jsDoc.Count > 0)
+            {
+                JSDocComment docComment = jsDoc[0] as JSDocComment;
+                if (docComment != null)
+                {
+                    return docComment.Tags.Find(tag => tag.Kind == NodeKind.JSDocTag && (tag as JSDocTag).TagName.Text == tagName) != null;
+                }
+            }
+            return false;
+        }
+
 
         [Conditional("DEBUG")]
         protected void ProcessUnknownNode(Node child)

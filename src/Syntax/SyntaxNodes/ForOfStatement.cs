@@ -7,8 +7,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class ForOfStatement : Statement
     {
-        private Node _type;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -31,22 +29,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             get;
             private set;
-        }
-
-        public Node Type
-        {
-            get
-            {
-                if (this._type == null)
-                {
-                    this._type = this.InferType();
-                }
-                return this._type;
-            }
-            private set
-            {
-                this._type = value;
-            }
         }
 
         public Node Identifier
@@ -95,12 +77,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     this.ProcessUnknownNode(childNode);
                     break;
             }
-        }
-
-        protected override Node InferType()
-        {
-            //TODO: get statement's type
-            return this.CreateNode(NodeKind.AnyKeyword);
         }
 
         private VariableDeclarationNode GetVariableDeclaration()

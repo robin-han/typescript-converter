@@ -14,7 +14,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ExpressionWithTypeArguments node)
         {
-            return SyntaxFactory.SimpleBaseType(node.Expression.ToCsNode<TypeSyntax>());
+            return SyntaxFactory.SimpleBaseType(node.Type.ToCsNode<TypeSyntax>());
         }
     }
 }

@@ -24,7 +24,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             csCtor = csCtor.AddModifiers(node.Modifiers.ToCsNodes<SyntaxToken>());
             csCtor = csCtor.AddParameterListParameters(node.Parameters.ToCsNodes<ParameterSyntax>());
 
-            ExpressionStatement baseNode = node.BaseConstructor as ExpressionStatement;
+            ExpressionStatement baseNode = node.Base as ExpressionStatement;
             if (baseNode != null)
             {
                 ArgumentSyntax[] csArgs = this.ToArgumentList((baseNode.Expression as CallExpression).Arguments);

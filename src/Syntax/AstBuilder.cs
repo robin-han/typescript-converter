@@ -7,22 +7,21 @@ using System.Linq;
 
 namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
-    public class TsAstBuilder
+    public class AstBuilder
     {
-        public TsAstBuilder()
+        public AstBuilder()
         {
         }
 
-        public TsDocument Build(string path)
+        public Document Build(string path)
         {
             JObject jsonObject = JObject.Parse(File.ReadAllText(path));
-            Node rootNode = this.Build(jsonObject);
-            rootNode.Normalize();
+            Node node = this.Build(jsonObject);
 
-            TsDocument document = new TsDocument()
+            Document document = new Document()
             {
                 Path = path,
-                RootNode = rootNode,
+                Root = node,
             };
 
             return document;

@@ -16,13 +16,25 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public Node Expression
         {
             get;
-            private set;
+            internal set;
         }
 
         public List<Node> TypeArguments
         {
             get;
             private set;
+        }
+
+        public Node Type
+        {
+            get
+            {
+                if (this.Expression.Kind == NodeKind.PropertyAccessExpression)
+                {
+                    return this.ToQualifiedName(this.Expression as PropertyAccessExpression);
+                }
+                return this.Expression;
+            }
         }
         #endregion
 
@@ -52,16 +64,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;
-            }
-        }
-
-        protected override void NormalizeImp()
-        {
-            base.NormalizeImp();
-
-            if (this.Expression.Kind == NodeKind.PropertyAccessExpression)
-            {
-                this.Expression = this.PropertyAccessExpressionToQualifiedName(this.Expression);
             }
         }
 

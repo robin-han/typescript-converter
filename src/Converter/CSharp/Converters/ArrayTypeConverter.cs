@@ -14,8 +14,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ArrayType node)
         {
-            ConverterContext context = LangConverter.CurrentContext;
-
             if (node.IsParams)
             {
                 return SyntaxFactory
@@ -24,7 +22,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             }
 
 
-            if (context.PreferTypeScriptType)
+            if (this.Context.Config.PreferTypeScriptType)
             {
                 return SyntaxFactory
                     .GenericName("Array")

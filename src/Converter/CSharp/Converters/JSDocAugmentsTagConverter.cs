@@ -17,7 +17,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             Node type = node.Class;
             if (type.Kind == NodeKind.ExpressionWithTypeArguments)
             {
-                type = (node.Class as ExpressionWithTypeArguments).Expression;
+                type = (node.Class as ExpressionWithTypeArguments).Type;
             }
 
             return SyntaxFactory.List<XmlNodeSyntax>(new XmlNodeSyntax[] {

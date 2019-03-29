@@ -14,8 +14,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(TypeLiteral node)
         {
-            ConverterContext context = LangConverter.CurrentContext;
-
             List<Node> members = node.Members;
 
             if (members.Count == 0)
@@ -30,7 +28,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 {
                     case NodeKind.PropertySignature:
                         var csType = (member as PropertySignature).Type.ToCsNode<TypeSyntax>();
-                        if (context.PreferTypeScriptType)
+                        if (this.Context.Config.PreferTypeScriptType)
                         {
                             return SyntaxFactory.GenericName("Hashtable").AddTypeArgumentListArguments(
                                 SyntaxFactory.IdentifierName("String"),

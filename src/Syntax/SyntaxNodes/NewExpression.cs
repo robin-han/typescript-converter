@@ -7,18 +7,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class NewExpression : Expression
     {
-        private Node _type;
-
         #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.NewExpression; }
         }
 
-        private Node Expression
+        public Node Expression
         {
             get;
-            set;
+            internal set;
         }
 
         public List<Node> TypeArguments
@@ -37,15 +35,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             get
             {
-                if (this._type == null)
+                if(this.Expression.Kind == NodeKind.PropertyAccessExpression)
                 {
-                    this._type = this.InferType();
+                    return this.ToQualifiedName(this.Expression as PropertyAccessExpression);
                 }
-                return this._type;
-            }
-            private set
-            {
-                this._type = value;
+                return this.Expression;
             }
         }
         #endregion
@@ -57,7 +51,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.Expression = null;
             this.Arguments = new List<Node>();
             this.TypeArguments = new List<Node>();
-            this.Type = null;
         }
 
         public override void AddNode(Node childNode)
@@ -84,16 +77,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-
-        protected override Node InferType()
-        {
-            if (this.Expression.Kind == NodeKind.PropertyAccessExpression)
-            {
-                return this.PropertyAccessExpressionToQualifiedName(this.Expression);
-            }
-            return this.Expression;
-        }
-
 
     }
 }

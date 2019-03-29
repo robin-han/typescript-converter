@@ -7,8 +7,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class Parameter : Node
     {
-        private Node _type;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -29,18 +27,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public Node Type
         {
-            get
-            {
-                if (this._type == null)
-                {
-                    this._type = this.InferType();
-                }
-                return this._type;
-            }
-            private set
-            {
-                this._type = value;
-            }
+            get;
+            internal set;
         }
 
         public Node QuestionToken
@@ -52,7 +40,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public Node Initializer
         {
             get;
-            private set;
+            internal set;
         }
 
         public bool IsOptional
@@ -154,34 +142,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-
-        protected override void NormalizeImp()
-        {
-            Node type = this.Type;
-
-            if (this.QuestionToken != null && this.Initializer == null)
-            {
-                this.Initializer = this.CreateNode(NodeKind.NullKeyword);
-            }
-
-            if (this.IsVariable)
-            {
-                if (type.Kind == NodeKind.ArrayType)
-                {
-                    (type as ArrayType).IsParams = true;
-                }
-                else if (type.Kind == NodeKind.TypeReference)
-                {
-                    (type as TypeReference).IsParams = true;
-                }
-            }
-        }
-
-        protected override Node InferType()
-        {
-            return this.CreateNode(NodeKind.AnyKeyword);
-        }
-
+       
     }
 }
 

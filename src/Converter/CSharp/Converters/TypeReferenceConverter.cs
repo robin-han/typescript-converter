@@ -14,7 +14,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(TypeReference node)
         {
-            ConverterContext context = LangConverter.CurrentContext;
             string typeText = node.TypeName.Text;
 
             switch (typeText)
@@ -39,7 +38,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                             .AddRankSpecifiers(SyntaxFactory.ArrayRankSpecifier());
                     }
 
-                    if (context.PreferTypeScriptType)
+                    if (this.Context.Config.PreferTypeScriptType)
                     {
                         return SyntaxFactory
                             .GenericName("Array")

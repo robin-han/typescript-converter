@@ -7,8 +7,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class PropertyDeclaration : Declaration
     {
-        private Node _type;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -35,18 +33,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public Node Type
         {
-            get
-            {
-                if (this._type == null)
-                {
-                    this._type = this.InferType();
-                }
-                return this._type;
-            }
-            private set
-            {
-                this._type = value;
-            }
+            get;
+            internal set;
         }
 
         public Node Initializer
@@ -100,26 +88,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-
-        protected override Node InferType()
-        {
-            Node type = null;
-            if (this.Initializer != null)
-            {
-                type = this.GetNodeType(this.Initializer);
-            }
-            return type ?? this.CreateNode(NodeKind.AnyKeyword);
-        }
-
-        protected override void NormalizeImp()
-        {
-            base.NormalizeImp();
-
-            if (!this.Modifiers.Exists(n => n.Kind == NodeKind.PublicKeyword || n.Kind == NodeKind.PrivateKeyword || n.Kind == NodeKind.ProtectedKeyword))
-            {
-                this.Modifiers.Add(this.CreateNode(NodeKind.PublicKeyword));
-            }
-        }
+       
     }
 }
 

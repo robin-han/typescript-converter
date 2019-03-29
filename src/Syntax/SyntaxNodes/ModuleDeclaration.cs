@@ -29,7 +29,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public Node Body
         {
             get;
-            private set;
+            internal set;
         }
 
         #endregion
@@ -65,36 +65,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;
-            }
-        }
-
-        protected override void NormalizeImp()
-        {
-            base.NormalizeImp();
-
-            this.CombineModules();
-        }
-
-        private void CombineModules()
-        {
-            List<string> mTexts = new List<string>();
-            ModuleDeclaration node = this;
-            while (true)
-            {
-                mTexts.Add(node.Name.Text);
-                if (node.Body == null || node.Body.Kind != NodeKind.ModuleDeclaration)
-                {
-                    break;
-                }
-                node = node.Body as ModuleDeclaration;
-            }
-
-            if (mTexts.Count > 1)
-            {
-                this.Name.Text = string.Join('.', mTexts);
-                this.Name.End = node.Name.End;
-
-                this.Body = node.Body;
             }
         }
 

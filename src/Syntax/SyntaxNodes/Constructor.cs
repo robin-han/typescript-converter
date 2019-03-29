@@ -37,10 +37,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             private set;
         }
 
-        public Node BaseConstructor
+        public Node Base
         {
             get;
-            private set;
+            internal set;
         }
         #endregion
 
@@ -54,7 +54,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.JsDoc = new List<Node>();
             this.Body = null;
 
-            this.BaseConstructor = null;
+            this.Base = null;
         }
 
         public override void AddNode(Node childNode)
@@ -84,50 +84,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     this.ProcessUnknownNode(childNode);
                     break;
             }
-        }
-
-        protected override void NormalizeImp()
-        {
-            base.NormalizeImp();
-
-            if (!this.Modifiers.Exists(n => n.Kind == NodeKind.PublicKeyword || n.Kind == NodeKind.PrivateKeyword || n.Kind == NodeKind.ProtectedKeyword))
-            {
-                this.Modifiers.Add(this.CreateNode(NodeKind.PublicKeyword));
-            }
-
-            List<Node> statements = (this.Body as Block).Statements;
-            for (int i = 0; i < statements.Count; i++)
-            {
-                Node statement = statements[i];
-                if (this.IsBaseConstructor(statement))
-                {
-                    this.Body.Remove(statement);
-                    this.BaseConstructor = this.CreateNode(statement.TsNode);
-                    break;
-                }
-            }
-        }
-
-        private bool IsBaseConstructor(Node node)
-        {
-            if (node.Kind != NodeKind.ExpressionStatement)
-            {
-                return false;
-            }
-
-            ExpressionStatement expStatement = node as ExpressionStatement;
-            if (expStatement.Expression.Kind != NodeKind.CallExpression)
-            {
-                return false;
-            }
-
-            CallExpression callExp = expStatement.Expression as CallExpression;
-            if (callExp.Expression.Kind != NodeKind.SuperKeyword)
-            {
-                return false;
-            }
-
-            return true;
         }
 
     }

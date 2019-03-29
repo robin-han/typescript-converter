@@ -54,14 +54,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-
-        protected override void NormalizeImp()
-        {
-            base.NormalizeImp();
-
-            this.Text = string.Join('.', this.Left.Text, this.Right.Text);
-        }
-
     }
 }
 

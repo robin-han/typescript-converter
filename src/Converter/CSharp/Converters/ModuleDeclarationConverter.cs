@@ -14,19 +14,19 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ModuleDeclaration node)
         {
-            ConverterContext context = LangConverter.CurrentContext;
-
             string ns = node.Name.Text;
-            if (context.NamespaceMappings.ContainsKey(ns))
-            {
-                ns = context.NamespaceMappings[ns];
-            }
-            else if (!string.IsNullOrEmpty(context.Namespace))
-            {
-                ns = context.Namespace;
-            }
-            NamespaceDeclarationSyntax csNS = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(ns));
 
+            if (this.Context.Config.NamespaceMappings.ContainsKey(ns))
+            {
+                ns = this.Context.Config.NamespaceMappings[ns];
+            }
+            else if (!string.IsNullOrEmpty(this.Context.Config.Namespace))
+            {
+                ns = this.Context.Config.Namespace;
+            }
+
+
+            NamespaceDeclarationSyntax csNS = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(ns));
             if (node.Body is ModuleBlock mb)
             {
                 csNS = csNS.WithMembers(mb.ToCsNode<SyntaxList<MemberDeclarationSyntax>>());
@@ -36,7 +36,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             {
                 csNS = csNS.AddMembers(node.Body.ToCsNode<MemberDeclarationSyntax>());
             }
-
             return csNS;
         }
     }

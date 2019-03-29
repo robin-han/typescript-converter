@@ -12,6 +12,49 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 {
     public class Converter
     {
+        #region Fields
+        private ConverterContext _context;
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// 
+        /// </summary>
+        public Converter()
+        {
+            this._context = new ConverterContext();
+        }
+        #endregion
+
+
+        #region Properties
+        /// <summary>
+        /// 
+        /// </summary>
+        public ConverterContext Context
+        {
+            get
+            {
+                return this._context;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    value = new ConverterContext();
+                }
+                this._context = value;
+            }
+        }
+        #endregion
+
+
+        #region Methods
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="argNodes"></param>
+        /// <returns></returns>
         protected ArgumentSyntax[] ToArgumentList(List<Node> argNodes)
         {
             List<ArgumentSyntax> csArgumetns = new List<ArgumentSyntax>();
@@ -23,9 +66,14 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             return csArgumetns.ToArray();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         protected string StripType(string type)
         {
-            List<string> omittedNames = LangConverter.CurrentContext.OmittedQualifiedNames;
+            List<string> omittedNames = this.Context.Config.OmittedQualifiedNames;
             foreach (string omitted in omittedNames)
             {
                 int index = type.IndexOf(omitted);
@@ -43,10 +91,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             return type;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         protected string CommentText(string text)
         {
             return "AAA___" + text + "___AAA";
         }
+        #endregion
 
     }
 }

@@ -79,15 +79,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             }
         }
 
-        protected override void NormalizeImp()
-        {
-            base.NormalizeImp();
-
-            foreach (Parameter parameter in this.Parameters)
-            {
-                parameter.IgnoreType = true;
-            }
-        }
     }
 }
 

@@ -7,8 +7,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class VariableDeclarationNode : Declaration
     {
-        private Node _type;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -23,18 +21,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public Node Type
         {
-            get
-            {
-                if (this._type == null)
-                {
-                    this._type = this.InferType();
-                }
-                return this._type;
-            }
-            private set
-            {
-                this._type = value;
-            }
+            get;
+            internal set;
         }
 
         public Node Initializer
@@ -77,22 +65,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     this.ProcessUnknownNode(childNode);
                     break;
             }
-        }
-
-        protected override Node InferType()
-        {
-            if (this.Parent.Kind == NodeKind.CatchClause)
-            {
-                return this.CreateNode(NodeKind.Identifier, "Exception");
-            }
-
-            Node type = null;
-            Node initValue = this.Initializer;
-            if (initValue != null)
-            {
-                type = this.GetNodeType(initValue);
-            }
-            return type ?? this.CreateNode(NodeKind.AnyKeyword);
         }
 
     }

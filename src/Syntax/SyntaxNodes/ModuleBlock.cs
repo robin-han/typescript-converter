@@ -51,50 +51,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-
-        protected override void NormalizeImp()
-        {
-            ClassifyStatments();
-        }
-
-        private void ClassifyStatments()
-        {
-            for (int i = this.Statements.Count - 1; i >= 0; i--)
-            {
-                Node statement = this.Statements[i];
-                switch (statement.Kind)
-                {
-                    case NodeKind.ExpressionStatement:
-                        if (statement.Text.IndexOf("use strict") >= 0) // 'use strict', ;)
-                        {
-                            this.Statements.RemoveAt(i);
-                        }
-                        break;
-
-                    case NodeKind.TypeAliasDeclaration:
-                        TypeAliasDeclaration alias = statement as TypeAliasDeclaration;
-                        if (alias.Type.Kind != NodeKind.FunctionType)
-                        {
-                            this.Statements.RemoveAt(i);
-                            this.TypeAliases.Add(statement);
-                        }
-                        break;
-
-                    case NodeKind.FunctionDeclaration:
-                    case NodeKind.ClassDeclaration:
-                        Declaration declaration = statement as Declaration;
-                        if (declaration.HasJsDocTag("csignore"))
-                        {
-                            this.Statements.RemoveAt(i);
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-        }
-
     }
 }
 

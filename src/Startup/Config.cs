@@ -8,8 +8,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 {
     class Config
     {
+        #region Fields
         private static readonly string DEAULT_CONFIGFILE_NAME = "tscconfig.json";
+        #endregion
 
+        #region Constructor
         public Config()
         {
             this.Init();
@@ -19,6 +22,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
         {
             this.Include = new List<string>();
             this.Exclude = new List<string>();
+            this.Samples = new List<string>();
+
             this.Output = string.Empty;
             this.FlatOutput = false;
             this.PreferTypeScriptType = true;
@@ -28,7 +33,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             this.NamespaceMappings = new List<string>();
             this.OmittedQualifiedNames = new List<string>();
         }
+        #endregion
 
+        #region Properties
         public List<string> Include
         {
             get;
@@ -37,6 +44,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
 
         public List<string> Exclude
+        {
+            get;
+            private set;
+        }
+
+        public List<string> Samples
         {
             get;
             private set;
@@ -83,11 +96,14 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             get;
             private set;
         }
+        #endregion
 
+        #region Methods
         public string Read()
         {
             return Read(DEAULT_CONFIGFILE_NAME);
         }
+
         public string Read(string configPath)
         {
             return this.ReadConfigFile(configPath);
@@ -187,8 +203,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
                 }
             }
 
+            //samples
+            JToken jsonSamples = jsonConfig["samples"];
+            if (jsonSamples != null)
+            {
+                foreach (JToken item in jsonSamples)
+                {
+                    this.Samples.Add(item.ToObject<string>());
+                }
+            }
+
             return string.Empty;
         }
-
+        #endregion
     }
 }

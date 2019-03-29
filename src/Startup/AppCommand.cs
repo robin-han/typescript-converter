@@ -11,14 +11,19 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 {
     class AppCommand
     {
+        #region Fields
         private readonly CommandLineApplication _appCmd;
+        #endregion
 
+        #region Constructor
         public AppCommand()
         {
             this._appCmd = this.CreateCommand();
             this._appCmd.OnExecute(new Func<int>(this.OnCommandLineExecute));
         }
+        #endregion
 
+        #region Public Methods
         public int Execute(params string[] args)
         {
             try
@@ -33,7 +38,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
             return 0;
         }
+        #endregion
 
+        #region Private Methods
         private int OnCommandLineExecute()
         {
             ExecuteArgument arg = ExecuteArgument.Create(this._appCmd.Options);
@@ -48,7 +55,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
                 return 0;
             }
 
-            List<TsDocument> tsDocs = this.BuildAst(arg.Files);
+            List<Document> tsDocs = this.BuildAst(arg.Files);
             if (this.ConfirmConvert(tsDocs))
             {
                 this.Convert(tsDocs, arg);
@@ -57,17 +64,17 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             return 0;
         }
 
-        private List<TsDocument> BuildAst(List<string> files)
+        private List<Document> BuildAst(List<string> files)
         {
-            List<TsDocument> tsDocs = new List<TsDocument>();
+            List<Document> tsDocs = new List<Document>();
 
             DateTime startTime = DateTime.Now;
             this.Log(string.Format("Starting build ast({0})", files.Count));
 
             foreach (string file in files)
             {
-                TsAstBuilder builder = new TsAstBuilder();
-                TsDocument doc = builder.Build(file);
+                AstBuilder builder = new AstBuilder();
+                Document doc = builder.Build(file);
 
                 tsDocs.Add(doc);
             }
@@ -78,11 +85,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             return tsDocs;
         }
 
-        private bool ConfirmConvert(List<TsDocument> tsDocs)
+        private bool ConfirmConvert(List<Document> tsDocs)
         {
             this.PrintLostNodes(tsDocs);
 
-            var nodeTypes = TsAstBuilder.AllNodeTypes.Keys;
+            var nodeTypes = AstBuilder.AllNodeTypes.Keys;
             List<string> unSupportedNodes = new List<string>();
 
             foreach (var doc in tsDocs)
@@ -112,23 +119,29 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             return true;
         }
 
-        private void Convert(List<TsDocument> tsDocs, ExecuteArgument arg)
+        private void Convert(List<Document> tsDocs, ExecuteArgument arg)
         {
-            foreach (TsDocument doc in tsDocs)
+            Project project = new Project(tsDocs);
+            ConverterContext context = this.CreateConverterContext(arg.Config, project);
+            LangConverter converter = new LangConverter(context);
+
+            List<Document> usedDocs = this.FilterDocuments(tsDocs, context.Config.ExcludeTypes);
+            
+            foreach (Document doc in usedDocs)
             {
                 DateTime startTime = DateTime.Now;
                 this.Log(string.Format("Starting convert '{0}'", doc.FileName));
 
-                LangConverter converter = new LangConverter(this.CreateConverterContext(arg.Config));
                 string savePath = arg.GetSavePath(doc.Path);
-                string code = converter.Convert(doc.RootNode);
+                converter.Analyze(doc.Root);
+                string code = converter.Convert(doc.Root);
 
                 File.WriteAllText(savePath, code);
 
                 DateTime endTime = DateTime.Now;
                 this.Log(string.Format("Finished after {0}s", (endTime - startTime).TotalSeconds.ToString("0.00")));
 
-                this.PrintCode(code);
+                //this.PrintCode(code);
             }
         }
 
@@ -144,7 +157,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             }
         }
 
-        private void PrintLostNodes(List<TsDocument> tsDocs)
+        private void PrintLostNodes(List<Document> tsDocs)
         {
             this.Log("Search node's lost child nodes");
 
@@ -169,15 +182,15 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             this.Log("Finish search");
         }
 
-        [Conditional("DEBUG")]
-        private void PrintCode(string code)
-        {
-            Console.WriteLine(code);
-        }
+        //[Conditional("DEBUG")]
+        //private void PrintCode(string code)
+        //{
+        //    Console.WriteLine(code);
+        //}
 
-        private ConverterContext CreateConverterContext(Config config)
+        private ConverterContext CreateConverterContext(Config config, Project project)
         {
-            ConverterContext context = new ConverterContext
+            CSharp.Config converterConfig = new CSharp.Config
             {
                 Namespace = config.Namespace,
                 PreferTypeScriptType = config.PreferTypeScriptType,
@@ -188,10 +201,36 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             foreach (string item in config.NamespaceMappings)
             {
                 string[] ms = item.Split(':');
-                context.NamespaceMappings[ms[0]] = ms[1];
+                converterConfig.NamespaceMappings[ms[0]] = ms[1];
             }
 
-            return context;
+            if (config.Samples.Count > 0)
+            {
+                List<string> usedTypes = project.GetReferences(config.Samples.ToArray());
+                List<string> allTypes = project.TypeNames;
+                converterConfig.ExcludeTypes = allTypes.FindAll(t => !usedTypes.Contains(t));
+            }
+
+            return new ConverterContext(converterConfig);
+        }
+
+        private List<Document> FilterDocuments(List<Document> docs, List<string> excludedTypes)
+        {
+            if (excludedTypes.Count == 0)
+            {
+                return docs;
+            }
+
+            List<Document> usedDocs = new List<Document>();
+            foreach (Document doc in docs)
+            {
+                bool isExcluded = doc.GetTypeNames().TrueForAll(n => excludedTypes.Contains(n));
+                if (!isExcluded)
+                {
+                    usedDocs.Add(doc);
+                }
+            }
+            return usedDocs;
         }
 
         private CommandLineApplication CreateCommand()
@@ -222,6 +261,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
             return app;
         }
-
+        #endregion
     }
 }

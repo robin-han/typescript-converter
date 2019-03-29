@@ -33,7 +33,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 return csName;
             }
             // omit names(dv. core.)
-            List<string> omittedNames = LangConverter.CurrentContext.OmittedQualifiedNames;
+            List<string> omittedNames = this.Context.Config.OmittedQualifiedNames;
             if (omittedNames.Count > 0 && omittedNames.Contains(node.Expression.Text.Trim()))
             {
                 return csName;
@@ -54,8 +54,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 parent = parent.Parent;
             }
 
-            MethodDeclaration method = parent as MethodDeclaration;
-            return (method == null ? false : method.IsStatic);
+            return (!(parent is MethodDeclaration method) ? false : method.IsStatic);
         }
 
     }

@@ -16,19 +16,19 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public string Pattern
         {
             get;
-            private set;
+            internal set;
         }
 
         public bool IgnoreCase
         {
             get;
-            private set;
+            internal set;
         }
 
         public bool Multiline
         {
             get;
-            private set;
+            internal set;
         }
         #endregion
 
@@ -53,23 +53,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-
-        protected override void NormalizeImp()
-        {
-            int lastIndex = this.Text.LastIndexOf('/');
-            this.Pattern = this.Text.Substring(1, lastIndex - 1);
-
-            string regOption = this.Text.Substring(lastIndex);
-            if (regOption.Contains('i'))
-            {
-                this.IgnoreCase = true;
-            }
-            if (regOption.Contains('m'))
-            {
-                this.Multiline = true;
-            }
-        }
-
     }
 }
 

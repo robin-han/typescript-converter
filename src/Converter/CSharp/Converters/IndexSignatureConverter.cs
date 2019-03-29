@@ -14,9 +14,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(IndexSignature node)
         {
-            ConverterContext context = LangConverter.CurrentContext;
-
-            if (context.PreferTypeScriptType)
+            if (this.Context.Config.PreferTypeScriptType)
             {
                 return SyntaxFactory
                     .GenericName("Hashtable")
