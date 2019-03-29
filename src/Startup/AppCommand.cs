@@ -124,13 +124,15 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             Project project = new Project(tsDocs);
             ConverterContext context = this.CreateConverterContext(arg.Config, project);
             LangConverter converter = new LangConverter(context);
-
             List<Document> usedDocs = this.FilterDocuments(tsDocs, context.Config.ExcludeTypes);
-            
+
+            DateTime startTime = DateTime.Now;
+            this.Log(string.Format("Starting convert files({0})", usedDocs.Count));
+
             foreach (Document doc in usedDocs)
             {
-                DateTime startTime = DateTime.Now;
-                this.Log(string.Format("Starting convert '{0}'", doc.FileName));
+                DateTime beginTime = DateTime.Now;
+                this.Log(string.Format("Starting convert file '{0}'", doc.FileName));
 
                 string savePath = arg.GetSavePath(doc.Path);
                 converter.Analyze(doc.Root);
@@ -138,11 +140,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
                 File.WriteAllText(savePath, code);
 
-                DateTime endTime = DateTime.Now;
-                this.Log(string.Format("Finished after {0}s", (endTime - startTime).TotalSeconds.ToString("0.00")));
+                this.Log(string.Format("Finished after {0}s", (DateTime.Now - beginTime).TotalSeconds.ToString("0.00")));
 
                 //this.PrintCode(code);
             }
+            
+            this.Log(string.Format("Finished after {0}s", (DateTime.Now - startTime).TotalSeconds.ToString("0.00")));
         }
 
         private void Log(string msg, bool hasTitle = true)

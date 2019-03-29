@@ -28,23 +28,24 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         #region ModuleDeclaration
         private void CombineModules(ModuleDeclaration module)
         {
+            ModuleDeclaration md = module;
             List<string> mTexts = new List<string>();
             while (true)
             {
-                mTexts.Add(module.Name.Text);
-                if (module.Body == null || module.Body.Kind != NodeKind.ModuleDeclaration)
+                mTexts.Add(md.Name.Text);
+                if (md.Body == null || md.Body.Kind != NodeKind.ModuleDeclaration)
                 {
                     break;
                 }
-                module = module.Body as ModuleDeclaration;
+                md = md.Body as ModuleDeclaration;
             }
 
             if (mTexts.Count > 1)
             {
-                module.Name.Text = string.Join('.', mTexts);
-                module.Name.End = module.Name.End;
+                md.Name.Text = string.Join('.', mTexts);
+                md.Name.End = md.Name.End;
 
-                module.Body = module.Body;
+                module.Body = md.Body;
             }
         }
         #endregion
