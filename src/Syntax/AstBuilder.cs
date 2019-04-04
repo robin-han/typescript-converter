@@ -79,12 +79,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
             if (nodeTypes.ContainsKey(syntaxKind))
             {
-                Type type = nodeTypes[syntaxKind];
-                ConstructorInfo constructorInfo = type.GetConstructor(Type.EmptyTypes);
+                System.Type type = nodeTypes[syntaxKind];
+                ConstructorInfo constructorInfo = type.GetConstructor(System.Type.EmptyTypes);
 
                 if (constructorInfo != null)
                 {
-                    Node syntaxNode = constructorInfo.Invoke(Type.EmptyTypes) as Node;
+                    Node syntaxNode = constructorInfo.Invoke(System.Type.EmptyTypes) as Node;
                     syntaxNode.Init(obj);
                     return syntaxNode;
                 }
@@ -104,8 +104,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         }
 
         #region Static Methods
-        private static Dictionary<string, Type> _allNodeTypes;
-        public static Dictionary<string, Type> AllNodeTypes
+        private static Dictionary<string, System.Type> _allNodeTypes;
+        public static Dictionary<string, System.Type> AllNodeTypes
         {
             get
             {
@@ -114,16 +114,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     return _allNodeTypes;
                 }
 
-                _allNodeTypes = new Dictionary<string, Type>();
-                Type baseType = typeof(Node);
-                Type[] types = Assembly.GetExecutingAssembly().GetExportedTypes();
+                _allNodeTypes = new Dictionary<string, System.Type>();
+                System.Type baseType = typeof(Node);
+                System.Type[] types = Assembly.GetExecutingAssembly().GetExportedTypes();
 
-                foreach (Type type in types)
+                foreach (System.Type type in types)
                 {
                     if (type.IsSubclassOf(baseType))
                     {
                         PropertyInfo p = type.GetProperty("Kind", typeof(NodeKind));
-                        string kind = p.GetValue(type.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes)).ToString();
+                        string kind = p.GetValue(type.GetConstructor(System.Type.EmptyTypes).Invoke(System.Type.EmptyTypes)).ToString();
                         _allNodeTypes[kind] = type;
                     }
                 }

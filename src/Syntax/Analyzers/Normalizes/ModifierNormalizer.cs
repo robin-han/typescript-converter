@@ -35,16 +35,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
 
             if (!this.HasModify(modifiers, NodeKind.PublicKeyword) && !this.HasModify(modifiers, NodeKind.PrivateKeyword) && !this.HasModify(modifiers, NodeKind.ProtectedKeyword))
             {
-                modifiers.Add(node.CreateNode(NodeKind.PublicKeyword));
+                modifiers.Add(NodeHelper.CreateNode(NodeKind.PublicKeyword));
             }
 
             if (node.HasJsDocTag("csoverride") && !this.HasModify(modifiers, NodeKind.OverrideKeyword))
             {
-                modifiers.Add(node.CreateNode(NodeKind.OverrideKeyword));
+                modifiers.Add(NodeHelper.CreateNode(NodeKind.OverrideKeyword));
             }
             if (node.HasJsDocTag("csnew") && !this.HasModify(modifiers, NodeKind.NewKeyword))
             {
-                modifiers.Add(node.CreateNode(NodeKind.NewKeyword));
+                modifiers.Add(NodeHelper.CreateNode(NodeKind.NewKeyword));
             }
         }
 

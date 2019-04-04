@@ -72,7 +72,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
                     removedNodes.Add(getAccessor);
                     removedNodes.Add(setAccessor);
 
-                    Node getSestAccessor = classNode.CreateNode(NodeKind.GetSetAccessor);
+                    Node getSestAccessor = NodeHelper.CreateNode(NodeKind.GetSetAccessor);
+                    getSestAccessor.Parent = classNode;
                     getSestAccessor.AddNode(getAccessor.TsNode);
                     getSestAccessor.AddNode(setAccessor.TsNode);
                     classNode.Members.Insert(i++, getSestAccessor);

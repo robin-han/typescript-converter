@@ -9,27 +9,72 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class Document
     {
+        #region Fields
+        private Node _root;
+        private string _path;
+        private Project _project;
+        #endregion
+
         #region Constructor
         public Document()
         {
-            this.Root = null;
-            this.Path = string.Empty;
+            this._root = null;
+            this._path = string.Empty;
+            this._project = null;
         }
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Gets the document's root node.
+        /// </summary>
         public Node Root
         {
-            get;
-            internal set;
+            get
+            {
+                return this._root;
+            }
+            internal set
+            {
+                Node root = value;
+                root.Document = this;
+                this._root = root;
+            }
         }
 
+        /// <summary>
+        /// Gets the document's path
+        /// </summary>
         public string Path
         {
-            get;
-            internal set;
+            get
+            {
+                return this._path;
+            }
+            internal set
+            {
+                this._path = value;
+            }
         }
 
+        /// <summary>
+        /// Get the document's project.
+        /// </summary>
+        public Project Project
+        {
+            get
+            {
+                return this._project;
+            }
+            internal set
+            {
+                this._project = value;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public string FileName
         {
             get
@@ -114,6 +159,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             return lost;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public List<string> GetTypeNames()
         {
             List<string> ret = new List<string>();
@@ -129,6 +178,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             }
             return ret;
         }
+
         /// <summary>
         /// Get all type nodes(class, interfact, enum etc.) in the document.
         /// </summary>
@@ -141,6 +191,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             });
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         internal string GetTypeName(Node node)
         {
             if (node.GetValue("Name") is Node name)

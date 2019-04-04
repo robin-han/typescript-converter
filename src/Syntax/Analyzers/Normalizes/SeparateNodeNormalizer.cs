@@ -111,7 +111,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
                 if (this.CanSeparate(member))
                 {
                     classNode.Members.RemoveAt(i);
-                    classNode.Members.InsertRange(i++, this.SeparateMember(member));
+                    List<Node> newMembers = this.SeparateMember(member);
+                    foreach (var mem in newMembers)
+                    {
+                        mem.Parent = classNode;
+                    }
+                    classNode.Members.InsertRange(i++, newMembers);
                 }
             }
         }
@@ -123,7 +128,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
             JObject getMethod = new JObject(member.TsNode);
             getMethod["parameters"][0].Remove();
             getMethod["body"]["statements"] = getMethod["body"]["statements"][0]["thenStatement"]["statements"];
-            newMembers.Add(member.CreateNode(getMethod));
+            newMembers.Add(NodeHelper.CreateNode(getMethod));
 
             JObject setMethod = new JObject(member.TsNode);
             setMethod.Remove("type");
@@ -137,7 +142,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
             {
                 setMethod["body"]["statements"][0] = elseStatement;
             }
-            newMembers.Add(member.CreateNode(setMethod));
+            newMembers.Add(NodeHelper.CreateNode(setMethod));
 
             return newMembers;
         }

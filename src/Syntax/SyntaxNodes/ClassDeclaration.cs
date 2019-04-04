@@ -71,7 +71,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 //make all class has the base object
                 if (!hasBaseClass)
                 {
-                    types.Insert(0, this.CreateNode("{ " +
+                    types.Insert(0, NodeHelper.CreateNode("{ " +
                         "kind: \"ExpressionWithTypeArguments \", " +
                         "expression: { " +
                            "kind: \"Identifier\", " +

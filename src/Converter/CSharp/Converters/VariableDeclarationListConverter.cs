@@ -14,18 +14,20 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(VariableDeclarationList node)
         {
+            bool isVar = false;
             Node type = node.Type;
             if ((type.Kind == NodeKind.AnyKeyword || type.Kind == NodeKind.ObjectKeyword) && node.Declarations.Count > 0)
             {
                 VariableDeclarationNode variableNode = node.Declarations[0] as VariableDeclarationNode;
                 if (variableNode.Initializer != null)
                 {
-                    type = node.CreateNode(NodeKind.Identifier, "var");
+                    isVar = true;
                 }
             }
 
+            TypeSyntax csType = isVar ? SyntaxFactory.IdentifierName("var") : node.Type.ToCsNode<TypeSyntax>();
             return SyntaxFactory
-                .VariableDeclaration(type.ToCsNode<TypeSyntax>())
+                .VariableDeclaration(csType)
                 .AddVariables(node.Declarations.ToCsNodes<VariableDeclaratorSyntax>());
         }
     }

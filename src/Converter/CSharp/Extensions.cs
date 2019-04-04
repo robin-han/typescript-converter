@@ -11,18 +11,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 {
     internal static class SyntaxNodeExtensions
     {
-        private static ConverterContext GetConvertContext(Node tsNode)
-        {
-            if (tsNode.Pocket.ContainsKey(LangConverter.CONVERTER_CONTEXT_KEY))
-            {
-                return tsNode.Pocket[LangConverter.CONVERTER_CONTEXT_KEY] as ConverterContext;
-            }
-            if (tsNode.Parent != null)
-            {
-                return GetConvertContext(tsNode.Parent);
-            }
-            return null;
-        }
+        //private static ConverterContext GetConvertContext(Node tsNode)
+        //{
+        //    if (tsNode.Pocket.ContainsKey(LangConverter.CONVERTER_CONTEXT_KEY))
+        //    {
+        //        return tsNode.Pocket[LangConverter.CONVERTER_CONTEXT_KEY] as ConverterContext;
+        //    }
+        //    if (tsNode.Parent != null)
+        //    {
+        //        return GetConvertContext(tsNode.Parent);
+        //    }
+        //    return null;
+        //}
 
         public static T ToCsNode<T>(this Node tsNode)
         {
@@ -36,7 +36,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             try
             {
                 object convertInstance = converter.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes);
-                ConverterContext context = GetConvertContext(tsNode);
+                ConverterContext context = LangConverter.CurrentContext;
                 converter.GetProperty("Context").SetValue(convertInstance, context);
 
                 MethodInfo convertMethod = converter.GetMethod("Convert");

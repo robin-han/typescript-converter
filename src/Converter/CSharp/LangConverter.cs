@@ -32,6 +32,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             }
         }
        
+        internal static ConverterContext CurrentContext
+        {
+            get;
+            set;
+        }
         #endregion
 
         #region Public Methods
@@ -46,9 +51,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 
         public string Convert(Node tsNode)
         {
-            tsNode.Pocket[CONVERTER_CONTEXT_KEY] = this.Context;
+            CurrentContext = this.Context;
             CSharpSyntaxNode csNode = tsNode?.ToCsNode<CSharpSyntaxNode>();
-            tsNode.Pocket.Remove(CONVERTER_CONTEXT_KEY);
+            CurrentContext = null;
 
             if (csNode != null)
             {

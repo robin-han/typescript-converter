@@ -8,6 +8,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
     public class ExpressionWithTypeArguments : Node
     {
         #region Properties
+        private Node _type = null;
+        #endregion
+
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.ExpressionWithTypeArguments; }
@@ -29,11 +33,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             get
             {
-                if (this.Expression.Kind == NodeKind.PropertyAccessExpression)
+                if (this._type == null)
                 {
-                    return this.ToQualifiedName(this.Expression as PropertyAccessExpression);
+                    if (this.Expression.Kind == NodeKind.PropertyAccessExpression)
+                    {
+                        this._type = this.Expression.ToQualifiedName();
+                    }
+                    else
+                    {
+                        this._type = this.Expression;
+                    }
                 }
-                return this.Expression;
+                return this._type;
             }
         }
         #endregion

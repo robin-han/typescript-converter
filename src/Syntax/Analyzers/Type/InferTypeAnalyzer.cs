@@ -69,11 +69,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
             }
         }
 
-        private void InferType(ArrayLiteralExpression note)
+        private void InferType(ArrayLiteralExpression node)
         {
-            if (note.Type == null)
+            if (node.Type == null)
             {
-                note.Type = note.GetNodeType();
+                node.Type = TypeHelper.GetNodeType(node);
             }
         }
 
@@ -81,7 +81,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = node.CreateNode(NodeKind.VoidKeyword);
+                node.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
             }
         }
 
@@ -89,7 +89,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = node.CreateNode(NodeKind.ObjectKeyword);
+                node.Type = NodeHelper.CreateNode(NodeKind.ObjectKeyword);
             }
         }
 
@@ -106,7 +106,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = node.CreateNode(NodeKind.ObjectKeyword);
+                node.Type = NodeHelper.CreateNode(NodeKind.ObjectKeyword);
             }
         }
 
@@ -114,7 +114,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = node.CreateNode(NodeKind.VoidKeyword);
+                node.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
             }
         }
 
@@ -122,7 +122,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = node.CreateNode(NodeKind.VoidKeyword);
+                node.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
             }
         }
 
@@ -130,7 +130,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = node.GetNodeType();
+                node.Type = TypeHelper.GetNodeType(node);
             }
         }
 
@@ -138,7 +138,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = node.CreateNode(NodeKind.AnyKeyword);
+                node.Type = NodeHelper.CreateNode(NodeKind.AnyKeyword);
             }
         }
 
@@ -149,9 +149,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
                 Node type = null;
                 if (node.Initializer != null)
                 {
-                    type = node.GetNodeType(node.Initializer);
+                    type = TypeHelper.GetNodeType(node.Initializer);
                 }
-                type = type ?? node.CreateNode(NodeKind.AnyKeyword);
+                type = type ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
                 node.Type = type;
             }
         }
@@ -160,7 +160,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = node.CreateNode(NodeKind.AnyKeyword);
+                node.Type = NodeHelper.CreateNode(NodeKind.AnyKeyword);
             }
         }
 
@@ -179,7 +179,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
                 }
                 else
                 {
-                    node.Type = node.CreateNode(NodeKind.AnyKeyword);
+                    node.Type = NodeHelper.CreateNode(NodeKind.AnyKeyword);
                 }
             }
         }
@@ -190,16 +190,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
             {
                 if (node.Parent.Kind == NodeKind.CatchClause)
                 {
-                    node.Type = node.CreateNode(NodeKind.Identifier, "Exception");
+                    node.Type = NodeHelper.CreateNode(NodeKind.Identifier, "Exception");
                 }
                 else
                 {
                     Node type = null;
                     if (node.Initializer != null)
                     {
-                        type = node.GetNodeType(node.Initializer);
+                        type = TypeHelper.GetNodeType(node.Initializer);
                     }
-                    type = type ?? node.CreateNode(NodeKind.AnyKeyword);
+                    type = type ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
 
                     node.Type = type;
                 }

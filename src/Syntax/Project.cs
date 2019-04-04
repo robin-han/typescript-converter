@@ -17,12 +17,17 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             this._documents = documents;
             this._typeNodes = null;
+
+            foreach (Document doc in documents)
+            {
+                doc.Project = this;
+            }
         }
         #endregion
 
         #region Properties
         /// <summary>
-        /// 
+        /// Gets all documents.
         /// </summary>
         public List<Document> Documents
         {
@@ -42,9 +47,41 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 return this.GetAllTypes().names;
             }
         }
+
+        /// <summary>
+        /// Gets all types in the project.
+        /// </summary>
+        public List<Node> Types
+        {
+            get
+            {
+                return this.GetAllTypes().nodes;
+            }
+        }
         #endregion
 
         #region Methods
+        /// <summary>
+        /// Gets class declaration node with the name.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public ClassDeclaration GetClass(string name)
+        {
+            foreach (Node type in this.Types)
+            {
+                if (type.Kind == NodeKind.ClassDeclaration)
+                {
+                    ClassDeclaration cls = type as ClassDeclaration;
+                    if (cls.Name != null && cls.Name.Text == name)
+                    {
+                        return cls;
+                    }
+                }
+            }
+            return null;
+        }
+
         /// <summary>
         /// Gets all reference type(class, interface, enums etc.) names.
         /// </summary>

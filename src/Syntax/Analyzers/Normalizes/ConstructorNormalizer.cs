@@ -31,7 +31,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
                 if (this.IsBaseConstructor(statement))
                 {
                     ctorNode.Body.Remove(statement);
-                    ctorNode.Base = ctorNode.CreateNode(statement.TsNode);
+                    Node baseNode = NodeHelper.CreateNode(statement.TsNode);
+                    baseNode.Parent = ctorNode;
+                    ctorNode.Base = baseNode;
                     break;
                 }
             }
