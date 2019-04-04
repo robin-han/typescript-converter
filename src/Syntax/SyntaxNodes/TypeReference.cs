@@ -29,7 +29,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             get;
             set;
-           
+
         }
         #endregion
 
@@ -61,6 +61,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     this.ProcessUnknownNode(childNode);
                     break;
             }
+        }
+
+        internal override string GetText()
+        {
+            return this.TypeName.Text;
         }
 
     }

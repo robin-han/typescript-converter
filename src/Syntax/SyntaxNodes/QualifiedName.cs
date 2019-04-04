@@ -54,6 +54,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
+
+        internal override string GetText()
+        {
+            return string.Join('.', this.Left.Text, this.Right.Text);
+        }
     }
 }
 

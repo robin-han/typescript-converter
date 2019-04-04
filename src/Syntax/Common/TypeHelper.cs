@@ -240,6 +240,13 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 return propertyParent.Type;
             }
             //
+            ReturnStatement returnParent = node.Parent as ReturnStatement;
+            if (returnParent != null)
+            {
+                MethodDeclaration method = GetMethodDeclarationParent(returnParent);
+                return method?.Type;
+            }
+            //
             BinaryExpression binaryParent = node.Parent as BinaryExpression;
             if (binaryParent != null && binaryParent.OperatorToken.Kind == NodeKind.EqualsToken) //assign
             {
