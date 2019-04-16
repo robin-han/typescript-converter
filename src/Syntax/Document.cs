@@ -187,7 +187,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         {
             return this.Root.Descendants((n) =>
             {
-                return n.Kind == NodeKind.ClassDeclaration || n.Kind == NodeKind.InterfaceDeclaration || n.Kind == NodeKind.EnumDeclaration;
+                return( 
+                n.Kind == NodeKind.ClassDeclaration || 
+                n.Kind == NodeKind.InterfaceDeclaration ||
+                n.Kind == NodeKind.EnumDeclaration ||
+                n.Kind == NodeKind.TypeAliasDeclaration);
             });
         }
 

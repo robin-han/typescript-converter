@@ -16,7 +16,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         {
             if (this.Context.Config.PreferTypeScriptType)
             {
-                return SyntaxFactory.IdentifierName("Object");
+                return SyntaxFactory.IdentifierName("Any");
             }
             else
             {

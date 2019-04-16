@@ -16,10 +16,10 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         {
             bool isVar = false;
             Node type = node.Type;
-            if ((type.Kind == NodeKind.AnyKeyword || type.Kind == NodeKind.ObjectKeyword) && node.Declarations.Count > 0)
+            if (type.Kind == NodeKind.AnyKeyword && node.Declarations.Count > 0)
             {
                 VariableDeclarationNode variableNode = node.Declarations[0] as VariableDeclarationNode;
-                if (variableNode.Initializer != null)
+                if (variableNode.Initializer != null && variableNode.Initializer.Kind != NodeKind.NullKeyword)
                 {
                     isVar = true;
                 }

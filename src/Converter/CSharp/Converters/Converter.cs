@@ -92,6 +92,41 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         }
 
         /// <summary>
+        /// Filter statements.
+        /// </summary>
+        /// <param name="statements"></param>
+        /// <returns></returns>
+        protected List<Node> FilterStatements(List<Node> statements)
+        {
+            List<string> excluteTypes = this.Context.Config.ExcludeTypes;
+            if (excluteTypes.Count == 0)
+            {
+                return statements;
+            }
+
+            return statements.FindAll(statement =>
+            {
+                switch (statement.Kind)
+                {
+                    case NodeKind.ClassDeclaration:
+                        return !excluteTypes.Contains((statement as ClassDeclaration).Name.Text);
+
+                    case NodeKind.InterfaceDeclaration:
+                        return !excluteTypes.Contains((statement as InterfaceDeclaration).Name.Text);
+
+                    case NodeKind.EnumDeclaration:
+                        return !excluteTypes.Contains((statement as EnumDeclaration).Name.Text);
+
+                    case NodeKind.TypeAliasDeclaration:
+                        return !excluteTypes.Contains((statement as TypeAliasDeclaration).Name.Text);
+
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="text"></param>

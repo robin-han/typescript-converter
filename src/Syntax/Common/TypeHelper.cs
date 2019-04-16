@@ -39,7 +39,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     {
                         return NodeHelper.CreateNode(NodeKind.NumberKeyword);
                     }
-                    return NodeHelper.CreateNode(NodeKind.ObjectKeyword);
+                    return NodeHelper.CreateNode(NodeKind.AnyKeyword);
 
                 case NodeKind.TrueKeyword:
                 case NodeKind.FalseKeyword:
@@ -50,7 +50,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
                 case NodeKind.Identifier:
                     Node identifierType = GetIndentifierType(node as Identifier);
-                    return identifierType ?? NodeHelper.CreateNode(NodeKind.ObjectKeyword);
+                    return identifierType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
 
                 case NodeKind.PropertyAccessExpression:
                 case NodeKind.CallExpression:
@@ -62,9 +62,23 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 case NodeKind.ObjectLiteralExpression:
                     return GetObjectLiteralType(node as ObjectLiteralExpression);
 
+                case NodeKind.ElementAccessExpression:
+                    return GetElementAccessType(node as ElementAccessExpression);
+
                 default:
                     return node.GetValue("Type") as Node;
             }
+        }
+
+        private static Node GetElementAccessType(ElementAccessExpression elementAccess)
+        {
+            //TODO:
+            Node type = GetNodeType(elementAccess.Expression);
+            if (type != null)
+            {
+                return type.Kind == NodeKind.ArrayType ? (type as ArrayType).ElementType : type;
+            }
+            return null;
         }
 
         private static Node GetIndentifierType(Identifier identifier)
@@ -180,7 +194,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 foreach (PropertyAssignment prop in properties)
                 {
                     Node elementType = GetNodeType(prop.Initializer);
-                    elementType = elementType ?? NodeHelper.CreateNode(NodeKind.ObjectKeyword);
+                    elementType = elementType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
                     elementType.Path = "type";
 
                     Node propSignature = NodeHelper.CreateNode(NodeKind.PropertySignature);
@@ -212,10 +226,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             }
             else if (elements.Count > 0)
             {
-                elementType = GetNodeType(elements[0]);
+                foreach (Node element in elements)
+                {
+                    Node type = GetNodeType(element);
+                    if (type != null)
+                    {
+                        elementType = type;
+                        break;
+                    }
+                }
             }
 
-            elementType = elementType ?? NodeHelper.CreateNode(NodeKind.ObjectKeyword);
+            elementType = elementType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
             elementType.Path = "elementType";
             return elementType;
         }

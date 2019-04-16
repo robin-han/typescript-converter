@@ -92,6 +92,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             List<string> ret = new List<string>();
             foreach (string name in typeNames)
             {
+                ret.Add(name);
                 this.GetReferences(name, ret);
             }
             return ret;
@@ -124,8 +125,13 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                 }
                 return false;
             });
-            foreach (Node type in types)
+            for (int i = 0; i < types.Count; i++)
             {
+                Node type = types[i];
+                if (type.Kind == NodeKind.ArrayType)
+                {
+                    type = (type as ArrayType).ElementType;
+                }
                 string[] parts = type.Text.Split('.');
                 string name = parts[parts.Length - 1].Trim();
                 if (Regex.IsMatch(name, "^[_A-Za-z]+[_A-Za-z0-9]*$") && !result.Contains(name) && names.Contains(name))

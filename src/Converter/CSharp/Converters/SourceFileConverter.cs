@@ -21,7 +21,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 csCompilationUnit = csCompilationUnit.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(us)));
             }
 
-            return csCompilationUnit.AddMembers(node.Statements.ToCsNodes<MemberDeclarationSyntax>());
+            List<Node> statements = this.FilterStatements(node.Statements);
+            return csCompilationUnit.AddMembers(statements.ToCsNodes<MemberDeclarationSyntax>());
         }
     }
 }

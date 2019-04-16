@@ -89,7 +89,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = NodeHelper.CreateNode(NodeKind.ObjectKeyword);
+                node.Type = NodeHelper.CreateNode(NodeKind.AnyKeyword);
             }
         }
 
@@ -106,7 +106,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = NodeHelper.CreateNode(NodeKind.ObjectKeyword);
+                node.Type = NodeHelper.CreateNode(NodeKind.AnyKeyword);
             }
         }
 

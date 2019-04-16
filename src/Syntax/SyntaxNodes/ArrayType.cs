@@ -7,8 +7,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 {
     public class ArrayType : Node
     {
-        private bool _isParams = false;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -23,15 +21,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         public bool IsParams
         {
-            get
-            {
-                return this._isParams;
-            }
-            set
-            {
-                this._isParams = value;
-            }
+            get;
+            set;
         }
+
+        public bool IsEnumerable
+        {
+            get;
+            set;
+        }
+
         #endregion
 
         public override void Init(JObject jsonObj)
@@ -39,6 +38,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             base.Init(jsonObj);
 
             this.ElementType = null;
+
+            this.IsParams = false;
+            this.IsEnumerable = false;
         }
 
         public override void AddNode(Node childNode)

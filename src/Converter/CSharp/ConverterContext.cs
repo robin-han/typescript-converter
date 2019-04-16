@@ -35,5 +35,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         }
         #endregion
 
+        #region Methods
+
+        #endregion
     }
 }
