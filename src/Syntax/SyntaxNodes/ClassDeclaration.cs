@@ -133,7 +133,66 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-      
+
+        public Constructor GetConstructor()
+        {
+            return this.Members.Find(m => m.Kind == NodeKind.Constructor) as Constructor;
+        }
+
+        public Node GetMember(string name)
+        {
+            List<Node> members = GetMembers(name);
+            if (members.Count > 0)
+            {
+                return members[0];
+            }
+            return null;
+        }
+
+        public List<Node> GetMembers(string name)
+        {
+            List<Node> ret = new List<Node>();
+
+            foreach (Node member in this.Members)
+            {
+                switch (member.Kind)
+                {
+                    case NodeKind.MethodDeclaration:
+                        MethodDeclaration method = member as MethodDeclaration;
+                        if (method.Name.Text == name)
+                        {
+                            ret.Add(method);
+                        }
+                        break;
+                    case NodeKind.GetAccessor:
+                        GetAccessor getAccess = member as GetAccessor;
+                        if (getAccess.Name.Text == name)
+                        {
+                            ret.Add(getAccess);
+                        }
+                        break;
+                    case NodeKind.GetSetAccessor:
+                        GetSetAccessor getSetAccess = member as GetSetAccessor;
+                        if (getSetAccess.Name.Text == name)
+                        {
+                            ret.Add(getSetAccess);
+                        }
+                        break;
+                    case NodeKind.PropertyDeclaration:
+                        PropertyDeclaration prop = member as PropertyDeclaration;
+                        if (prop.Name.Text == name)
+                        {
+                            ret.Add(prop);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return ret;
+        }
+
     }
 }
 

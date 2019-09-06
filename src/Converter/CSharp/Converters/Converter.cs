@@ -20,9 +20,21 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         /// <summary>
         /// 
         /// </summary>
-        public Converter()
+        public Converter() : this(new ConverterContext(null))
         {
-            this._context = new ConverterContext();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        public Converter(ConverterContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
+            this._context = context;
         }
         #endregion
 
@@ -37,11 +49,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             {
                 return this._context;
             }
-            set
+            internal set
             {
                 if (value == null)
                 {
-                    value = new ConverterContext();
+                    throw new ArgumentNullException("context");
                 }
                 this._context = value;
             }
@@ -89,6 +101,29 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 }
             }
             return type;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="exprSyntax"></param>
+        /// <param name="typeName"></param>
+        /// <returns></returns>
+        protected CSharpSyntaxNode As(ExpressionSyntax exprSyntax, string typeName)
+        {
+            if (string.IsNullOrEmpty(typeName))
+            {
+                return exprSyntax;
+            }
+            else
+            {
+                typeName = this.StripType(typeName);
+                BinaryExpressionSyntax csAs = SyntaxFactory.BinaryExpression(
+                    SyntaxKind.AsExpression,
+                    exprSyntax,
+                    SyntaxFactory.ParseName(typeName));
+                return SyntaxFactory.ParenthesizedExpression(csAs);
+            }
         }
 
         /// <summary>

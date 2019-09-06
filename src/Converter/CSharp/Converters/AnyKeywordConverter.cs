@@ -14,14 +14,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(AnyKeyword node)
         {
-            if (this.Context.Config.PreferTypeScriptType)
-            {
-                return SyntaxFactory.IdentifierName("Any");
-            }
-            else
-            {
-                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
-            }
+            return SyntaxFactory.IdentifierName("dynamic");
+            
+            //if (this.Context.Config.PreferTypeScriptType)
+            //{
+            //    return SyntaxFactory.IdentifierName("Any");
+            //}
+            //else
+            //{
+            //    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
+            //}
         }
     }
 }

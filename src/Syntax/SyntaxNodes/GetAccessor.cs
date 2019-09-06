@@ -48,6 +48,31 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             get;
             private set;
         }
+
+        public bool IsStatic
+        {
+            get
+            {
+                return this.HasModify(NodeKind.StaticKeyword);
+            }
+        }
+
+        public bool IsPrivate
+        {
+            get
+            {
+                return this.HasModify(NodeKind.PrivateKeyword);
+            }
+        }
+
+        public bool IsAbstract
+        {
+            get
+            {
+                return this.HasModify(NodeKind.AbstractKeyword);
+            }
+        }
+
         #endregion
 
         public override void Init(JObject jsonObj)

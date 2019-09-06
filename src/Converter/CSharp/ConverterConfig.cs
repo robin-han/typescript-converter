@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 {
-    public class Config
+    public class ConverterConfig
     {
         #region Fields
         private string _ns;
@@ -15,7 +15,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         private List<string> _excludeTypes;
         #endregion
 
-        public Config()
+        public ConverterConfig()
         {
             this._ns = "";
             this._preferTsType = true;

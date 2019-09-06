@@ -14,7 +14,26 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(NumericLiteral node)
         {
-            return SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(node.Text, double.Parse(node.Text)));
+            string text = node.Text;
+            if (Zeroize(node))
+            {
+                text += ".0";
+            }
+            return SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(text, double.Parse(text)));
+        }
+
+        private bool Zeroize(NumericLiteral node)
+        {
+            BinaryExpression expr = node.Parent == null ? null : node.Parent as BinaryExpression;
+            if (expr != null &&
+                expr.OperatorToken.Kind == NodeKind.SlashToken &&
+                expr.Left.Kind == NodeKind.NumericLiteral &&
+                expr.Right.Kind == NodeKind.NumericLiteral &&
+                node.Text.IndexOf(".") == -1)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

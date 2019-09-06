@@ -33,7 +33,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.Types = new List<Node>();
 
             JToken jsonToken = jsonObj["token"];
-            this.Token = jsonToken == null ? NodeKind.Unknown : (NodeKind)(jsonToken.ToObject<int>() + 1);
+            this.Token = jsonToken == null ? NodeKind.Unknown : (NodeKind)jsonToken.ToObject<int>();
         }
 
         public override void AddNode(Node childNode)

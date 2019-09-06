@@ -14,18 +14,15 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(RegularExpressionLiteral node)
         {
-            ExpressionSyntax csPattern = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(node.Pattern));
-
+            ExpressionSyntax patternExpr = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(node.Pattern));
             ObjectCreationExpressionSyntax csObj = SyntaxFactory.ObjectCreationExpression(
-                SyntaxFactory.IdentifierName("Regex"))
-                .AddArgumentListArguments(SyntaxFactory.Argument(csPattern));
-            if (node.IgnoreCase)
+               SyntaxFactory.IdentifierName("RegExp"))
+               .AddArgumentListArguments(SyntaxFactory.Argument(patternExpr));
+
+            if (!string.IsNullOrEmpty(node.SearchFlags))
             {
-                ExpressionSyntax csRegOption = SyntaxFactory.MemberAccessExpression(
-                      SyntaxKind.SimpleMemberAccessExpression,
-                      SyntaxFactory.IdentifierName("RegexOptions"),
-                      SyntaxFactory.IdentifierName("IgnoreCase"));
-                csObj = csObj.AddArgumentListArguments(SyntaxFactory.Argument(csRegOption));
+                ExpressionSyntax flagsExpr = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(node.SearchFlags));
+                csObj = csObj.AddArgumentListArguments(SyntaxFactory.Argument(flagsExpr));
             }
             return csObj;
         }

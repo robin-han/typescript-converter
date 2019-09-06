@@ -22,7 +22,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                     .AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
                     .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
 
-                if (!node.Modifiers.Exists(n => n.Kind == NodeKind.ReadonlyKeyword))
+                if (!node.HasModify(NodeKind.ReadonlyKeyword))
                 {
                     csProperty = csProperty.AddAccessorListAccessors(SyntaxFactory
                         .AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)

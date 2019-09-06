@@ -37,7 +37,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             private set;
         }
 
-        private int ModifierFlagsCache { get; set; }
         #endregion
 
         public override void Init(JObject jsonObj)

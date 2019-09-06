@@ -34,7 +34,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public Node QuestionToken
         {
             get;
-            private set;
+            internal set;
         }
 
         public Node Initializer

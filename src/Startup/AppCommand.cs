@@ -49,16 +49,21 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             {
                 return 1;
             }
-            if (arg.Files.Count == 0)
+
+            if (arg.Files.Count == 0 && arg.Config.Samples.Count == 0)
             {
                 this.Log("No files to convert.");
                 return 0;
             }
 
-            List<Document> tsDocs = this.BuildAst(arg.Files);
-            if (this.ConfirmConvert(tsDocs))
+            List<Document> allDocs = this.BuildAst(arg.AllFiles);
+            List<Document> tsDocs = allDocs.FindAll(doc => arg.Files.Contains(doc.Path));
+            Project project = new Project(allDocs, tsDocs);
+            ConverterContext context = this.CreateConverterContext(project, arg.Config);
+
+            if (this.ConfirmConvert(project.Documents))
             {
-                this.Convert(tsDocs, arg);
+                this.Convert(context, arg);
             }
 
             return 0;
@@ -119,23 +124,31 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             return true;
         }
 
-        private void Convert(List<Document> tsDocs, ExecuteArgument arg)
+        private void Convert(ConverterContext context, ExecuteArgument arg)
         {
-            Project project = new Project(tsDocs);
-            ConverterContext context = this.CreateConverterContext(arg.Config, project);
-            LangConverter converter = new LangConverter(context);
-            List<Document> usedDocs = this.FilterDocuments(tsDocs, context.Config.ExcludeTypes);
+            CSharpConverter converter = new CSharpConverter(context);
+            List<Document> avaiableDocs = this.FilterDocuments(context.Project.Documents, context.Config.ExcludeTypes);
 
             DateTime startTime = DateTime.Now;
-            this.Log(string.Format("Starting convert files({0})", usedDocs.Count));
+            this.Log(string.Format("Starting convert files({0})", avaiableDocs.Count));
 
-            foreach (Document doc in usedDocs)
+            //
+            this.Log(string.Format("Starting analyze"));
+            List<Node> nodes = new List<Node>();
+            foreach (Document doc in avaiableDocs)
+            {
+                nodes.Add(doc.Root);
+            }
+            converter.Analyze(nodes);
+            this.Log(string.Format("Finished after {0}s", (DateTime.Now - startTime).TotalSeconds.ToString("0.00")));
+
+            //
+            foreach (Document doc in avaiableDocs)
             {
                 DateTime beginTime = DateTime.Now;
-                this.Log(string.Format("Starting convert file '{0}'", doc.FileName));
+                this.Log(string.Format("Starting convert file '{0}'", Path.GetFileNameWithoutExtension(doc.FileName)));
 
                 string savePath = arg.GetSavePath(doc.Path);
-                converter.Analyze(doc.Root);
                 string code = converter.Convert(doc.Root);
 
                 File.WriteAllText(savePath, code);
@@ -144,7 +157,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
                 //this.PrintCode(code);
             }
-            
+
             this.Log(string.Format("Finished after {0}s", (DateTime.Now - startTime).TotalSeconds.ToString("0.00")));
         }
 
@@ -191,9 +204,9 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
         //    Console.WriteLine(code);
         //}
 
-        private ConverterContext CreateConverterContext(Config config, Project project)
+        private ConverterContext CreateConverterContext(Project project, Config config)
         {
-            CSharp.Config converterConfig = new CSharp.Config
+            ConverterConfig converterConfig = new ConverterConfig
             {
                 Namespace = config.Namespace,
                 PreferTypeScriptType = config.PreferTypeScriptType,
@@ -209,12 +222,21 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
 
             if (config.Samples.Count > 0)
             {
-                List<string> usedTypes = project.GetReferences(config.Samples.ToArray());
+                //always convert samples
+                foreach (var sample in config.Samples)
+                {
+                    Document doc = project.GetDocument(sample);
+                    if (doc != null)
+                    {
+                        project.AddDocument(doc);
+                    }
+                }
+                List<string> avaiableTypes = project.GetReferences(config.Samples.ToArray());
                 List<string> allTypes = project.TypeNames;
-                converterConfig.ExcludeTypes = allTypes.FindAll(t => !usedTypes.Contains(t));
+                converterConfig.ExcludeTypes = allTypes.FindAll(t => !avaiableTypes.Contains(t));
             }
 
-            return new ConverterContext(converterConfig);
+            return new ConverterContext(project, converterConfig);
         }
 
         private List<Document> FilterDocuments(List<Document> docs, List<string> excludedTypes)

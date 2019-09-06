@@ -58,6 +58,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 }
 
                 return SyntaxFactory.TupleType().WithElements(SyntaxFactory.SeparatedList(csTupleElements));
+
+                //return SyntaxFactory.IdentifierName("dynamic");
             }
         }
     }

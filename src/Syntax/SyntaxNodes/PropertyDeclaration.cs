@@ -43,6 +43,38 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             private set;
         }
 
+        public bool IsPublic
+        {
+            get
+            {
+                return this.HasModify(NodeKind.PublicKeyword);
+            }
+        }
+
+        public bool IsStatic
+        {
+            get
+            {
+                return this.HasModify(NodeKind.StaticKeyword);
+            }
+        }
+
+        public bool IsReadonly
+        {
+            get
+            {
+                return this.HasModify(NodeKind.ReadonlyKeyword);
+            }
+        }
+
+        public bool IsPrivate
+        {
+            get
+            {
+                return this.HasModify(NodeKind.PrivateKeyword);
+            }
+        }
+
         private Node QuestionToken { get; set; }
         #endregion
 
@@ -88,7 +120,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
                     break;
             }
         }
-       
+
     }
 }
 

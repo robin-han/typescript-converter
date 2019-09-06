@@ -14,6 +14,14 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(PropertyAccessExpression node)
         {
+            if (node.Parent != null && node.Parent.Kind == NodeKind.EnumMember && node.Text.Trim() == "Number.MAX_VALUE")
+            {
+                return SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword)),
+                    SyntaxFactory.IdentifierName("MaxValue"));
+            }
+
             SimpleNameSyntax csName = null;
             List<Node> typeArguments = node.Parent == null ? null : node.Parent.GetValue("TypeArguments") as List<Node>;
             if (typeArguments != null && typeArguments.Count > 0)
@@ -39,7 +47,8 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 return csName;
             }
             //
-            return SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, node.Expression.ToCsNode<ExpressionSyntax>(), csName);
+            MemberAccessExpressionSyntax accessExprSyntax = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, node.Expression.ToCsNode<ExpressionSyntax>(), csName);
+            return this.As(accessExprSyntax, node.As);
         }
 
         private bool WithInStaticMethod(PropertyAccessExpression node)

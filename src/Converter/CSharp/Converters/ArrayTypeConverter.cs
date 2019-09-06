@@ -20,12 +20,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                     .ArrayType(node.ElementType.ToCsNode<TypeSyntax>())
                     .AddRankSpecifiers(SyntaxFactory.ArrayRankSpecifier());
             }
-            if (node.IsEnumerable)
-            {
-                return SyntaxFactory
-                    .GenericName("IEnumerable")
-                    .AddTypeArgumentListArguments(node.ElementType.ToCsNode<TypeSyntax>());
-            }
 
             if (this.Context.Config.PreferTypeScriptType)
             {

@@ -33,7 +33,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.Operand = null;
 
             JToken jsonOperator = jsonObj["operator"];
-            this.Operator = jsonOperator == null ? NodeKind.Unknown : (NodeKind)(jsonOperator.ToObject<int>() + 1);
+            this.Operator = jsonOperator == null ? NodeKind.Unknown : (NodeKind)jsonOperator.ToObject<int>();
         }
 
         public override void AddNode(Node childNode)

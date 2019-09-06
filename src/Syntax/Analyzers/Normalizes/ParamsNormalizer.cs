@@ -25,7 +25,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
         {
             Node type = parameterNode.Type;
 
-            if (parameterNode.QuestionToken != null && parameterNode.Initializer == null)
+            if (parameterNode.IsOptional && parameterNode.Initializer == null)
             {
                 parameterNode.Initializer = NodeHelper.CreateNode(NodeKind.NullKeyword);
             }

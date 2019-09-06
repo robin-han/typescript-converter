@@ -108,55 +108,84 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
             {
                 Node member = classNode.Members[i];
 
-                if (this.CanSeparate(member))
+                if (member.Kind == NodeKind.MethodDeclaration)
                 {
-                    classNode.Members.RemoveAt(i);
-                    List<Node> newMembers = this.SeparateMember(member);
-                    foreach (var mem in newMembers)
+                    MethodDeclaration method = member as MethodDeclaration;
+                    if (this.CanSeparate(method))
                     {
-                        mem.Parent = classNode;
+                        classNode.Members.RemoveAt(i);
+                        List<Node> newMembers = this.Separate(method);
+                        foreach (var mem in newMembers)
+                        {
+                            mem.Parent = classNode;
+                        }
+                        classNode.Members.InsertRange(i++, newMembers);
                     }
-                    classNode.Members.InsertRange(i++, newMembers);
                 }
             }
         }
 
-        private List<Node> SeparateMember(Node member)
+        private List<Node> Separate(MethodDeclaration method)
         {
             List<Node> newMembers = new List<Node>();
-
-            JObject getMethod = new JObject(member.TsNode);
-            getMethod["parameters"][0].Remove();
-            getMethod["body"]["statements"] = getMethod["body"]["statements"][0]["thenStatement"]["statements"];
-            newMembers.Add(NodeHelper.CreateNode(getMethod));
-
-            JObject setMethod = new JObject(member.TsNode);
-            setMethod.Remove("type");
-            (setMethod["parameters"][0] as JObject).Remove("questionToken");
-            JToken elseStatement = setMethod["body"]["statements"][0]["elseStatement"];
-            if (elseStatement["kind"].ToObject<string>() == "Block")
+            if (method.IsAbstract)
             {
-                setMethod["body"]["statements"] = elseStatement = elseStatement["statements"];
+                (method.Parameters[0] as Parameter).QuestionToken = null;
+                MethodDeclaration newGet = NodeHelper.CreateNode(NodeKind.MethodDeclaration) as MethodDeclaration;
+                newGet.Modifiers.AddRange(method.Modifiers);
+                newGet.Name = method.Name;
+                newGet.Type = method.Type;
+                newMembers.Add(newGet);
+
+                MethodDeclaration newSet = NodeHelper.CreateNode(NodeKind.MethodDeclaration) as MethodDeclaration;
+                newSet.Modifiers.AddRange(method.Modifiers);
+                newSet.Name = method.Name;
+                newSet.Parameters.AddRange(method.Parameters);
+                newSet.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+                newMembers.Add(newSet);
             }
             else
             {
-                setMethod["body"]["statements"][0] = elseStatement;
+                JObject getMethod = new JObject(method.TsNode);
+                getMethod["parameters"][0].Remove();
+                getMethod["body"]["statements"] = getMethod["body"]["statements"][0]["thenStatement"]["statements"];
+                newMembers.Add(NodeHelper.CreateNode(getMethod));
+
+                JObject setMethod = new JObject(method.TsNode);
+                setMethod.Remove("type");
+                (setMethod["parameters"][0] as JObject).Remove("questionToken");
+                JToken elseStatement = setMethod["body"]["statements"][0]["elseStatement"];
+                if (elseStatement["kind"].ToObject<string>() == "Block")
+                {
+                    setMethod["body"]["statements"] = elseStatement = elseStatement["statements"];
+                }
+                else
+                {
+                    setMethod["body"]["statements"][0] = elseStatement;
+                }
+                MethodDeclaration newSet = NodeHelper.CreateNode(setMethod) as MethodDeclaration;
+                newSet.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+                newMembers.Add(newSet);
             }
-            newMembers.Add(NodeHelper.CreateNode(setMethod));
 
             return newMembers;
         }
 
-        private bool CanSeparate(Node node)
+        private bool CanSeparate(MethodDeclaration method)
         {
-            if (node.Kind != NodeKind.MethodDeclaration || (node as MethodDeclaration).Parameters.Count != 1)
+            if (method.Parameters.Count != 1)
             {
                 return false;
             }
 
-            MethodDeclaration method = node as MethodDeclaration;
             Parameter parameter = method.Parameters[0] as Parameter;
             Block body = method.Body as Block;
+
+            if (method.IsAbstract && parameter.IsOptional)
+            {
+                return true;
+            }
+
             if (!parameter.IsOptional || body == null || body.Statements.Count != 1 || body.Statements[0].Kind != NodeKind.IfStatement)
             {
                 return false;

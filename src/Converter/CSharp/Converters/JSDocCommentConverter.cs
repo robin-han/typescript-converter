@@ -39,7 +39,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             {
                 if (this.IsDocCommentTag(tag))
                 {
-                    comment += (tag as JSDocTag).Text;
+                    comment += (tag as JSDocTag).Comment;
                 }
             }
 

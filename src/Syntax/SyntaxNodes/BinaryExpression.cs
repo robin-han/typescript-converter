@@ -16,19 +16,19 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public Node Left
         {
             get;
-            private set;
+            internal set;
         }
 
         public Node OperatorToken
         {
             get;
-            private set;
+            internal set;
         }
 
         public Node Right
         {
             get;
-            private set;
+            internal set;
         }
         #endregion
 

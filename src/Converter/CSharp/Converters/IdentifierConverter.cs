@@ -12,18 +12,50 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 {
     public class IdentifierConverter : Converter
     {
+        private readonly Dictionary<string, string> IdentifierMappings = new Dictionary<string, string>()
+        {
+            { "as", "@as" },
+            //{ "length", "Length" },
+        };
+
         public CSharpSyntaxNode Convert(Identifier node)
         {
-            //RegExp
             string text = node.Text;
-            if (text == "RegExp")
+            if (IdentifierMappings.ContainsKey(text))
             {
-                text = "Regex";
+                text = IdentifierMappings[text];
+            }
+
+            if (text == "length" && node.Parent.Kind == NodeKind.PropertyAccessExpression)
+            {
+                PropertyAccessExpression parent = node.Parent as PropertyAccessExpression;
+                Node type = TypeHelper.GetNodeType(parent.Expression);
+                if (type != null)
+                {
+                    type = TypeHelper.NormalizeUnionType(type);
+                    if (TypeHelper.IsStringType(type))
+                    {
+                        text = "Length";
+                    }
+                    else if (TypeHelper.IsArrayType(type))
+                    {
+                        if (type.Parent != null && type.Parent.Kind == NodeKind.Parameter && (type.Parent as Parameter).IsVariable)
+                        {
+                            text = "Length";
+                        }
+                        else
+                        {
+                            text = "Count";
+                        }
+                    }
+                }
             }
 
             NameSyntax csNameSyntax = null;
             List<Node> typeArguments = node.Parent == null ? null : node.Parent.GetValue("TypeArguments") as List<Node>;
-            if (typeArguments != null && typeArguments.Count > 0)
+            List<Node> arguments = node.Parent == null ? null : node.Parent.GetValue("Arguments") as List<Node>;
+
+            if (typeArguments != null && typeArguments.Count > 0 && (arguments == null || !arguments.Contains(node))) //not in arguments 
             {
                 csNameSyntax = SyntaxFactory
                    .GenericName(text)
@@ -35,20 +67,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
             }
 
             //
-            string asType = node.As;
-            if (string.IsNullOrEmpty(asType))
-            {
-                return csNameSyntax;
-            }
-            else
-            {
-                asType = this.StripType(asType);
-                BinaryExpressionSyntax csAs = SyntaxFactory.BinaryExpression(
-                    SyntaxKind.AsExpression,
-                    csNameSyntax,
-                    SyntaxFactory.ParseName(asType));
-                return SyntaxFactory.ParenthesizedExpression(csAs);
-            }
+            return this.As(csNameSyntax, node.As);
         }
     }
 }

@@ -11,33 +11,19 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 {
     internal static class SyntaxNodeExtensions
     {
-        //private static ConverterContext GetConvertContext(Node tsNode)
-        //{
-        //    if (tsNode.Pocket.ContainsKey(LangConverter.CONVERTER_CONTEXT_KEY))
-        //    {
-        //        return tsNode.Pocket[LangConverter.CONVERTER_CONTEXT_KEY] as ConverterContext;
-        //    }
-        //    if (tsNode.Parent != null)
-        //    {
-        //        return GetConvertContext(tsNode.Parent);
-        //    }
-        //    return null;
-        //}
-
         public static T ToCsNode<T>(this Node tsNode)
         {
-            Type converter = LangConverter.GetConverter(tsNode);
+            Type converter = CSharpConverter.GetConverter(tsNode);
             if (converter == null)
             {
                 Log(string.Format("Cannot find {0} Converter", tsNode.Kind));
                 return default(T);
             }
-           
+
             try
             {
                 object convertInstance = converter.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes);
-                ConverterContext context = LangConverter.CurrentContext;
-                converter.GetProperty("Context").SetValue(convertInstance, context);
+                converter.GetProperty("Context").SetValue(convertInstance, CSharpConverter.CurrentContext);
 
                 MethodInfo convertMethod = converter.GetMethod("Convert");
                 object node = convertMethod.Invoke(convertInstance, new object[] { tsNode });
@@ -87,21 +73,25 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         }
 
 
-        private static bool CanConvert(Node tsNode)
+        private static bool CanConvert(Node node)
         {
-            switch (tsNode.Kind)
+            switch (node.Kind)
             {
+                //case NodeKind.UnionType:
                 case NodeKind.LiteralType:
-                case NodeKind.DeleteExpression:
                 case NodeKind.ForInStatement:
                 case NodeKind.ArrayBindingPattern:
                 case NodeKind.BindingElement:
-                case NodeKind.UnionType:
                 case NodeKind.CallSignature:
                 case NodeKind.FunctionType:
-                case NodeKind.SpreadElement:
                 case NodeKind.InKeyword:
                     return false;
+
+                case NodeKind.DeleteExpression:
+                    return (node as DeleteExpression).Expression.Kind == NodeKind.ElementAccessExpression;
+
+                case NodeKind.SpreadElement:
+                    return (node.Parent != null && node.Parent.Kind == NodeKind.CallExpression);
 
                 default:
                     return true;

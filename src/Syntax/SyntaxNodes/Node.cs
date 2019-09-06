@@ -15,6 +15,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         private Document _document = null;
         #endregion
 
+        #region Ignored Properties
+        protected int modifierFlagsCache { get; set; }
+        protected int TransformFlags { get; set; }
+        #endregion
+
         #region Properties
         public virtual NodeKind Kind
         {
@@ -165,6 +170,14 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             }
         }
 
+        public Project Project
+        {
+            get
+            {
+                return this.Document?.Project;
+            }
+        }
+
         #endregion
 
         #region Public Methods
@@ -289,10 +302,27 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             {
                 nodes.Add(this);
             }
+
             nodes.AddRange(this.Descendants(match));
 
             return nodes;
         }
+
+        public Node GetAncestor(NodeKind kind)
+        {
+            Node parent = this.Parent;
+            while (parent != null)
+            {
+                if (parent.Kind == kind)
+                {
+                    return parent;
+                }
+
+                parent = parent.Parent;
+            }
+            return null;
+        }
+
         #endregion
 
         #region Internal and Private Methods
@@ -311,21 +341,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
 
         private bool IsIgnoredProperty(string propName)
         {
-            return (propName == "Parent" || propName == "OriginalChildren");
-        }
-
-        internal bool HasJsDocTag(string tagName)
-        {
-            List<Node> jsDoc = this.GetValue("JsDoc") as List<Node>;
-            if (jsDoc != null && jsDoc.Count > 0)
-            {
-                JSDocComment docComment = jsDoc[0] as JSDocComment;
-                if (docComment != null)
-                {
-                    return docComment.Tags.Find(tag => tag.Kind == NodeKind.JSDocTag && (tag as JSDocTag).TagName.Text == tagName) != null;
-                }
-            }
-            return false;
+            return (propName == "Parent" || propName == "OriginalChildren" || propName == "jsDoc");
         }
         #endregion
 

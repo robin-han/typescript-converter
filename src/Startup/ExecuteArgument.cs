@@ -13,6 +13,12 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
         }
 
         #region Properties
+        public List<string> AllFiles
+        {
+            get;
+            private set;
+        }
+
         public List<string> Files
         {
             get;
@@ -99,7 +105,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             //
             string basePath = string.Empty;
             string output = string.Empty;
-            List<string> files = new List<string>();
+            List<string> allFiles = new List<string>();
             List<string> exclusion = new List<string>();
 
             //input source
@@ -112,16 +118,16 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
                     Console.WriteLine(string.Format("Cannot find input file or directory {0}", input));
                     return null;
                 }
-                files.AddRange(inputFiles);
+                allFiles.AddRange(inputFiles);
             }
             if (configOption.HasValue() || !sourceOption.HasValue())
             {
-                files.AddRange(config.Include);
+                allFiles.AddRange(config.Include);
             }
             //base path
             if (!config.FlatOutput)
             {
-                basePath = Utils.GetBasePath(files);
+                basePath = Utils.GetBasePath(allFiles);
             }
 
             //exclusion
@@ -138,10 +144,11 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter
             output = outOption.HasValue() ? outOption.Value() : config.Output;
 
             //
-            files = Utils.FilterFiles(files, exclusion);
+            List<string> files = Utils.FilterFiles(allFiles, exclusion);
 
             return new ExecuteArgument()
             {
+                AllFiles = allFiles,
                 Files = files,
                 Output = output,
                 BasePath = basePath,

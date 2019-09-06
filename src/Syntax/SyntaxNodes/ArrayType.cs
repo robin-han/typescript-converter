@@ -25,12 +25,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             set;
         }
 
-        public bool IsEnumerable
-        {
-            get;
-            set;
-        }
-
         #endregion
 
         public override void Init(JObject jsonObj)
@@ -40,7 +34,6 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             this.ElementType = null;
 
             this.IsParams = false;
-            this.IsEnumerable = false;
         }
 
         public override void AddNode(Node childNode)

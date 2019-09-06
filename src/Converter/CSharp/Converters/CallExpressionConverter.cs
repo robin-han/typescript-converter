@@ -14,6 +14,13 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(CallExpression node)
         {
+            if (node.Expression.Text == "Number")
+            {
+                return SyntaxFactory
+                  .InvocationExpression(SyntaxFactory.ParseExpression("ToNumber"))
+                  .AddArgumentListArguments(this.ToArgumentList(node.Arguments));
+            }
+
             return SyntaxFactory
                 .InvocationExpression(node.Expression.ToCsNode<ExpressionSyntax>())
                 .AddArgumentListArguments(this.ToArgumentList(node.Arguments));

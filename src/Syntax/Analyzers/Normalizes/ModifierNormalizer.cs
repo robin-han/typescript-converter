@@ -33,24 +33,21 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
                 return;
             }
 
-            if (!this.HasModify(modifiers, NodeKind.PublicKeyword) && !this.HasModify(modifiers, NodeKind.PrivateKeyword) && !this.HasModify(modifiers, NodeKind.ProtectedKeyword))
+            if (!node.HasModify(NodeKind.PublicKeyword) && !node.HasModify(NodeKind.PrivateKeyword) && !node.HasModify(NodeKind.ProtectedKeyword))
             {
                 modifiers.Add(NodeHelper.CreateNode(NodeKind.PublicKeyword));
             }
 
-            if (node.HasJsDocTag("csoverride") && !this.HasModify(modifiers, NodeKind.OverrideKeyword))
+            if (node.HasJsDocTag("csoverride") && !node.HasModify(NodeKind.OverrideKeyword))
             {
                 modifiers.Add(NodeHelper.CreateNode(NodeKind.OverrideKeyword));
             }
-            if (node.HasJsDocTag("csnew") && !this.HasModify(modifiers, NodeKind.NewKeyword))
+            if (node.HasJsDocTag("csnew") && !node.HasModify(NodeKind.NewKeyword))
             {
                 modifiers.Add(NodeHelper.CreateNode(NodeKind.NewKeyword));
             }
         }
 
-        private bool HasModify(List<Node> modifiers, NodeKind modify)
-        {
-            return modifiers.Exists(n => n.Kind == modify);
-        }
+
     }
 }

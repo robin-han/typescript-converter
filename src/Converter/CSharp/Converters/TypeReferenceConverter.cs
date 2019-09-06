@@ -30,6 +30,19 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 //case "Object":
                 //    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
 
+                case "Integer":
+                case "IntegerType":
+                    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword));
+
+                case "LongType":
+                case "LongIntegerType":
+                    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.LongKeyword));
+
+                case "ObjectType":
+                case "AnyObject":
+                case "DataValueObject":
+                    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
+
                 case "Array":
                     if (node.IsParams)
                     {
@@ -50,6 +63,22 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                             .GenericName("List")
                             .AddTypeArgumentListArguments(node.TypeArguments[0].ToCsNode<TypeSyntax>());
                     }
+
+                case "RegExpMatchArray":
+                case "RegExpExecArray":
+                    //if (this.Context.Config.PreferTypeScriptType)
+                    //{
+                    //    return SyntaxFactory
+                    //        .GenericName("Array")
+                    //        .AddTypeArgumentListArguments(SyntaxFactory.IdentifierName("String"));
+                    //}
+                    //else
+                    //{
+                    //    return SyntaxFactory
+                    //        .GenericName("List")
+                    //        .AddTypeArgumentListArguments(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword)));
+                    //}
+                    return SyntaxFactory.IdentifierName("RegExpArray");
 
                 default:
                     return node.TypeName.ToCsNode<TypeSyntax>();

@@ -16,7 +16,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         {
             return SyntaxFactory.List(this.CreateXmlTextBlock(
                 "param",
-                node.Comment,
+                node.Comment.TrimStart(' ', '-'),
                 new List<KeyValuePair<string, string>>()
                 {
                     new KeyValuePair<string, string>("name", node.Name.Text)

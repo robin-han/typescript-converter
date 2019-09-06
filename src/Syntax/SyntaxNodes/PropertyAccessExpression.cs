@@ -16,13 +16,19 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         public Node Expression
         {
             get;
-            private set;
+            internal set;
         }
 
         public Node Name
         {
             get;
-            private set;
+            internal set;
+        }
+
+        public string As
+        {
+            get;
+            internal set;
         }
         #endregion
 

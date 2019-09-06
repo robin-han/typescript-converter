@@ -113,6 +113,35 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
             }
         }
 
+
+        public Node GetMember(string name)
+        {
+            foreach (Node member in this.Members)
+            {
+                switch (member.Kind)
+                {
+                    case NodeKind.MethodSignature:
+                        MethodSignature method = member as MethodSignature;
+                        if (method.Name.Text == name)
+                        {
+                            return method;
+                        }
+                        break;
+
+                    case NodeKind.PropertySignature:
+                        PropertySignature prop = member as PropertySignature;
+                        if (prop.Name.Text == name)
+                        {
+                            return prop;
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return null;
+        }
     }
 }
 

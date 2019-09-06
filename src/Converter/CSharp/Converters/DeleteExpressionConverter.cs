@@ -21,7 +21,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 MemberAccessExpressionSyntax csPropertyAccess = SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     elementAccessNode.Expression.ToCsNode<ExpressionSyntax>(),
-                    SyntaxFactory.IdentifierName("remove"));
+                    SyntaxFactory.IdentifierName("Remove"));
 
                 return SyntaxFactory
                     .InvocationExpression(csPropertyAccess)

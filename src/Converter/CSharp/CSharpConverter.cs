@@ -6,18 +6,18 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using Project = GrapeCity.CodeAnalysis.TypeScript.Syntax.Project;
 
 namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
 {
-    public class LangConverter
+    public class CSharpConverter
     {
         #region Fields
         private readonly ConverterContext _context;
-        internal const string CONVERTER_CONTEXT_KEY = "ConverterContext";
         #endregion
 
         #region Constructor
-        public LangConverter(ConverterContext context)
+        public CSharpConverter(ConverterContext context)
         {
             this._context = context;
         }
@@ -31,21 +31,24 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 return this._context;
             }
         }
-       
-        internal static ConverterContext CurrentContext
+
+        public static ConverterContext CurrentContext
         {
             get;
-            set;
+            internal set;
         }
         #endregion
 
         #region Public Methods
-        public void Analyze(Node tsNode)
+        public void Analyze(List<Node> nodes)
         {
-            foreach (Type type in Analyzers)
+            foreach (Type type in this.Context.Project.GetAnalyzerTypes())
             {
-                Analyzer analyzer = type.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes) as Analyzer;
-                analyzer.Analyze(tsNode);
+                foreach (Node node in nodes)
+                {
+                    Analyzer analyzer = type.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes) as Analyzer;
+                    analyzer.Analyze(node);
+                }
             }
         }
 
@@ -73,38 +76,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
         }
         #endregion
 
-
-        private static List<Type> _analyzers;
-        public static List<Type> Analyzers
-        {
-            get
-            {
-                if (_analyzers != null)
-                {
-                    return _analyzers;
-                }
-
-                //
-                _analyzers = new List<Type>();
-                Type baseType = typeof(Analyzer);
-                Type normaizerType = typeof(Normalizer);
-
-                Type[] types = typeof(Analyzer).Assembly.GetExportedTypes();
-                foreach (Type type in types)
-                {
-                    if (type.IsSubclassOf(normaizerType))
-                    {
-                        _analyzers.Insert(0, type);
-                    }
-                    else if (type.IsSubclassOf(baseType))
-                    {
-                        _analyzers.Add(type);
-                    }
-                }
-                return _analyzers;
-            }
-        }
-
+        #region Static Members
         private static Dictionary<Type, Type> _converters;
         private static Dictionary<Type, Type> Converters
         {
@@ -143,6 +115,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
                 return _converters;
             }
         }
+        #endregion
     }
 
 }

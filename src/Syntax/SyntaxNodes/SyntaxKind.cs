@@ -368,6 +368,7 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
         /* Follows are added by the tool. Others are from TypeScript*/
         GetSetAccessor,
         OverrideKeyword,
+        VirtualKeyword,
         //~
 
 

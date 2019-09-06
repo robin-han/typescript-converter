@@ -14,8 +14,18 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(UnionType node)
         {
-            //TODO: NOT SUPPORT
-            //return SyntaxFactory.ParseName(this.CommentText(node.Text));
+            List<Node> types = node.Types;
+            if (types.Count == 2)
+            {
+                if (types[0].Kind == NodeKind.NullKeyword)
+                {
+                    return types[1].ToCsNode<TypeSyntax>();
+                }
+                else if (types[1].Kind == NodeKind.NullKeyword)
+                {
+                    return types[0].ToCsNode<TypeSyntax>();
+                }
+            }
             return SyntaxFactory.IdentifierName("dynamic");
         }
     }

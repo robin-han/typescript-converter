@@ -14,23 +14,26 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(NewExpression node)
         {
-            ObjectCreationExpressionSyntax csNewExpr = SyntaxFactory.ObjectCreationExpression(node.Type.ToCsNode<TypeSyntax>());
             if (node.Arguments.Count == 1 && node.Arguments[0].Kind == NodeKind.ObjectLiteralExpression)
             {
+                ObjectLiteralExpression literaExpression = node.Arguments[0] as ObjectLiteralExpression;
+
+                ObjectCreationExpressionSyntax csObjNewExpr = SyntaxFactory.ObjectCreationExpression(node.Type.ToCsNode<TypeSyntax>());
                 InitializerExpressionSyntax csInitExpr = SyntaxFactory.InitializerExpression(SyntaxKind.ObjectInitializerExpression);
-                ObjectLiteralExpression objLiteraNode = node.Arguments[0] as ObjectLiteralExpression;
-                foreach (PropertyAssignment prop in objLiteraNode.Properties)
+                foreach (PropertyAssignment prop in literaExpression.Properties)
                 {
                     csInitExpr = csInitExpr.AddExpressions(SyntaxFactory.AssignmentExpression(
                         SyntaxKind.SimpleAssignmentExpression,
                         prop.Name.ToCsNode<ExpressionSyntax>(),
                         prop.Initializer.ToCsNode<ExpressionSyntax>()));
                 }
-                return csNewExpr.WithInitializer(csInitExpr).AddArgumentListArguments();
+                return csObjNewExpr.WithInitializer(csInitExpr).AddArgumentListArguments();
             }
             else
             {
-                return csNewExpr.AddArgumentListArguments(this.ToArgumentList(node.Arguments));
+                return SyntaxFactory
+                    .ObjectCreationExpression(node.Type.ToCsNode<TypeSyntax>())
+                    .AddArgumentListArguments(this.ToArgumentList(node.Arguments));
             }
         }
 

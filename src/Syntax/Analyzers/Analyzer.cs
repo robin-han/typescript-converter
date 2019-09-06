@@ -20,8 +20,15 @@ namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
             }
         }
 
+        public virtual int Priority
+        {
+            get { return int.MaxValue; }
+        }
+
         protected virtual void Visit(Node node)
         {
         }
+
+
     }
 }
