@@ -1,4 +1,4 @@
 .vs
-src/**/bin
-src/**/obj
+**/bin
+**/obj
 build
