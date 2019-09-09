@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
+namespace TypeScript.Syntax
 {
     public class Node
     {

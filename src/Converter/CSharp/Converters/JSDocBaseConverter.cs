@@ -5,10 +5,10 @@ using Newtonsoft.Json.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using GrapeCity.CodeAnalysis.TypeScript.Syntax;
+using TypeScript.Syntax;
 using System;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
+namespace TypeScript.Converter.CSharp
 {
     public class JSDocBaseConverter : Converter
     {

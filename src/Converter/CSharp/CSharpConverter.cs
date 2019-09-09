@@ -1,14 +1,14 @@
-﻿using GrapeCity.CodeAnalysis.TypeScript.Syntax;
-using GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis;
+﻿using TypeScript.Syntax;
+using TypeScript.Syntax.Analysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using Project = GrapeCity.CodeAnalysis.TypeScript.Syntax.Project;
+using Project = TypeScript.Syntax.Project;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
+namespace TypeScript.Converter.CSharp
 {
     public class CSharpConverter
     {

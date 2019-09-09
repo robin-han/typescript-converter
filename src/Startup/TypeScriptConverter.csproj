@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Converter\CSharp\GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp.csproj" />
-    <ProjectReference Include="..\Syntax\GrapeCity.CodeAnalysis.TypeScript.Syntax.csproj" />
+    <ProjectReference Include="..\Converter\CSharp\TypeScript.Converter.CSharp.csproj" />
+    <ProjectReference Include="..\Syntax\TypeScript.Syntax.csproj" />
   </ItemGroup>
 
 </Project>

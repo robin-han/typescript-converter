@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
+namespace TypeScript.Syntax.Analysis
 {
     public class RenameNormalizer : Normalizer
     {

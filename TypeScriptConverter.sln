@@ -9,13 +9,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Converter", "Converter", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSharp", "CSharp", "{FA2C645A-8035-4B1A-B95A-1B01F06E90CC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp", "src\Converter\CSharp\GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp.csproj", "{F2537EF3-0813-4F92-9C08-ECB7EA1B2E93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeScript.Converter.CSharp", "src\Converter\CSharp\TypeScript.Converter.CSharp.csproj", "{F2537EF3-0813-4F92-9C08-ECB7EA1B2E93}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Startup", "Startup", "{C1BF44FB-F123-4459-9EFA-A0ABAE70D4C0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeScriptConverter", "src\Startup\TypeScriptConverter.csproj", "{F66EA55D-C726-4649-9BA2-934F739411B1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrapeCity.CodeAnalysis.TypeScript.Syntax", "src\Syntax\GrapeCity.CodeAnalysis.TypeScript.Syntax.csproj", "{E416CE28-6163-46BA-8078-01C0C93BF690}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeScript.Syntax", "src\Syntax\TypeScript.Syntax.csproj", "{E416CE28-6163-46BA-8078-01C0C93BF690}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

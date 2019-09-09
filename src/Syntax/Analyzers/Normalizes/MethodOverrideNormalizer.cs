@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis
+namespace TypeScript.Syntax.Analysis
 {
     public class MethodOverrideNormalizer : Normalizer
     {

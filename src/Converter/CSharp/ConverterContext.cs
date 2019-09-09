@@ -1,9 +1,9 @@
-﻿using GrapeCity.CodeAnalysis.TypeScript.Syntax;
+﻿using TypeScript.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
+namespace TypeScript.Converter.CSharp
 {
     public class ConverterContext
     {

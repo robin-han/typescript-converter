@@ -5,7 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Linq;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
+namespace TypeScript.Syntax
 {
     public class AstBuilder
     {

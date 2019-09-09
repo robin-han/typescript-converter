@@ -4,7 +4,7 @@ using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
+namespace TypeScript.Syntax
 {
     internal class Util
     {

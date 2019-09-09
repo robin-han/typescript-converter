@@ -6,9 +6,9 @@ using Newtonsoft.Json.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using GrapeCity.CodeAnalysis.TypeScript.Syntax;
+using TypeScript.Syntax;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
+namespace TypeScript.Converter.CSharp
 {
     public class ThisKeywordConverter : Converter
     {

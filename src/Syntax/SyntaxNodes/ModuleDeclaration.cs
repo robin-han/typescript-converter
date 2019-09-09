@@ -4,7 +4,7 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
+namespace TypeScript.Syntax
 {
     public class ModuleDeclaration : Declaration
     {

@@ -1,10 +1,10 @@
-﻿using GrapeCity.CodeAnalysis.TypeScript.Syntax.Analysis;
+﻿using TypeScript.Syntax.Analysis;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
+namespace TypeScript.Syntax
 {
     public class Project
     {

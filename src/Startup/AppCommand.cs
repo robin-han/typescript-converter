@@ -1,5 +1,5 @@
-﻿using GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp;
-using GrapeCity.CodeAnalysis.TypeScript.Syntax;
+﻿using TypeScript.Converter.CSharp;
+using TypeScript.Syntax;
 using Microsoft.Extensions.CommandLineUtils;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Converter
+namespace TypeScript.Converter
 {
     class AppCommand
     {

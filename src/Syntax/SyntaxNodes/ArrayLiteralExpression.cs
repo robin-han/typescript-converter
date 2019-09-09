@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Syntax
+namespace TypeScript.Syntax
 {
     public class ArrayLiteralExpression : Expression
     {

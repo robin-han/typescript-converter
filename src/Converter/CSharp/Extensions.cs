@@ -1,4 +1,4 @@
-﻿using GrapeCity.CodeAnalysis.TypeScript.Syntax;
+﻿using TypeScript.Syntax;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp
+namespace TypeScript.Converter.CSharp
 {
     internal static class SyntaxNodeExtensions
     {

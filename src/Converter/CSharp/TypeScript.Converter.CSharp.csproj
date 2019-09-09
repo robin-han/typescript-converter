@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Syntax\GrapeCity.CodeAnalysis.TypeScript.Syntax.csproj" />
+    <ProjectReference Include="..\..\Syntax\TypeScript.Syntax.csproj" />
   </ItemGroup>
 
 </Project>

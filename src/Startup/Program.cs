@@ -1,12 +1,12 @@
-﻿using GrapeCity.CodeAnalysis.TypeScript.Converter.CSharp;
-using GrapeCity.CodeAnalysis.TypeScript.Syntax;
+﻿using TypeScript.Converter.CSharp;
+using TypeScript.Syntax;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.CommandLineUtils;
 
-namespace GrapeCity.CodeAnalysis.TypeScript.Converter
+namespace TypeScript.Converter
 {
     class Program
     {
