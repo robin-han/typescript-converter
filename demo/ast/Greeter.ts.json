@@ -1,0 +1,918 @@
+{
+  "pos": 0,
+  "end": 767,
+  "flags": 0,
+  "modifierFlagsCache": 0,
+  "transformFlags": 0,
+  "kind": "SourceFile",
+  "text": "namespace MyTest {\r\n    \"use strict\";\r\n\r\n    export class Greeter implements IGreeter {\r\n        private _useName: string;\r\n        private _greeting: string;\r\n\r\n        constructor() {\r\n            this._useName = '';\r\n            this._greeting = '';\r\n        }\r\n\r\n        public userName(value?: string): string {\r\n            if (arguments.length== 0) {\r\n                return this._useName;\r\n            } else {\r\n                this._useName = value;\r\n            }\r\n        }\r\n\r\n        public get greeting(): string {\r\n            return this._greeting;\r\n        }\r\n\r\n        public set greeting(value: string) {\r\n            this._greeting = value;\r\n        }\r\n\r\n        greet(): string {\r\n            return \"Hello, \" + this.greeting;\r\n        }\r\n    }\r\n}",
+  "bindDiagnostics": [],
+  "languageVersion": 2,
+  "fileName": "E:/Work/GitHub/typescript-converter/demo/input/Greeter.ts",
+  "languageVariant": 0,
+  "isDeclarationFile": false,
+  "scriptKind": 3,
+  "pragmas": {},
+  "referencedFiles": [],
+  "typeReferenceDirectives": [],
+  "libReferenceDirectives": [],
+  "amdDependencies": [],
+  "hasNoDefaultLib": false,
+  "statements": [
+    {
+      "pos": 0,
+      "end": 767,
+      "flags": 16,
+      "modifierFlagsCache": 536870912,
+      "transformFlags": 0,
+      "kind": "ModuleDeclaration",
+      "name": {
+        "pos": 9,
+        "end": 16,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "escapedText": "MyTest",
+        "text": "MyTest",
+        "kind": "Identifier"
+      },
+      "body": {
+        "pos": 16,
+        "end": 767,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "kind": "ModuleBlock",
+        "statements": [
+          {
+            "pos": 18,
+            "end": 37,
+            "flags": 0,
+            "modifierFlagsCache": 0,
+            "transformFlags": 0,
+            "kind": "ExpressionStatement",
+            "expression": {
+              "pos": 18,
+              "end": 36,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": "StringLiteral",
+              "text": "use strict"
+            }
+          },
+          {
+            "pos": 37,
+            "end": 764,
+            "flags": 0,
+            "modifierFlagsCache": 0,
+            "transformFlags": 0,
+            "kind": "ClassDeclaration",
+            "modifiers": [
+              {
+                "pos": 37,
+                "end": 51,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": "ExportKeyword"
+              }
+            ],
+            "name": {
+              "pos": 57,
+              "end": 65,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "escapedText": "Greeter",
+              "text": "Greeter",
+              "kind": "Identifier"
+            },
+            "heritageClauses": [
+              {
+                "pos": 65,
+                "end": 85,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": "HeritageClause",
+                "token": 110,
+                "types": [
+                  {
+                    "pos": 76,
+                    "end": 85,
+                    "flags": 0,
+                    "modifierFlagsCache": 0,
+                    "transformFlags": 0,
+                    "kind": "ExpressionWithTypeArguments",
+                    "expression": {
+                      "pos": 76,
+                      "end": 85,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "escapedText": "IGreeter",
+                      "text": "IGreeter",
+                      "kind": "Identifier"
+                    }
+                  }
+                ]
+              }
+            ],
+            "members": [
+              {
+                "pos": 87,
+                "end": 122,
+                "flags": 0,
+                "modifierFlagsCache": 536870920,
+                "transformFlags": 0,
+                "kind": "PropertyDeclaration",
+                "modifiers": [
+                  {
+                    "pos": 87,
+                    "end": 104,
+                    "flags": 0,
+                    "modifierFlagsCache": 0,
+                    "transformFlags": 0,
+                    "kind": "PrivateKeyword"
+                  }
+                ],
+                "name": {
+                  "pos": 104,
+                  "end": 113,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "escapedText": "_useName",
+                  "text": "_useName",
+                  "kind": "Identifier"
+                },
+                "type": {
+                  "pos": 114,
+                  "end": 121,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "StringKeyword"
+                }
+              },
+              {
+                "pos": 122,
+                "end": 158,
+                "flags": 0,
+                "modifierFlagsCache": 536870920,
+                "transformFlags": 0,
+                "kind": "PropertyDeclaration",
+                "modifiers": [
+                  {
+                    "pos": 122,
+                    "end": 139,
+                    "flags": 0,
+                    "modifierFlagsCache": 0,
+                    "transformFlags": 0,
+                    "kind": "PrivateKeyword"
+                  }
+                ],
+                "name": {
+                  "pos": 139,
+                  "end": 149,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "escapedText": "_greeting",
+                  "text": "_greeting",
+                  "kind": "Identifier"
+                },
+                "type": {
+                  "pos": 150,
+                  "end": 157,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "StringKeyword"
+                }
+              },
+              {
+                "pos": 158,
+                "end": 263,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": "Constructor",
+                "parameters": [],
+                "body": {
+                  "pos": 183,
+                  "end": 263,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "Block",
+                  "multiLine": true,
+                  "statements": [
+                    {
+                      "pos": 185,
+                      "end": 218,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "kind": "ExpressionStatement",
+                      "expression": {
+                        "pos": 185,
+                        "end": 217,
+                        "flags": 0,
+                        "modifierFlagsCache": 0,
+                        "transformFlags": 0,
+                        "kind": "BinaryExpression",
+                        "left": {
+                          "pos": 185,
+                          "end": 212,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "PropertyAccessExpression",
+                          "expression": {
+                            "pos": 185,
+                            "end": 203,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "kind": "ThisKeyword"
+                          },
+                          "name": {
+                            "pos": 204,
+                            "end": 212,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "escapedText": "_useName",
+                            "text": "_useName",
+                            "kind": "Identifier"
+                          }
+                        },
+                        "operatorToken": {
+                          "pos": 212,
+                          "end": 214,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "FirstAssignment"
+                        },
+                        "right": {
+                          "pos": 214,
+                          "end": 217,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "StringLiteral",
+                          "text": ""
+                        }
+                      }
+                    },
+                    {
+                      "pos": 218,
+                      "end": 252,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "kind": "ExpressionStatement",
+                      "expression": {
+                        "pos": 218,
+                        "end": 251,
+                        "flags": 0,
+                        "modifierFlagsCache": 0,
+                        "transformFlags": 0,
+                        "kind": "BinaryExpression",
+                        "left": {
+                          "pos": 218,
+                          "end": 246,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "PropertyAccessExpression",
+                          "expression": {
+                            "pos": 218,
+                            "end": 236,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "kind": "ThisKeyword"
+                          },
+                          "name": {
+                            "pos": 237,
+                            "end": 246,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "escapedText": "_greeting",
+                            "text": "_greeting",
+                            "kind": "Identifier"
+                          }
+                        },
+                        "operatorToken": {
+                          "pos": 246,
+                          "end": 248,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "FirstAssignment"
+                        },
+                        "right": {
+                          "pos": 248,
+                          "end": 251,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "StringLiteral",
+                          "text": ""
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "pos": 263,
+                "end": 484,
+                "flags": 0,
+                "modifierFlagsCache": 536870916,
+                "transformFlags": 0,
+                "kind": "MethodDeclaration",
+                "modifiers": [
+                  {
+                    "pos": 263,
+                    "end": 281,
+                    "flags": 0,
+                    "modifierFlagsCache": 0,
+                    "transformFlags": 0,
+                    "kind": "PublicKeyword"
+                  }
+                ],
+                "name": {
+                  "pos": 281,
+                  "end": 290,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "escapedText": "userName",
+                  "text": "userName",
+                  "kind": "Identifier"
+                },
+                "parameters": [
+                  {
+                    "pos": 291,
+                    "end": 305,
+                    "flags": 0,
+                    "modifierFlagsCache": 0,
+                    "transformFlags": 0,
+                    "kind": "Parameter",
+                    "name": {
+                      "pos": 291,
+                      "end": 296,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "escapedText": "value",
+                      "text": "value",
+                      "kind": "Identifier"
+                    },
+                    "questionToken": {
+                      "pos": 296,
+                      "end": 297,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "kind": "QuestionToken"
+                    },
+                    "type": {
+                      "pos": 298,
+                      "end": 305,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "kind": "StringKeyword"
+                    }
+                  }
+                ],
+                "type": {
+                  "pos": 307,
+                  "end": 314,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "StringKeyword"
+                },
+                "body": {
+                  "pos": 314,
+                  "end": 484,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "Block",
+                  "multiLine": true,
+                  "statements": [
+                    {
+                      "pos": 316,
+                      "end": 473,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "kind": "IfStatement",
+                      "expression": {
+                        "pos": 334,
+                        "end": 354,
+                        "flags": 0,
+                        "modifierFlagsCache": 0,
+                        "transformFlags": 0,
+                        "kind": "BinaryExpression",
+                        "left": {
+                          "pos": 334,
+                          "end": 350,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "PropertyAccessExpression",
+                          "expression": {
+                            "pos": 334,
+                            "end": 343,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "escapedText": "arguments",
+                            "text": "arguments",
+                            "kind": "Identifier"
+                          },
+                          "name": {
+                            "pos": 344,
+                            "end": 350,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "escapedText": "length",
+                            "text": "length",
+                            "kind": "Identifier"
+                          }
+                        },
+                        "operatorToken": {
+                          "pos": 350,
+                          "end": 352,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "EqualsEqualsToken"
+                        },
+                        "right": {
+                          "pos": 352,
+                          "end": 354,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "FirstLiteralToken",
+                          "text": "0",
+                          "numericLiteralFlags": 0
+                        }
+                      },
+                      "thenStatement": {
+                        "pos": 355,
+                        "end": 411,
+                        "flags": 0,
+                        "modifierFlagsCache": 0,
+                        "transformFlags": 0,
+                        "kind": "Block",
+                        "multiLine": true,
+                        "statements": [
+                          {
+                            "pos": 357,
+                            "end": 396,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "kind": "ReturnStatement",
+                            "expression": {
+                              "pos": 381,
+                              "end": 395,
+                              "flags": 0,
+                              "modifierFlagsCache": 0,
+                              "transformFlags": 0,
+                              "kind": "PropertyAccessExpression",
+                              "expression": {
+                                "pos": 381,
+                                "end": 386,
+                                "flags": 0,
+                                "modifierFlagsCache": 0,
+                                "transformFlags": 0,
+                                "kind": "ThisKeyword"
+                              },
+                              "name": {
+                                "pos": 387,
+                                "end": 395,
+                                "flags": 0,
+                                "modifierFlagsCache": 0,
+                                "transformFlags": 0,
+                                "escapedText": "_useName",
+                                "text": "_useName",
+                                "kind": "Identifier"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "elseStatement": {
+                        "pos": 416,
+                        "end": 473,
+                        "flags": 0,
+                        "modifierFlagsCache": 0,
+                        "transformFlags": 0,
+                        "kind": "Block",
+                        "multiLine": true,
+                        "statements": [
+                          {
+                            "pos": 418,
+                            "end": 458,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "kind": "ExpressionStatement",
+                            "expression": {
+                              "pos": 418,
+                              "end": 457,
+                              "flags": 0,
+                              "modifierFlagsCache": 0,
+                              "transformFlags": 0,
+                              "kind": "BinaryExpression",
+                              "left": {
+                                "pos": 418,
+                                "end": 449,
+                                "flags": 0,
+                                "modifierFlagsCache": 0,
+                                "transformFlags": 0,
+                                "kind": "PropertyAccessExpression",
+                                "expression": {
+                                  "pos": 418,
+                                  "end": 440,
+                                  "flags": 0,
+                                  "modifierFlagsCache": 0,
+                                  "transformFlags": 0,
+                                  "kind": "ThisKeyword"
+                                },
+                                "name": {
+                                  "pos": 441,
+                                  "end": 449,
+                                  "flags": 0,
+                                  "modifierFlagsCache": 0,
+                                  "transformFlags": 0,
+                                  "escapedText": "_useName",
+                                  "text": "_useName",
+                                  "kind": "Identifier"
+                                }
+                              },
+                              "operatorToken": {
+                                "pos": 449,
+                                "end": 451,
+                                "flags": 0,
+                                "modifierFlagsCache": 0,
+                                "transformFlags": 0,
+                                "kind": "FirstAssignment"
+                              },
+                              "right": {
+                                "pos": 451,
+                                "end": 457,
+                                "flags": 0,
+                                "modifierFlagsCache": 0,
+                                "transformFlags": 0,
+                                "escapedText": "value",
+                                "text": "value",
+                                "kind": "Identifier"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "pos": 484,
+                "end": 574,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": "GetAccessor",
+                "modifiers": [
+                  {
+                    "pos": 484,
+                    "end": 502,
+                    "flags": 0,
+                    "modifierFlagsCache": 0,
+                    "transformFlags": 0,
+                    "kind": "PublicKeyword"
+                  }
+                ],
+                "name": {
+                  "pos": 506,
+                  "end": 515,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "escapedText": "greeting",
+                  "text": "greeting",
+                  "kind": "Identifier"
+                },
+                "parameters": [],
+                "type": {
+                  "pos": 518,
+                  "end": 525,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "StringKeyword"
+                },
+                "body": {
+                  "pos": 525,
+                  "end": 574,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "Block",
+                  "multiLine": true,
+                  "statements": [
+                    {
+                      "pos": 527,
+                      "end": 563,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "kind": "ReturnStatement",
+                      "expression": {
+                        "pos": 547,
+                        "end": 562,
+                        "flags": 0,
+                        "modifierFlagsCache": 0,
+                        "transformFlags": 0,
+                        "kind": "PropertyAccessExpression",
+                        "expression": {
+                          "pos": 547,
+                          "end": 552,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "ThisKeyword"
+                        },
+                        "name": {
+                          "pos": 553,
+                          "end": 562,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "escapedText": "_greeting",
+                          "text": "_greeting",
+                          "kind": "Identifier"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "pos": 574,
+                "end": 670,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": "SetAccessor",
+                "modifiers": [
+                  {
+                    "pos": 574,
+                    "end": 592,
+                    "flags": 0,
+                    "modifierFlagsCache": 0,
+                    "transformFlags": 0,
+                    "kind": "PublicKeyword"
+                  }
+                ],
+                "name": {
+                  "pos": 596,
+                  "end": 605,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "escapedText": "greeting",
+                  "text": "greeting",
+                  "kind": "Identifier"
+                },
+                "parameters": [
+                  {
+                    "pos": 606,
+                    "end": 619,
+                    "flags": 0,
+                    "modifierFlagsCache": 0,
+                    "transformFlags": 0,
+                    "kind": "Parameter",
+                    "name": {
+                      "pos": 606,
+                      "end": 611,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "escapedText": "value",
+                      "text": "value",
+                      "kind": "Identifier"
+                    },
+                    "type": {
+                      "pos": 612,
+                      "end": 619,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "kind": "StringKeyword"
+                    }
+                  }
+                ],
+                "body": {
+                  "pos": 620,
+                  "end": 670,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "Block",
+                  "multiLine": true,
+                  "statements": [
+                    {
+                      "pos": 622,
+                      "end": 659,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "kind": "ExpressionStatement",
+                      "expression": {
+                        "pos": 622,
+                        "end": 658,
+                        "flags": 0,
+                        "modifierFlagsCache": 0,
+                        "transformFlags": 0,
+                        "kind": "BinaryExpression",
+                        "left": {
+                          "pos": 622,
+                          "end": 650,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "PropertyAccessExpression",
+                          "expression": {
+                            "pos": 622,
+                            "end": 640,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "kind": "ThisKeyword"
+                          },
+                          "name": {
+                            "pos": 641,
+                            "end": 650,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "escapedText": "_greeting",
+                            "text": "_greeting",
+                            "kind": "Identifier"
+                          }
+                        },
+                        "operatorToken": {
+                          "pos": 650,
+                          "end": 652,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "FirstAssignment"
+                        },
+                        "right": {
+                          "pos": 652,
+                          "end": 658,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "escapedText": "value",
+                          "text": "value",
+                          "kind": "Identifier"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "pos": 670,
+                "end": 757,
+                "flags": 0,
+                "modifierFlagsCache": 536870912,
+                "transformFlags": 0,
+                "kind": "MethodDeclaration",
+                "name": {
+                  "pos": 670,
+                  "end": 687,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "escapedText": "greet",
+                  "text": "greet",
+                  "kind": "Identifier"
+                },
+                "parameters": [],
+                "type": {
+                  "pos": 690,
+                  "end": 697,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "StringKeyword"
+                },
+                "body": {
+                  "pos": 697,
+                  "end": 757,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "Block",
+                  "multiLine": true,
+                  "statements": [
+                    {
+                      "pos": 699,
+                      "end": 746,
+                      "flags": 0,
+                      "modifierFlagsCache": 0,
+                      "transformFlags": 0,
+                      "kind": "ReturnStatement",
+                      "expression": {
+                        "pos": 719,
+                        "end": 745,
+                        "flags": 0,
+                        "modifierFlagsCache": 0,
+                        "transformFlags": 0,
+                        "kind": "BinaryExpression",
+                        "left": {
+                          "pos": 719,
+                          "end": 729,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "StringLiteral",
+                          "text": "Hello, "
+                        },
+                        "operatorToken": {
+                          "pos": 729,
+                          "end": 731,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "PlusToken"
+                        },
+                        "right": {
+                          "pos": 731,
+                          "end": 745,
+                          "flags": 0,
+                          "modifierFlagsCache": 0,
+                          "transformFlags": 0,
+                          "kind": "PropertyAccessExpression",
+                          "expression": {
+                            "pos": 731,
+                            "end": 736,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "kind": "ThisKeyword"
+                          },
+                          "name": {
+                            "pos": 737,
+                            "end": 745,
+                            "flags": 0,
+                            "modifierFlagsCache": 0,
+                            "transformFlags": 0,
+                            "escapedText": "greeting",
+                            "text": "greeting",
+                            "kind": "Identifier"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "endOfFileToken": {
+    "pos": 767,
+    "end": 767,
+    "flags": 0,
+    "modifierFlagsCache": 0,
+    "transformFlags": 0,
+    "kind": "EndOfFileToken"
+  },
+  "nodeCount": 111,
+  "identifierCount": 25,
+  "identifiers": {},
+  "parseDiagnostics": []
+}

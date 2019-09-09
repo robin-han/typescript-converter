@@ -1,0 +1,163 @@
+{
+  "pos": 0,
+  "end": 135,
+  "flags": 0,
+  "modifierFlagsCache": 0,
+  "transformFlags": 0,
+  "kind": "SourceFile",
+  "text": "namespace MyTest {\r\n    'use strict';\r\n\r\n    export interface IGreeter {\r\n        greeting: string;\r\n        greet(): string;\r\n    }\r\n}",
+  "bindDiagnostics": [],
+  "languageVersion": 2,
+  "fileName": "E:/Work/GitHub/typescript-converter/demo/input/IGreeter.ts",
+  "languageVariant": 0,
+  "isDeclarationFile": false,
+  "scriptKind": 3,
+  "pragmas": {},
+  "referencedFiles": [],
+  "typeReferenceDirectives": [],
+  "libReferenceDirectives": [],
+  "amdDependencies": [],
+  "hasNoDefaultLib": false,
+  "statements": [
+    {
+      "pos": 0,
+      "end": 135,
+      "flags": 16,
+      "modifierFlagsCache": 536870912,
+      "transformFlags": 0,
+      "kind": "ModuleDeclaration",
+      "name": {
+        "pos": 9,
+        "end": 16,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "escapedText": "MyTest",
+        "text": "MyTest",
+        "kind": "Identifier"
+      },
+      "body": {
+        "pos": 16,
+        "end": 135,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "kind": "ModuleBlock",
+        "statements": [
+          {
+            "pos": 18,
+            "end": 37,
+            "flags": 0,
+            "modifierFlagsCache": 0,
+            "transformFlags": 0,
+            "kind": "ExpressionStatement",
+            "expression": {
+              "pos": 18,
+              "end": 36,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": "StringLiteral",
+              "text": "use strict"
+            }
+          },
+          {
+            "pos": 37,
+            "end": 132,
+            "flags": 0,
+            "modifierFlagsCache": 0,
+            "transformFlags": 0,
+            "kind": "InterfaceDeclaration",
+            "modifiers": [
+              {
+                "pos": 37,
+                "end": 51,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": "ExportKeyword"
+              }
+            ],
+            "name": {
+              "pos": 61,
+              "end": 70,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "escapedText": "IGreeter",
+              "text": "IGreeter",
+              "kind": "Identifier"
+            },
+            "members": [
+              {
+                "pos": 72,
+                "end": 99,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": "PropertySignature",
+                "name": {
+                  "pos": 72,
+                  "end": 90,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "escapedText": "greeting",
+                  "text": "greeting",
+                  "kind": "Identifier"
+                },
+                "type": {
+                  "pos": 91,
+                  "end": 98,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "StringKeyword"
+                }
+              },
+              {
+                "pos": 99,
+                "end": 125,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": "MethodSignature",
+                "name": {
+                  "pos": 99,
+                  "end": 114,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "escapedText": "greet",
+                  "text": "greet",
+                  "kind": "Identifier"
+                },
+                "parameters": [],
+                "type": {
+                  "pos": 117,
+                  "end": 124,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": "StringKeyword"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "endOfFileToken": {
+    "pos": 135,
+    "end": 135,
+    "flags": 0,
+    "modifierFlagsCache": 0,
+    "transformFlags": 0,
+    "kind": "EndOfFileToken"
+  },
+  "nodeCount": 17,
+  "identifierCount": 5,
+  "identifiers": {},
+  "parseDiagnostics": []
+}

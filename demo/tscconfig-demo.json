@@ -1,0 +1,15 @@
+{
+  "include": ["ast"],
+  "exclude": [],
+  "output": "csharp",
+  "samples": [],
+  "flatOutput": false,
+  "preferTypeScriptType": true,
+  "namespace": "Demo",
+  "usings": [
+    "System.Linq",
+	"TypeScriptObject"
+  ],
+  "namespaceMappings": [],
+  "omittedQualifiedNames": []
+}
