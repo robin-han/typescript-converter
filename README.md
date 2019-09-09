@@ -28,10 +28,10 @@ ts2csharp.sh
 
 ## Config
 All config setting in file tscconfig.json
-```json
+```js
 {
   "include": [], // source list directory or file
-  "exclude": [], // exclude source and will not translate
+  "exclude": [], // exclude source will not translate
   "output": "", // output
   "samples": [], // If translate part of the source, put the root class name here
   "flatOutput": false, // true will not keep its directory hierarchy
