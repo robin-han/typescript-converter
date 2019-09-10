@@ -104,6 +104,8 @@ namespace TypeScript.Syntax.Analysis
         //Separate getset method to two method
         private void SeparateClassMembers(ClassDeclaration classNode)
         {
+            List<MethodDeclaration> changedMethods = new List<MethodDeclaration>();
+
             for (int i = 0; i < classNode.Members.Count; i++)
             {
                 Node member = classNode.Members[i];
@@ -113,7 +115,9 @@ namespace TypeScript.Syntax.Analysis
                     MethodDeclaration method = member as MethodDeclaration;
                     if (this.CanSeparate(method))
                     {
+                        changedMethods.Add(method);
                         classNode.Members.RemoveAt(i);
+
                         List<Node> newMembers = this.Separate(method);
                         foreach (var mem in newMembers)
                         {
@@ -121,6 +125,40 @@ namespace TypeScript.Syntax.Analysis
                         }
                         classNode.Members.InsertRange(i++, newMembers);
                     }
+                }
+            }
+
+            //separate interface member
+            if (changedMethods.Count > 0)
+            {
+                Project project = classNode.Project;
+                foreach (InterfaceDeclaration @interface in project.GetInheritInterfaces(classNode))
+                {
+                    foreach (MethodDeclaration changedMethod in changedMethods)
+                    {
+                        this.SeparateInterfaceMember(@interface, changedMethod.Name.Text);
+                    }
+                }
+            }
+        }
+
+        private void SeparateInterfaceMember(InterfaceDeclaration @interface, string memberName)
+        {
+            Node member = @interface.GetMember(memberName);
+            if (member != null && member.Kind == NodeKind.MethodSignature)
+            {
+                MethodSignature method = member as MethodSignature;
+                if (CanSeparate(method))
+                {
+                    int index = @interface.Members.IndexOf(method);
+                    @interface.Members.RemoveAt(index);
+
+                    List<Node> newMembers = this.Separate(method);
+                    foreach (var mem in newMembers)
+                    {
+                        mem.Parent = @interface;
+                    }
+                    @interface.Members.InsertRange(index, newMembers);
                 }
             }
         }
@@ -171,6 +209,22 @@ namespace TypeScript.Syntax.Analysis
             return newMembers;
         }
 
+        private List<Node> Separate(MethodSignature method)
+        {
+            List<Node> newMembers = new List<Node>();
+
+            MethodSignature setMethod = NodeHelper.CreateNode(method.TsNode) as MethodSignature;
+            (setMethod.Parameters[0] as Parameter).QuestionToken = null;
+            setMethod.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+            newMembers.Add(setMethod);
+
+            MethodSignature getMethod = NodeHelper.CreateNode(method.TsNode) as MethodSignature;
+            getMethod.Parameters = new List<Node>();
+            newMembers.Add(getMethod);
+
+            return newMembers;
+        }
+
         private bool CanSeparate(MethodDeclaration method)
         {
             if (method.Parameters.Count != 1)
@@ -198,6 +252,19 @@ namespace TypeScript.Syntax.Analysis
             }
             string exprText = ifStatement.Expression.Text.Replace(" ", "");
             return (exprText == "arguments.length<=0" || exprText == "arguments.length==0" || exprText == "arguments.length===0");
+        }
+
+        private bool CanSeparate(MethodSignature method)
+        {
+            if (method.Parameters.Count == 1)
+            {
+                Parameter parameter = method.Parameters[0] as Parameter;
+                if (parameter.IsOptional && parameter.Type.Text == method.Type.Text)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
         #endregion
     }

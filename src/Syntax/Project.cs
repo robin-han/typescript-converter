@@ -172,6 +172,32 @@ namespace TypeScript.Syntax
             return null;
         }
 
+        public List<ClassDeclaration> GetInheritClasses(Node node)
+        {
+            List<ClassDeclaration> ret = new List<ClassDeclaration>();
+            foreach (Node baseNode in this.GetInherits(node))
+            {
+                if (baseNode.Kind == NodeKind.ClassDeclaration)
+                {
+                    ret.Add(baseNode as ClassDeclaration);
+                }
+            }
+            return ret;
+        }
+
+        public List<InterfaceDeclaration> GetInheritInterfaces(Node node)
+        {
+            List<InterfaceDeclaration> ret = new List<InterfaceDeclaration>();
+            foreach (Node baseNode in this.GetInherits(node))
+            {
+                if (baseNode.Kind == NodeKind.InterfaceDeclaration)
+                {
+                    ret.Add(baseNode as InterfaceDeclaration);
+                }
+            }
+            return ret;
+        }
+
         public List<Node> GetInherits(Node node)
         {
             List<Node> ret = new List<Node>();

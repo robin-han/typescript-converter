@@ -34,7 +34,7 @@ namespace TypeScript.Syntax
         public List<Node> Parameters
         {
             get;
-            private set;
+            internal set;
         }
 
         public Node Type
