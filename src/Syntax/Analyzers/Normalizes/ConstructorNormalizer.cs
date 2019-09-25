@@ -101,7 +101,7 @@ namespace TypeScript.Syntax.Analysis
                 Node statement = statements[i];
                 if (this.IsBaseConstructor(statement))
                 {
-                    ctorNode.Body.Remove(statement);
+                    ctorNode.Body.RemoveChild(statement);
                     Node baseNode = NodeHelper.CreateNode(statement.TsNode);
                     baseNode.Parent = ctorNode;
                     ctorNode.Base = baseNode;

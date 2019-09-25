@@ -41,7 +41,7 @@ namespace TypeScript.Converter.CSharp
 
         #region Properties
         /// <summary>
-        /// 
+        /// Gets or sets the converter context
         /// </summary>
         public ConverterContext Context
         {
@@ -49,7 +49,7 @@ namespace TypeScript.Converter.CSharp
             {
                 return this._context;
             }
-            internal set
+            set
             {
                 if (value == null)
                 {

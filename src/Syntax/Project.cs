@@ -9,20 +9,24 @@ namespace TypeScript.Syntax
     public class Project
     {
         #region Fields
-        private List<Document> _allDocuments;
+        private string _path;
         private List<Document> _documents;
+        private List<Document> _includedDocuments;
+
         private (List<Node> nodes, List<string> names)? _typeNodes;
         private List<Type> _analyzerTypes;
         #endregion
 
         #region Constructor
-        public Project(List<Document> allDocs, List<Document> docs)
+        public Project(string path, List<Document> documents, List<Document> includedDocuments)
         {
-            this._allDocuments = allDocs;
-            this._documents = docs;
+            this._path = path;
+            this._documents = documents;
+            this._includedDocuments = includedDocuments;
             this._typeNodes = null;
+            this._analyzerTypes = null;
 
-            foreach (Document doc in allDocs)
+            foreach (Document doc in documents)
             {
                 doc.Project = this;
             }
@@ -31,24 +35,35 @@ namespace TypeScript.Syntax
 
         #region Properties
         /// <summary>
-        /// Gets all documents.
+        /// Gets the project's path.
         /// </summary>
-        public List<Document> AllDocuments
+        public string Path
         {
             get
             {
-                return this._allDocuments;
+                return this._path;
             }
         }
 
         /// <summary>
-        /// Gets convert documents.
+        /// Gets all documents.
         /// </summary>
         public List<Document> Documents
         {
             get
             {
                 return this._documents;
+            }
+        }
+
+        /// <summary>
+        /// Gets convert documents.
+        /// </summary>
+        public List<Document> IncludedDocuments
+        {
+            get
+            {
+                return this._includedDocuments;
             }
         }
 
@@ -79,21 +94,32 @@ namespace TypeScript.Syntax
         /// <summary>
         /// Add document to document collection
         /// </summary>
-        /// <param name="doc"></param>
-        public void AddDocument(Document doc)
+        /// <param name="doc">The document.</param>
+        public void AddConversionDocument(Document doc)
         {
-            if (!this.Documents.Contains(doc))
+            if (!this.IncludedDocuments.Contains(doc))
             {
-                this.Documents.Add(doc);
+                this.IncludedDocuments.Add(doc);
             }
         }
 
         /// <summary>
-        /// 
+        /// Gets the document by its path.
         /// </summary>
-        /// <param name="typeName"></param>
-        /// <returns></returns>
-        public Document GetDocument(string typeName)
+        /// <param name="path">The import/export path.</param>
+        /// <returns>The document.</returns>
+        public Document GetDocumentByPath(string path)
+        {
+            string docPath = (path.EndsWith(".ts.json") ? path : path + ".ts.json");
+            return this.Documents.Find(doc => doc.Path == docPath);
+        }
+
+        /// <summary>
+        /// Gets the document which the class, interface, enum or typeAlias within.
+        /// </summary>
+        /// <param name="typeName">The type name.</param>
+        /// <returns>The document where the type in</returns>
+        public Document GetDocumentByType(string typeName)
         {
             int index = this.TypeNames.IndexOf(typeName);
             if (index >= 0)
@@ -155,6 +181,11 @@ namespace TypeScript.Syntax
             return null;
         }
 
+        /// <summary>
+        /// Gets class's base class.
+        /// </summary>
+        /// <param name="classNode">The class node to get its base.</param>
+        /// <returns>The base class.</returns>
         public ClassDeclaration GetBaseClass(ClassDeclaration classNode)
         {
             if (classNode == null)
@@ -166,16 +197,21 @@ namespace TypeScript.Syntax
             {
                 if (inherit.Token == NodeKind.ExtendsKeyword && inherit.Types.Count > 0)
                 {
-                    return this.GetClass(TypeHelper.GetTypeName(inherit.Types[0]));
+                    return this.GetClass(TypeHelper.GetName(inherit.Types[0].Text));
                 }
             }
             return null;
         }
 
-        public List<ClassDeclaration> GetInheritClasses(Node node)
+        /// <summary>
+        /// Ges all its inherited classes.
+        /// </summary>
+        /// <param name="classNode">The class node</param>
+        /// <returns>Inherited classes</returns>
+        public List<ClassDeclaration> GetInheritClasses(ClassDeclaration classNode)
         {
             List<ClassDeclaration> ret = new List<ClassDeclaration>();
-            foreach (Node baseNode in this.GetInherits(node))
+            foreach (Node baseNode in this.GetInherits(classNode))
             {
                 if (baseNode.Kind == NodeKind.ClassDeclaration)
                 {
@@ -185,6 +221,11 @@ namespace TypeScript.Syntax
             return ret;
         }
 
+        /// <summary>
+        /// Ges all its inherited interfaces.
+        /// </summary>
+        /// <param name="classNode">The class or interface node</param>
+        /// <returns>Inherited interfaces.</returns>
         public List<InterfaceDeclaration> GetInheritInterfaces(Node node)
         {
             List<InterfaceDeclaration> ret = new List<InterfaceDeclaration>();
@@ -198,6 +239,12 @@ namespace TypeScript.Syntax
             return ret;
         }
 
+
+        /// <summary>
+        /// Ges all its inherited interfaces and classes.
+        /// </summary>
+        /// <param name="classNode">The class or interface node</param>
+        /// <returns>Inherited interfaces and classes.</returns>
         public List<Node> GetInherits(Node node)
         {
             List<Node> ret = new List<Node>();
@@ -224,7 +271,7 @@ namespace TypeScript.Syntax
                 {
                     if (inherit.Token == NodeKind.ExtendsKeyword)
                     {
-                        ClassDeclaration baseClass = this.GetClass(TypeHelper.GetTypeName(type));
+                        ClassDeclaration baseClass = this.GetClass(TypeHelper.GetName(type.Text));
                         if (baseClass != null)
                         {
                             ret.Add(baseClass);
@@ -236,7 +283,7 @@ namespace TypeScript.Syntax
                     }
                     else
                     {
-                        InterfaceDeclaration baseInterface = this.GetInterface(TypeHelper.GetTypeName(type));
+                        InterfaceDeclaration baseInterface = this.GetInterface(TypeHelper.GetName(type.Text));
                         if (baseInterface != null)
                         {
                             ret.Add(baseInterface);
@@ -269,10 +316,10 @@ namespace TypeScript.Syntax
         }
 
         /// <summary>
-        /// 
+        /// Gets a type's reference
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="results"></param>
+        /// <param name="name">The type name.</param>
+        /// <param name="results">The referenced types.</param>
         private void GetReferences(string typeName, List<string> result)
         {
             var (nodes, names) = this.GetAllTypes();
@@ -283,7 +330,7 @@ namespace TypeScript.Syntax
             }
 
             Node rootNode = nodes[index];
-            if (rootNode.Document != null && !this.Documents.Contains(rootNode.Document))
+            if (rootNode.Document != null && !this.IncludedDocuments.Contains(rootNode.Document))
             {
                 return;
             }
@@ -360,12 +407,12 @@ namespace TypeScript.Syntax
             //
             List<Node> nodes = new List<Node>();
             List<string> names = new List<string>();
-            foreach (Document doc in this.AllDocuments)
+            foreach (Document doc in this.Documents)
             {
-                List<Node> docTypes = doc.GetTypeNodes();
+                List<Node> docTypes = doc.TypeNodes;
                 foreach (Node node in docTypes)
                 {
-                    string name = doc.GetTypeName(node);
+                    string name = TypeHelper.GetTypeName(node);
                     if (!string.IsNullOrEmpty(name) && !names.Contains(name))
                     {
                         nodes.Add(node);
@@ -378,6 +425,10 @@ namespace TypeScript.Syntax
             return (nodes, names);
         }
 
+        /// <summary>
+        /// Gets all analyzer types of the project
+        /// </summary>
+        /// <returns></returns>
         public List<Type> GetAnalyzerTypes()
         {
             if (this._analyzerTypes != null)

@@ -7,6 +7,8 @@ namespace TypeScript.Syntax
 {
     public class Constructor : Node
     {
+        private Node _base;
+
         #region Properties
         public override NodeKind Kind
         {
@@ -39,8 +41,18 @@ namespace TypeScript.Syntax
 
         public Node Base
         {
-            get;
-            internal set;
+            get
+            {
+                return this._base;
+            }
+            internal set
+            {
+                this._base = value;
+                if (this._base != null)
+                {
+                    this._base.Parent = this;
+                }
+            }
         }
         #endregion
 
@@ -57,9 +69,9 @@ namespace TypeScript.Syntax
             this.Base = null;
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)

@@ -40,7 +40,7 @@ namespace TypeScript.Syntax.Analysis
             {
                 Node leftNode = instanceof.Left;
                 Node leftNodeType = TypeHelper.GetNodeType(leftNode);
-                if (leftNodeType != null && TypeHelper.GetTypeName(leftNodeType) == "DataValueType")
+                if (leftNodeType != null && TypeHelper.GetName(leftNodeType.Text) == "DataValueType")
                 {
                     PropertyAccessExpression newLeft = NodeHelper.CreateNode(NodeKind.PropertyAccessExpression) as PropertyAccessExpression;
                     newLeft.Parent = leftNode.Parent;

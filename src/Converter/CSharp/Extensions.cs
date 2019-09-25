@@ -9,11 +9,55 @@ using System.Text;
 
 namespace TypeScript.Converter.CSharp
 {
-    internal static class SyntaxNodeExtensions
+    #region Document Extension
+    internal static class DocumentExtension
     {
-        public static T ToCsNode<T>(this Node tsNode)
+        internal static string GetPackageName(this Syntax.Document doc)
         {
-            Type converter = CSharpConverter.GetConverter(tsNode);
+            string ns1 = ConverterContext.Current.Config.Namespace;
+            string ns2 = doc.RelativePath.Replace("\\", ".");
+            if (!string.IsNullOrEmpty(ns1) && !string.IsNullOrEmpty(ns2))
+            {
+                return ns1 + "." + ns2;
+            }
+            else if (!string.IsNullOrEmpty(ns1))
+            {
+                return ns1;
+            }
+            else if (!string.IsNullOrEmpty(ns2))
+            {
+                return ns2;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+    }
+    #endregion
+
+    #region SyntaxNode
+    public static class SyntaxNodeExtension
+    {
+        /// <summary>
+        /// Convert to csharp code.
+        /// </summary>
+        /// <param name="node">The typescipt node.</param>
+        /// <returns>The csharp code.</returns>
+        public static string ToCSharp(this Node node)
+        {
+            CSharpSyntaxNode csNode = node?.ToCsNode<CSharpSyntaxNode>();
+            if (csNode != null)
+            {
+                return csNode.NormalizeWhitespace().ToFullString();
+            }
+
+            return string.Empty;
+        }
+
+        internal static T ToCsNode<T>(this Node tsNode)
+        {
+            Converter converter = ConverterContext.Current.CreateConverter(tsNode);
             if (converter == null)
             {
                 Log(string.Format("Cannot find {0} Converter", tsNode.Kind));
@@ -22,11 +66,8 @@ namespace TypeScript.Converter.CSharp
 
             try
             {
-                object convertInstance = converter.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes);
-                converter.GetProperty("Context").SetValue(convertInstance, CSharpConverter.CurrentContext);
-
-                MethodInfo convertMethod = converter.GetMethod("Convert");
-                object node = convertMethod.Invoke(convertInstance, new object[] { tsNode });
+                MethodInfo convertMethod = converter.GetType().GetMethod("Convert", new Type[] { tsNode.GetType() });
+                object node = convertMethod.Invoke(converter, new object[] { tsNode });
 
                 if (!CanConvert(tsNode))
                 {
@@ -48,7 +89,7 @@ namespace TypeScript.Converter.CSharp
             }
         }
 
-        public static List<T> ToCsNodeList<T>(this IEnumerable<Node> nodes)
+        internal static T[] ToCsNodes<T>(this IEnumerable<Node> nodes)
         {
             List<T> ret = new List<T>();
             foreach (Node node in nodes)
@@ -64,14 +105,8 @@ namespace TypeScript.Converter.CSharp
                     ret.Add(csNode);
                 }
             }
-            return ret;
+            return ret.ToArray();
         }
-
-        public static T[] ToCsNodes<T>(this IEnumerable<Node> nodes)
-        {
-            return nodes.ToCsNodeList<T>().ToArray();
-        }
-
 
         private static bool CanConvert(Node node)
         {
@@ -102,8 +137,8 @@ namespace TypeScript.Converter.CSharp
         {
             switch (tsNode.Kind)
             {
-                //case NodeKind.ExportKeyword:
-                //    return true;
+                case NodeKind.DefaultKeyword:
+                    return true;
 
                 default:
                     return false;
@@ -125,7 +160,6 @@ namespace TypeScript.Converter.CSharp
             Console.WriteLine(msg);
         }
 
-
         [Conditional("DEBUG")]
         private static void PrintExecption(Exception ex)
         {
@@ -138,4 +172,5 @@ namespace TypeScript.Converter.CSharp
         }
 
     }
+    #endregion
 }

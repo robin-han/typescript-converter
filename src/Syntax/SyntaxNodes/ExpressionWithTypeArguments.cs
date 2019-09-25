@@ -7,7 +7,8 @@ namespace TypeScript.Syntax
 {
     public class ExpressionWithTypeArguments : Node
     {
-        #region Properties
+        #region Fields
+        private Node _expression;
         private Node _type = null;
         #endregion
 
@@ -19,8 +20,18 @@ namespace TypeScript.Syntax
 
         public Node Expression
         {
-            get;
-            internal set;
+            get
+            {
+                return this._expression;
+            }
+            internal set
+            {
+                this._expression = value;
+                if (this._expression != null)
+                {
+                    this._expression.Parent = this;
+                }
+            }
         }
 
         public List<Node> TypeArguments
@@ -57,9 +68,9 @@ namespace TypeScript.Syntax
             this.TypeArguments = new List<Node>();
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)

@@ -7,6 +7,9 @@ namespace TypeScript.Syntax
 {
     public class MethodDeclaration : Declaration
     {
+        private Node _name;
+        private Node _type;
+
         #region Properties
         public override NodeKind Kind
         {
@@ -27,8 +30,18 @@ namespace TypeScript.Syntax
 
         public Node Name
         {
-            get;
-            internal set;
+            get
+            {
+                return this._name;
+            }
+            internal set
+            {
+                this._name = value;
+                if (this._name != null)
+                {
+                    this._name.Parent = this;
+                }
+            }
         }
 
         public List<Node> TypeParameters
@@ -45,8 +58,18 @@ namespace TypeScript.Syntax
 
         public Node Type
         {
-            get;
-            internal set;
+            get
+            {
+                return this._type;
+            }
+            internal set
+            {
+                this._type = value;
+                if (this._type != null)
+                {
+                    this._type.Parent = this;
+                }
+            }
         }
 
         public Block Body
@@ -94,9 +117,9 @@ namespace TypeScript.Syntax
             this.Body = null;
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)

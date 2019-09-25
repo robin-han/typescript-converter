@@ -112,7 +112,7 @@ namespace TypeScript.Converter
             if (sourceOption.HasValue())
             {
                 string input = sourceOption.Value();
-                List<string> inputFiles = Utils.GetTsJsonFiles(input);
+                List<string> inputFiles = FileUtil.GetTsJsonFiles(input);
                 if (inputFiles == null)
                 {
                     Console.WriteLine(string.Format("Cannot find input file or directory {0}", input));
@@ -127,7 +127,7 @@ namespace TypeScript.Converter
             //base path
             if (!config.FlatOutput)
             {
-                basePath = Utils.GetBasePath(allFiles);
+                basePath = FileUtil.GetBasePath(allFiles);
             }
 
             //exclusion
@@ -144,7 +144,7 @@ namespace TypeScript.Converter
             output = outOption.HasValue() ? outOption.Value() : config.Output;
 
             //
-            List<string> files = Utils.FilterFiles(allFiles, exclusion);
+            List<string> files = FileUtil.FilterFiles(allFiles, exclusion);
 
             return new ExecuteArgument()
             {

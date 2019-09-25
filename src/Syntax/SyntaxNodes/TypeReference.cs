@@ -42,9 +42,9 @@ namespace TypeScript.Syntax
             this.IsParams = false;
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)
@@ -63,7 +63,7 @@ namespace TypeScript.Syntax
             }
         }
 
-        internal override string GetText()
+        protected override string GetText()
         {
             return this.TypeName.Text;
         }

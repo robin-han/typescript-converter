@@ -7,6 +7,8 @@ namespace TypeScript.Syntax
 {
     public class FunctionDeclaration : Declaration
     {
+        private Node _type;
+
         #region Properties
         public override NodeKind Kind
         {
@@ -51,8 +53,18 @@ namespace TypeScript.Syntax
 
         public Node Type
         {
-            get;
-            internal set;
+            get
+            {
+                return this._type;
+            }
+            internal set
+            {
+                this._type = value;
+                if (this._type != null)
+                {
+                    this._type.Parent = this;
+                }
+            }
         }
         #endregion
 
@@ -69,9 +81,9 @@ namespace TypeScript.Syntax
             this.Body = null;
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)

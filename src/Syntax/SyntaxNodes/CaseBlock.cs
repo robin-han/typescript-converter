@@ -27,9 +27,9 @@ namespace TypeScript.Syntax
             this.Clauses = new List<Node>();
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)

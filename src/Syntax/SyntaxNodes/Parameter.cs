@@ -7,6 +7,10 @@ namespace TypeScript.Syntax
 {
     public class Parameter : Node
     {
+        private Node _type;
+        private Node _questionToken;
+        private Node _initializer;
+
         #region Properties
         public override NodeKind Kind
         {
@@ -27,20 +31,50 @@ namespace TypeScript.Syntax
 
         public Node Type
         {
-            get;
-            internal set;
+            get
+            {
+                return this._type;
+            }
+            internal set
+            {
+                this._type = value;
+                if (this._type != null)
+                {
+                    this._type.Parent = this;
+                }
+            }
         }
 
         public Node QuestionToken
         {
-            get;
-            internal set;
+            get
+            {
+                return this._questionToken;
+            }
+            internal set
+            {
+                this._questionToken = value;
+                if (this._questionToken != null)
+                {
+                    this._questionToken.Parent = this;
+                }
+            }
         }
 
         public Node Initializer
         {
-            get;
-            internal set;
+            get
+            {
+                return this._initializer;
+            }
+            internal set
+            {
+                this._initializer = value;
+                if (this._initializer != null)
+                {
+                    this._initializer.Parent = this;
+                }
+            }
         }
 
         public bool IsOptional
@@ -110,9 +144,9 @@ namespace TypeScript.Syntax
             this.IgnoreType = false;
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)
@@ -142,7 +176,7 @@ namespace TypeScript.Syntax
                     break;
             }
         }
-       
+
     }
 }
 

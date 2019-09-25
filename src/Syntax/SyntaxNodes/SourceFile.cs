@@ -47,6 +47,7 @@ namespace TypeScript.Syntax
         private int IdentifierCount { get; set; }
         private object Identifiers { get; set; }
         private List<string> ParseDiagnostics { get; set; }
+        private Node ExternalModuleIndicator { get; set; }
         #endregion
 
         #endregion
@@ -62,9 +63,9 @@ namespace TypeScript.Syntax
             this.FileName = jsonFileName == null ? "" : jsonFileName.ToObject<string>();
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)
@@ -72,13 +73,20 @@ namespace TypeScript.Syntax
                 case "endOfFileToken":
                     this.EndOfFileToken = childNode as EndOfFileToken;
                     break;
+
                 case "statements":
                     this.Statements.Add(childNode);
                     break;
+
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;
             }
+        }
+
+        public override bool IsValidChild(Node childNode)
+        {
+            return childNode.NodeName != "externalModuleIndicator";
         }
     }
 }

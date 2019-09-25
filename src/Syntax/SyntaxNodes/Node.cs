@@ -45,12 +45,6 @@ namespace TypeScript.Syntax
             }
         }
 
-        public List<Node> OriginalChildren
-        {
-            get;
-            private set;
-        }
-
         public List<Node> Children
         {
             get
@@ -65,20 +59,20 @@ namespace TypeScript.Syntax
                         continue;
                     }
 
-                    System.Type propType = prop.PropertyType;
+                    Type propType = prop.PropertyType;
                     if (TypeHelper.IsNodeType(propType))
                     {
-                        Node node = prop.GetValue(this) as Node;
-                        if (node != null && !children.Contains(node))
+                        if (prop.GetValue(this) is Node node && !children.Contains(node))
                         {
+                            if (node.Parent != this) { node.Parent = this; };
                             children.Add(node);
                         }
                     }
                     else if (TypeHelper.IsNodeListType(propType))
                     {
-                        List<Node> nodes = prop.GetValue(this) as List<Node>;
-                        if (nodes != null && nodes.Count > 0)
+                        if (prop.GetValue(this) is List<Node> nodes && nodes.Count > 0)
                         {
+                            nodes.ForEach(n => { if (n.Parent != this) { n.Parent = this; } });
                             children.AddRange(nodes);
                         }
                     }
@@ -126,25 +120,25 @@ namespace TypeScript.Syntax
         public int Pos
         {
             get;
-            internal set;
+            protected set;
         }
 
         public int End
         {
             get;
-            internal set;
+            protected set;
         }
 
         public int Flags
         {
             get;
-            private set;
+            protected set;
         }
 
         public Dictionary<string, Object> Pocket
         {
             get;
-            private set;
+            protected set;
         }
 
         public JObject TsNode
@@ -157,14 +151,23 @@ namespace TypeScript.Syntax
         {
             get
             {
-                Node root = this.Root;
-                if (root == this)
+                if (this._document != null)
                 {
                     return this._document;
                 }
-                return root._document;
+
+                Node parent = this;
+                while ((parent = parent.Parent) != null)
+                {
+                    if (parent._document != null)
+                    {
+                        this._document = parent._document;
+                        break;
+                    }
+                }
+                return this._document;
             }
-            internal set
+            set
             {
                 this._document = value;
             }
@@ -186,7 +189,6 @@ namespace TypeScript.Syntax
             this.TsNode = jsonObj;
 
             this.Parent = null;
-            this.OriginalChildren = new List<Node>();
 
             this.Pocket = new Dictionary<string, object>();
             this.Path = jsonObj.Path;
@@ -209,6 +211,11 @@ namespace TypeScript.Syntax
             return this.GetType().GetProperty(name) != null;
         }
 
+        public virtual bool IsValidChild(Node childNode)
+        {
+            return true;
+        }
+
         public object GetValue(string propName)
         {
             PropertyInfo prop = this.GetType().GetProperty(propName);
@@ -228,18 +235,17 @@ namespace TypeScript.Syntax
             }
         }
 
-        public virtual void AddNode(Node childNode)
+        public virtual void AddChild(Node childNode)
         {
             childNode.Parent = this;
-            this.OriginalChildren.Add(childNode);
         }
 
-        public void AddNode(JObject tsNode)
+        public void AddChild(JObject tsNode)
         {
-            this.AddNode(NodeHelper.CreateNode(tsNode));
+            this.AddChild(NodeHelper.CreateNode(tsNode));
         }
 
-        public void Remove(Node childNode)
+        public void RemoveChild(Node childNode)
         {
             PropertyInfo[] properties = this.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
             foreach (PropertyInfo prop in properties)
@@ -276,8 +282,17 @@ namespace TypeScript.Syntax
 
         public List<Node> Descendants(Predicate<Node> match = null)
         {
-            List<Node> nodes = new List<Node>();
+            return this.DescendantsImpl(match, false);
+        }
 
+        public List<Node> DescendantsOnce(Predicate<Node> match = null)
+        {
+            return this.DescendantsImpl(match, true);
+        }
+
+        private List<Node> DescendantsImpl(Predicate<Node> match, bool once)
+        {
+            List<Node> nodes = new List<Node>();
             Queue<Node> queue = new Queue<Node>(this.Children);
             while (queue.Count > 0)
             {
@@ -285,8 +300,11 @@ namespace TypeScript.Syntax
                 if (match == null || match.Invoke(node))
                 {
                     nodes.Add(node);
+                    if (match != null && once)
+                    {
+                        continue;
+                    }
                 }
-
                 foreach (Node nd in node.Children)
                 {
                     queue.Enqueue(nd);
@@ -297,28 +315,38 @@ namespace TypeScript.Syntax
 
         public List<Node> DescendantsAndSelf(Predicate<Node> match = null)
         {
+            return this.DescendantsAndSelfImpl(match, false);
+        }
+
+        public List<Node> DescendantsAndSelfOnce(Predicate<Node> match = null)
+        {
+            return this.DescendantsAndSelfImpl(match, true);
+        }
+
+        private List<Node> DescendantsAndSelfImpl(Predicate<Node> match, bool once)
+        {
             List<Node> nodes = new List<Node>();
             if (match == null || match.Invoke(this))
             {
                 nodes.Add(this);
+                if (match != null && once)
+                {
+                    return nodes;
+                }
             }
-
             nodes.AddRange(this.Descendants(match));
-
             return nodes;
         }
 
-        public Node GetAncestor(NodeKind kind)
+        public Node Ancestor(NodeKind kind)
         {
-            Node parent = this.Parent;
-            while (parent != null)
+            Node parent = this;
+            while ((parent = parent.Parent) != null)
             {
                 if (parent.Kind == kind)
                 {
                     return parent;
                 }
-
-                parent = parent.Parent;
             }
             return null;
         }
@@ -329,7 +357,7 @@ namespace TypeScript.Syntax
         /// <summary>
         /// Get node's original text.
         /// </summary>
-        internal virtual string GetText()
+        protected virtual string GetText()
         {
             Node root = this.Root;
             if (root.Kind == NodeKind.SourceFile)
@@ -341,7 +369,7 @@ namespace TypeScript.Syntax
 
         private bool IsIgnoredProperty(string propName)
         {
-            return (propName == "Parent" || propName == "OriginalChildren" || propName == "jsDoc");
+            return (propName == "Parent" || propName == "JsDoc");
         }
         #endregion
 

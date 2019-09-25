@@ -12,10 +12,6 @@ namespace TypeScript.Syntax.Analysis
 
             switch (node.Kind)
             {
-                case NodeKind.ModuleDeclaration:
-                    this.CombineModules(node as ModuleDeclaration);
-                    break;
-
                 case NodeKind.ClassDeclaration:
                     this.CombineGetSetAccess(node as ClassDeclaration);
                     break;
@@ -24,31 +20,6 @@ namespace TypeScript.Syntax.Analysis
                     break;
             }
         }
-
-        #region ModuleDeclaration
-        private void CombineModules(ModuleDeclaration module)
-        {
-            ModuleDeclaration md = module;
-            List<string> mTexts = new List<string>();
-            while (true)
-            {
-                mTexts.Add(md.Name.Text);
-                if (md.Body == null || md.Body.Kind != NodeKind.ModuleDeclaration)
-                {
-                    break;
-                }
-                md = md.Body as ModuleDeclaration;
-            }
-
-            if (mTexts.Count > 1)
-            {
-                md.Name.Text = string.Join('.', mTexts);
-                md.Name.End = md.Name.End;
-
-                module.Body = md.Body;
-            }
-        }
-        #endregion
 
         #region ClassDeclaration
         private void CombineGetSetAccess(ClassDeclaration classNode)
@@ -74,8 +45,8 @@ namespace TypeScript.Syntax.Analysis
 
                     Node getSestAccessor = NodeHelper.CreateNode(NodeKind.GetSetAccessor);
                     getSestAccessor.Parent = classNode;
-                    getSestAccessor.AddNode(getAccessor.TsNode);
-                    getSestAccessor.AddNode(setAccessor.TsNode);
+                    getSestAccessor.AddChild(getAccessor.TsNode);
+                    getSestAccessor.AddChild(setAccessor.TsNode);
                     classNode.Members.Insert(i++, getSestAccessor);
                 }
             }

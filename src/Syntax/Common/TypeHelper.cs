@@ -26,14 +26,22 @@ namespace TypeScript.Syntax
             return type;
         }
 
-        public static string GetTypeName(Node type)
+        public static string GetTypeName(Node typeNode)
         {
-            string name = type.Text;
-            string ret = name;
-            int genericIndex = name.IndexOf("<");
+            if (typeNode.GetValue("Name") is Node name)
+            {
+                return name.Text;
+            }
+            return null;
+        }
+
+        public static string GetName(string typeName)
+        {
+            string ret = typeName;
+            int genericIndex = typeName.IndexOf("<");
             if (genericIndex >= 0)
             {
-                ret = name.Substring(0, genericIndex);
+                ret = typeName.Substring(0, genericIndex);
             }
             string[] parts = ret.Split('.');
             return parts[parts.Length - 1].Trim();
@@ -325,11 +333,11 @@ namespace TypeScript.Syntax
 
                 if (i == 0 && memberName == "this")
                 {
-                    classNode = accessNode.GetAncestor(NodeKind.ClassDeclaration);
+                    classNode = accessNode.Ancestor(NodeKind.ClassDeclaration);
                 }
                 else if (memberName == "super")
                 {
-                    ClassDeclaration thisClassNode = accessNode.GetAncestor(NodeKind.ClassDeclaration) as ClassDeclaration;
+                    ClassDeclaration thisClassNode = accessNode.Ancestor(NodeKind.ClassDeclaration) as ClassDeclaration;
                     classNode = thisClassNode == null ? null : project.GetBaseClass(thisClassNode);
                     if (classNode != null && accessNames.Length == 1)
                     {
@@ -387,7 +395,7 @@ namespace TypeScript.Syntax
 
             Node valueType = GetItemType(arrayLiteral);
             Node arrayType = NodeHelper.CreateNode(NodeKind.ArrayType);
-            arrayType.AddNode(valueType);
+            arrayType.AddChild(valueType);
             return arrayType;
         }
 
@@ -421,8 +429,8 @@ namespace TypeScript.Syntax
                     elementType.Path = "type";
 
                     Node propSignature = NodeHelper.CreateNode(NodeKind.PropertySignature);
-                    propSignature.AddNode(prop.Name.TsNode);
-                    propSignature.AddNode(elementType);
+                    propSignature.AddChild(prop.Name.TsNode);
+                    propSignature.AddChild(elementType);
 
                     typeLiteral.Members.Add(propSignature);
                 }
@@ -546,7 +554,7 @@ namespace TypeScript.Syntax
             ReturnStatement returnParent = node.Parent as ReturnStatement;
             if (returnParent != null)
             {
-                MethodDeclaration method = returnParent.GetAncestor(NodeKind.MethodDeclaration) as MethodDeclaration;
+                MethodDeclaration method = returnParent.Ancestor(NodeKind.MethodDeclaration) as MethodDeclaration;
                 return method?.Type;
             }
             //
@@ -566,7 +574,7 @@ namespace TypeScript.Syntax
             if (newParent != null)
             {
                 int index = newParent.Arguments.IndexOf(node);
-                string clsName = GetTypeName(newParent.Type);
+                string clsName = TypeHelper.GetName(newParent.Type.Text);
                 Project project = newParent.Project;
                 ClassDeclaration classDeclaration = project?.GetClass(clsName);
                 Constructor ctor = classDeclaration?.GetConstructor();

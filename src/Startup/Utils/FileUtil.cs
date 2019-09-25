@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace TypeScript.Converter
 {
-    class Utils
+    class FileUtil
     {
         private static readonly string directorySeparator = "/";
         private static readonly string backSlash = "\\";
@@ -63,10 +63,10 @@ namespace TypeScript.Converter
             return ret;
         }
 
-        public static string GetBasePath(List<string> paths)
+        public static string GetBasePath(List<string> files)
         {
             string basePath = string.Empty;
-            foreach (string path in paths)
+            foreach (string path in files)
             {
                 if (!Directory.Exists(path) && !File.Exists(path))
                 {
@@ -248,7 +248,5 @@ namespace TypeScript.Converter
             }
             return ret;
         }
-
-
     }
 }

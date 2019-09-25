@@ -194,7 +194,7 @@ namespace TypeScript.Converter
                 foreach (JToken item in jsonInclude)
                 {
                     string include = item.ToObject<string>();
-                    List<string> files = Utils.GetTsJsonFiles(include);
+                    List<string> files = FileUtil.GetTsJsonFiles(include);
                     if (files == null)
                     {
                         return string.Format("Cannot find include file or directory {0}", include);

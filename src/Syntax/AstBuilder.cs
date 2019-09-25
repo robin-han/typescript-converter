@@ -16,15 +16,8 @@ namespace TypeScript.Syntax
         public Document Build(string path)
         {
             JObject jsonObject = JObject.Parse(File.ReadAllText(path));
-            Node node = this.Build(jsonObject);
-
-            Document document = new Document()
-            {
-                Path = path,
-                Root = node,
-            };
-
-            return document;
+            Node root = this.Build(jsonObject);
+            return new Document(path, root);
         }
 
         public Node Build(JToken jsonToken)
@@ -44,21 +37,22 @@ namespace TypeScript.Syntax
             if (tokenType == JTokenType.Object)
             {
                 Node node = this.CreateNode(jsonToken as JObject);
-                if (node != null)
+                if (node == null || (parent != null && !parent.IsValidChild(node)))
                 {
-                    if (parent == null)
-                    {
-                        parent = node;
-                    }
-                    else
-                    {
-                        parent.AddNode(node);
-                    }
+                    return parent;
+                }
 
-                    foreach (var item in jsonToken)
-                    {
-                        this.Build(item, node);
-                    }
+                if (parent == null)
+                {
+                    parent = node;
+                }
+                else
+                {
+                    parent.AddChild(node);
+                }
+                foreach (var item in jsonToken)
+                {
+                    this.Build(item, node);
                 }
             }
             else
@@ -79,12 +73,12 @@ namespace TypeScript.Syntax
 
             if (nodeTypes.ContainsKey(syntaxKind))
             {
-                System.Type type = nodeTypes[syntaxKind];
-                ConstructorInfo constructorInfo = type.GetConstructor(System.Type.EmptyTypes);
+                Type type = nodeTypes[syntaxKind];
+                ConstructorInfo constructorInfo = type.GetConstructor(Type.EmptyTypes);
 
                 if (constructorInfo != null)
                 {
-                    Node syntaxNode = constructorInfo.Invoke(System.Type.EmptyTypes) as Node;
+                    Node syntaxNode = constructorInfo.Invoke(Type.EmptyTypes) as Node;
                     syntaxNode.Init(obj);
                     return syntaxNode;
                 }
@@ -93,7 +87,8 @@ namespace TypeScript.Syntax
             return null;
         }
 
-        internal static string GetSyntaxNodeKey(JObject node)
+        #region Static Methods
+        public static string GetSyntaxNodeKey(JObject node)
         {
             string kind = node["kind"].ToString();
             if (Enum.TryParse(typeof(NodeKind), kind, out object result))
@@ -103,9 +98,8 @@ namespace TypeScript.Syntax
             return kind;
         }
 
-        #region Static Methods
-        private static Dictionary<string, System.Type> _allNodeTypes;
-        public static Dictionary<string, System.Type> AllNodeTypes
+        private static Dictionary<string, Type> _allNodeTypes;
+        public static Dictionary<string, Type> AllNodeTypes
         {
             get
             {
@@ -114,16 +108,16 @@ namespace TypeScript.Syntax
                     return _allNodeTypes;
                 }
 
-                _allNodeTypes = new Dictionary<string, System.Type>();
-                System.Type baseType = typeof(Node);
-                System.Type[] types = Assembly.GetExecutingAssembly().GetExportedTypes();
+                _allNodeTypes = new Dictionary<string, Type>();
+                Type baseType = typeof(Node);
+                Type[] types = Assembly.GetExecutingAssembly().GetExportedTypes();
 
-                foreach (System.Type type in types)
+                foreach (Type type in types)
                 {
                     if (type.IsSubclassOf(baseType))
                     {
                         PropertyInfo p = type.GetProperty("Kind", typeof(NodeKind));
-                        string kind = p.GetValue(type.GetConstructor(System.Type.EmptyTypes).Invoke(System.Type.EmptyTypes)).ToString();
+                        string kind = p.GetValue(type.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes)).ToString();
                         _allNodeTypes[kind] = type;
                     }
                 }

@@ -29,7 +29,7 @@ namespace TypeScript.Syntax
         public Node Body
         {
             get;
-            internal set;
+            private set;
         }
 
         #endregion
@@ -43,9 +43,9 @@ namespace TypeScript.Syntax
             this.Body = null;
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)

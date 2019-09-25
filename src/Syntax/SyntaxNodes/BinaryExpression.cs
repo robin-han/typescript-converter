@@ -7,6 +7,10 @@ namespace TypeScript.Syntax
 {
     public class BinaryExpression : Expression
     {
+        private Node _left;
+        private Node _operatorToken;
+        private Node _right;
+
         #region Properties
         public override NodeKind Kind
         {
@@ -15,20 +19,50 @@ namespace TypeScript.Syntax
 
         public Node Left
         {
-            get;
-            internal set;
+            get
+            {
+                return this._left;
+            }
+            internal set
+            {
+                this._left = value;
+                if (this._left != null)
+                {
+                    this._left.Parent = this;
+                }
+            }
         }
 
         public Node OperatorToken
         {
-            get;
-            internal set;
+            get
+            {
+                return this._operatorToken;
+            }
+            internal set
+            {
+                this._operatorToken = value;
+                if (this._operatorToken != null)
+                {
+                    this._operatorToken.Parent = this;
+                }
+            }
         }
 
         public Node Right
         {
-            get;
-            internal set;
+            get
+            {
+                return this._right;
+            }
+            internal set
+            {
+                this._right = value;
+                if (this._right != null)
+                {
+                    this._right.Parent = this;
+                }
+            }
         }
         #endregion
 
@@ -41,9 +75,9 @@ namespace TypeScript.Syntax
             this.Right = null;
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)

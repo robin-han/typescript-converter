@@ -20,7 +20,7 @@ namespace TypeScript.Syntax
         public Node Expression
         {
             get;
-            internal set;
+            private set;
         }
 
         public List<Node> TypeArguments
@@ -64,9 +64,9 @@ namespace TypeScript.Syntax
             this.TypeArguments = new List<Node>();
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)

@@ -34,9 +34,9 @@ namespace TypeScript.Syntax
             this.MultiLine = jsonMultiLine == null ? false : jsonMultiLine.ToObject<bool>();
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)

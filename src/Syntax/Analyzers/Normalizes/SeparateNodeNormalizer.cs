@@ -219,7 +219,7 @@ namespace TypeScript.Syntax.Analysis
             newMembers.Add(setMethod);
 
             MethodSignature getMethod = NodeHelper.CreateNode(method.TsNode) as MethodSignature;
-            getMethod.Parameters = new List<Node>();
+            getMethod.Parameters.Clear();
             newMembers.Add(getMethod);
 
             return newMembers;

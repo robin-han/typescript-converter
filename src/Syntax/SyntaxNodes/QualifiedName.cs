@@ -34,9 +34,9 @@ namespace TypeScript.Syntax
             this.Right = null;
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)
@@ -55,7 +55,7 @@ namespace TypeScript.Syntax
             }
         }
 
-        internal override string GetText()
+        protected override string GetText()
         {
             return string.Join('.', this.Left.Text, this.Right.Text);
         }

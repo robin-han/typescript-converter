@@ -17,7 +17,7 @@ namespace TypeScript.Converter.CSharp
 
         public ConverterConfig()
         {
-            this._ns = "";
+            this._ns = string.Empty;
             this._preferTsType = true;
             this._usings = new List<string>();
             this._nsMappings = new Dictionary<string, string>();
@@ -26,6 +26,9 @@ namespace TypeScript.Converter.CSharp
         }
 
         #region Properties
+        /// <summary>
+        /// Gets or sets the namespace.
+        /// </summary>
         public string Namespace
         {
             get
@@ -38,6 +41,10 @@ namespace TypeScript.Converter.CSharp
             }
         }
 
+        /// <summary>
+        /// Gets or sets whehter convert to typescript type. 
+        /// <b>true</b> will convert to typescript primitive type, otherwise will convert to csharp primitive type.
+        /// </summary>
         public bool PreferTypeScriptType
         {
             get
@@ -50,6 +57,9 @@ namespace TypeScript.Converter.CSharp
             }
         }
 
+        /// <summary>
+        /// Gets or sets the usings for every file.
+        /// </summary>
         public List<string> Usings
         {
             get
@@ -58,14 +68,13 @@ namespace TypeScript.Converter.CSharp
             }
             set
             {
-                if (value == null)
-                {
-                    value = new List<string>();
-                }
-                this._usings = value;
+                this._usings = value ?? throw new ArgumentNullException("usings");
             }
         }
 
+        /// <summary>
+        /// Gets or sets the namespace mappings.
+        /// </summary>
         public Dictionary<string, string> NamespaceMappings
         {
             get
@@ -74,14 +83,13 @@ namespace TypeScript.Converter.CSharp
             }
             set
             {
-                if (value == null)
-                {
-                    value = new Dictionary<string, string>();
-                }
-                this._nsMappings = value;
+                this._nsMappings = value ?? throw new ArgumentNullException("namespace mappings");
             }
         }
 
+        /// <summary>
+        /// Gets or sets the omitted qualified names.
+        /// </summary>
         public List<string> OmittedQualifiedNames
         {
             get
@@ -90,14 +98,13 @@ namespace TypeScript.Converter.CSharp
             }
             set
             {
-                if (value == null)
-                {
-                    value = new List<string>();
-                }
-                this._omittedQualifiedNames = value;
+                this._omittedQualifiedNames = value ?? throw new ArgumentNullException("omiited qualified names");
             }
         }
 
+        /// <summary>
+        /// Gets or sets the exclude types.
+        /// </summary>
         public List<string> ExcludeTypes
         {
             get
@@ -106,11 +113,7 @@ namespace TypeScript.Converter.CSharp
             }
             set
             {
-                if (value == null)
-                {
-                    value = new List<string>();
-                }
-                this._excludeTypes = value;
+                this._excludeTypes = value ?? throw new ArgumentNullException("exclude types");
             }
         }
         #endregion

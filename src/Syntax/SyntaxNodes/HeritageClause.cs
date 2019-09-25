@@ -36,9 +36,9 @@ namespace TypeScript.Syntax
             this.Token = jsonToken == null ? NodeKind.Unknown : (NodeKind)jsonToken.ToObject<int>();
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)

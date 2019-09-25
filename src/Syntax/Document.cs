@@ -2,8 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Text;
+
 
 namespace TypeScript.Syntax
 {
@@ -16,15 +15,45 @@ namespace TypeScript.Syntax
         #endregion
 
         #region Constructor
-        public Document()
+        public Document(string path, Node root)
         {
-            this._root = null;
-            this._path = string.Empty;
+            this._path = path;
+            this._root = root;
             this._project = null;
+
+            root.Document = this;
         }
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Gets the document's full path.
+        /// </summary>
+        public string Path
+        {
+            get
+            {
+                return this._path;
+            }
+        }
+
+        /// <summary>
+        /// Gets the document's relative path.
+        /// </summary>
+        public string RelativePath
+        {
+            get
+            {
+                if (this.Project != null && !string.IsNullOrEmpty(this.Project.Path))
+                {
+                    string dir = System.IO.Path.GetDirectoryName(this.Path);
+                    string relativePath = System.IO.Path.GetRelativePath(this.Project.Path, dir);
+                    return (relativePath == "." ? string.Empty : relativePath);
+                }
+                return string.Empty;
+            }
+        }
+
         /// <summary>
         /// Gets the document's root node.
         /// </summary>
@@ -34,31 +63,10 @@ namespace TypeScript.Syntax
             {
                 return this._root;
             }
-            internal set
-            {
-                Node root = value;
-                root.Document = this;
-                this._root = root;
-            }
         }
 
         /// <summary>
-        /// Gets the document's path
-        /// </summary>
-        public string Path
-        {
-            get
-            {
-                return this._path;
-            }
-            internal set
-            {
-                this._path = value;
-            }
-        }
-
-        /// <summary>
-        /// Get the document's project.
+        /// Gets the document's project.
         /// </summary>
         public Project Project
         {
@@ -66,149 +74,201 @@ namespace TypeScript.Syntax
             {
                 return this._project;
             }
-            internal set
+            set
             {
                 this._project = value;
             }
         }
 
         /// <summary>
-        /// 
+        /// Gets all type nodes(class, interfact, enum, type alias, etc.) in the document.
         /// </summary>
-        public string FileName
+        public List<Node> TypeNodes
         {
             get
             {
-                return System.IO.Path.GetFileName(this.Path);
+                return this.Root.DescendantsOnce((n) =>
+                {
+                    return (
+                       n.Kind == NodeKind.ClassDeclaration
+                    || n.Kind == NodeKind.InterfaceDeclaration
+                    || n.Kind == NodeKind.EnumDeclaration
+                    || n.Kind == NodeKind.TypeAliasDeclaration);
+                });
             }
         }
         #endregion
 
         #region Methods
         /// <summary>
-        /// 
+        /// Gets the export default node.
         /// </summary>
-        /// <returns></returns>
-        public List<string> GetNodeKinds()
+        public string GetExportDefaultName()
         {
-            List<string> kinds = new List<string>();
-
-            JObject jsonObject = JObject.Parse(File.ReadAllText(this.Path));
-            Queue<JToken> queue = new Queue<JToken>(jsonObject);
-            while (queue.Count > 0)
+            if (this.Root == null || this.Root.Kind != NodeKind.SourceFile)
             {
-                JToken jsonToken = queue.Dequeue();
-                if (jsonToken.HasValues && jsonToken.Type == JTokenType.Object)
+                return string.Empty;
+            }
+
+            SourceFile source = this.Root as SourceFile;
+            foreach (Node statement in source.Statements)
+            {
+                switch (statement.Kind)
                 {
-                    string syntaxKind = AstBuilder.GetSyntaxNodeKey(jsonToken as JObject);
-                    if (!kinds.Contains(syntaxKind))
+                    case NodeKind.ClassDeclaration:
+                        ClassDeclaration classNode = statement as ClassDeclaration;
+                        if (classNode.HasModify(NodeKind.ExportKeyword) && classNode.HasModify(NodeKind.DefaultKeyword))
+                        {
+                            return classNode.Name.Text;
+                        }
+                        break;
+
+                    case NodeKind.InterfaceDeclaration:
+                        InterfaceDeclaration interfaceNode = statement as InterfaceDeclaration;
+                        if (interfaceNode.HasModify(NodeKind.ExportKeyword) && interfaceNode.HasModify(NodeKind.DefaultKeyword))
+                        {
+                            return interfaceNode.Name.Text;
+                        }
+                        break;
+
+                    case NodeKind.EnumDeclaration:
+                        EnumDeclaration enumNode = statement as EnumDeclaration;
+                        if (enumNode.HasModify(NodeKind.ExportKeyword) && enumNode.HasModify(NodeKind.DefaultKeyword))
+                        {
+                            return enumNode.Name.Text;
+                        }
+                        break;
+
+                    case NodeKind.ExportDeclaration:
+                        ExportDeclaration exportNode = statement as ExportDeclaration;
+                        foreach (ExportSpecifier specifier in ((NamedExports)exportNode.ExportClause).Elements)
+                        {
+                            if (specifier.Name.Text == "default")
+                            {
+                                string propertyName = specifier.PropertyName.Text;
+                                if (exportNode.ModuleSpecifier != null)
+                                {
+                                    Document fromDoc = source.Project.GetDocumentByPath(exportNode.ModulePath);
+                                    return fromDoc.GetExportActualName(propertyName);
+                                }
+                                else
+                                {
+                                    return propertyName;
+                                }
+                            }
+                        }
+                        break;
+
+                    case NodeKind.ExportAssignment:
+                        ExportAssignment assignmentNode = statement as ExportAssignment;
+                        return assignmentNode.Expression.Text;
+
+                    default:
+                        break;
+                }
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Gets the actual class, interface, enum name of export.
+        /// </summary>
+        /// <param name="declarationName">The declaration name</param>
+        /// <returns>The export actual model name.</returns>
+        public string GetExportActualName(string declarationName)
+        {
+            if (this.Root == null || this.Root.Kind != NodeKind.SourceFile)
+            {
+                return string.Empty;
+            }
+
+            SourceFile source = this.Root as SourceFile;
+            foreach (Node statement in source.Statements)
+            {
+                switch (statement.Kind)
+                {
+                    case NodeKind.ClassDeclaration:
+                        ClassDeclaration classNode = statement as ClassDeclaration;
+                        if (classNode.Name.Text == declarationName && classNode.HasModify(NodeKind.ExportKeyword))
+                        {
+                            return declarationName;
+                        }
+                        break;
+
+                    case NodeKind.InterfaceDeclaration:
+                        InterfaceDeclaration interfaceNode = statement as InterfaceDeclaration;
+                        if (interfaceNode.Name.Text == declarationName && interfaceNode.HasModify(NodeKind.ExportKeyword))
+                        {
+                            return declarationName;
+                        }
+                        break;
+
+                    case NodeKind.EnumDeclaration:
+                        EnumDeclaration enumNode = statement as EnumDeclaration;
+                        if (enumNode.Name.Text == declarationName && enumNode.HasModify(NodeKind.ExportKeyword))
+                        {
+                            return declarationName;
+                        }
+                        break;
+
+                    case NodeKind.ExportDeclaration:
+                        ExportDeclaration exportNode = statement as ExportDeclaration;
+                        string actualName = this.GetExportDeclarationActualName(exportNode, declarationName);
+                        if (!string.IsNullOrEmpty(actualName))
+                        {
+                            return actualName;
+                        }
+                        break;
+
+                    case NodeKind.ExportAssignment:
+                        ExportAssignment assignmentNode = statement as ExportAssignment;
+                        if (assignmentNode.Expression.Text == declarationName)
+                        {
+                            return declarationName;
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            return String.Empty;
+        }
+
+        /// <summary>
+        /// Gets export declaration actual name.
+        /// </summary>
+        /// <param name="export">The export declaration.</param>
+        /// <param name="name">The export name</param>
+        /// <returns>The export actual model name.</returns>
+        private string GetExportDeclarationActualName(ExportDeclaration export, string name)
+        {
+            Document fromDoc = null;
+            if (export.ModuleSpecifier != null)
+            {
+                fromDoc = export.Project.GetDocumentByPath(export.ModulePath);
+            }
+
+            if (export.ExportClause == null) // export * from './abc'
+            {
+                return (fromDoc != null ? fromDoc.GetExportActualName(name) : string.Empty);
+            }
+            else
+            {
+                NamedExports namedExports = export.ExportClause as NamedExports;
+                foreach (ExportSpecifier specifier in namedExports.Elements)
+                {
+                    if (specifier.Name.Text == name)
                     {
-                        kinds.Add(syntaxKind);
+                        string actualName = (specifier.PropertyName != null ? specifier.PropertyName.Text : specifier.Name.Text);
+                        return (fromDoc != null ? fromDoc.GetExportActualName(actualName) : actualName);
                     }
                 }
-
-                foreach (var token in jsonToken)
-                {
-                    queue.Enqueue(token);
-                }
             }
-
-            return kinds;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public Dictionary<string, string> GetLostNodes()
-        {
-            Dictionary<string, string> lost = new Dictionary<string, string>();
-            List<Node> nodes = this.Root.DescendantsAndSelf();
-
-            foreach (Node node in nodes)
-            {
-                string key = node.Kind.ToString();
-                if (lost.ContainsKey(key))
-                {
-                    continue;
-                }
-
-                List<string> ignoredProperties = new List<string>();
-                List<string> definedProperties = new List<string>();
-                PropertyInfo[] properties = node.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-                foreach (PropertyInfo p in properties)
-                {
-                    definedProperties.Add(p.Name.ToLower());
-                }
-
-                foreach (var p in node.TsNode.Properties())
-                {
-                    if (!definedProperties.Contains(p.Name.ToLower()))
-                    {
-                        ignoredProperties.Add(p.Name);
-                    }
-                }
-
-                if (ignoredProperties.Count > 0)
-                {
-                    lost[key] = string.Join(',', ignoredProperties);
-                }
-            }
-
-            return lost;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public List<string> GetTypeNames()
-        {
-            List<string> ret = new List<string>();
-            List<Node> types = this.GetTypeNodes();
-
-            foreach (Node type in types)
-            {
-                string name = this.GetTypeName(type);
-                if (!string.IsNullOrEmpty(name))
-                {
-                    ret.Add(name);
-                }
-            }
-            return ret;
-        }
-
-        /// <summary>
-        /// Get all type nodes(class, interfact, enum etc.) in the document.
-        /// </summary>
-        /// <returns></returns>
-        public List<Node> GetTypeNodes()
-        {
-            return this.Root.Descendants((n) =>
-            {
-                return( 
-                n.Kind == NodeKind.ClassDeclaration || 
-                n.Kind == NodeKind.InterfaceDeclaration ||
-                n.Kind == NodeKind.EnumDeclaration ||
-                n.Kind == NodeKind.TypeAliasDeclaration);
-            });
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        internal string GetTypeName(Node node)
-        {
-            if (node.GetValue("Name") is Node name)
-            {
-                return name.Text;
-            }
-            return null;
+            return string.Empty;
         }
         #endregion
-
     }
 }

@@ -37,9 +37,9 @@ namespace TypeScript.Syntax
             this.Body = null;
         }
 
-        public override void AddNode(Node childNode)
+        public override void AddChild(Node childNode)
         {
-            base.AddNode(childNode);
+            base.AddChild(childNode);
 
             string nodeName = childNode.NodeName;
             switch (nodeName)
@@ -53,7 +53,7 @@ namespace TypeScript.Syntax
                     break;
 
                 default:
-                    this.ProcessUnknownNode(childNode);
+                    // this.ProcessUnknownNode(childNode);
                     break;
             }
         }
