@@ -149,7 +149,7 @@ namespace TypeScript.Syntax
                                 if (exportNode.ModuleSpecifier != null)
                                 {
                                     Document fromDoc = source.Project.GetDocumentByPath(exportNode.ModulePath);
-                                    return fromDoc.GetExportActualName(propertyName);
+                                    return (fromDoc != null ? fromDoc.GetExportActualName(propertyName): string.Empty);
                                 }
                                 else
                                 {

@@ -12,10 +12,13 @@ namespace TypeScript.Converter.CSharp
         {
             ImportDeclaration import = node.Ancestor(NodeKind.ImportDeclaration) as ImportDeclaration;
             Document fromDoc = node.Project.GetDocumentByPath(import.ModulePath);
-
-            return SyntaxFactory.UsingDirective(
-                SyntaxFactory.NameEquals(node.Name.Text),
-                SyntaxFactory.ParseName(fromDoc.GetPackageName()));
+            if (fromDoc != null)
+            {
+                return SyntaxFactory.UsingDirective(
+                    SyntaxFactory.NameEquals(node.Name.Text),
+                    SyntaxFactory.ParseName(fromDoc.GetPackageName()));
+            }
+            return null;
         }
     }
 }

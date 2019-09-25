@@ -17,10 +17,13 @@ namespace TypeScript.Converter.CSharp
             {
                 ImportDeclaration import = node.Ancestor(NodeKind.ImportDeclaration) as ImportDeclaration;
                 Syntax.Document fromDoc = node.Project.GetDocumentByPath(import.ModulePath);
-                UsingDirectiveSyntax usignSyntax = SyntaxFactory.UsingDirective(
-                    SyntaxFactory.NameEquals(node.Name.Text),
-                    SyntaxFactory.ParseName(fromDoc.GetPackageName() + "." + fromDoc.GetExportDefaultName()));
-                usings = usings.Add(usignSyntax);
+                if (fromDoc != null)
+                {
+                    UsingDirectiveSyntax usignSyntax = SyntaxFactory.UsingDirective(
+                        SyntaxFactory.NameEquals(node.Name.Text),
+                        SyntaxFactory.ParseName(fromDoc.GetPackageName() + "." + fromDoc.GetExportDefaultName()));
+                    usings = usings.Add(usignSyntax);
+                }
             }
 
             if (node.NamedBindings != null)

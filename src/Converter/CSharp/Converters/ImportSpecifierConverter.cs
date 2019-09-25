@@ -13,11 +13,14 @@ namespace TypeScript.Converter.CSharp
         {
             ImportDeclaration import = node.Ancestor(NodeKind.ImportDeclaration) as ImportDeclaration;
             Document fromDoc = node.Project.GetDocumentByPath(import.ModulePath);
-            string typeName = node.PropertyName != null ? fromDoc.GetExportActualName(node.PropertyName.Text) : fromDoc.GetExportActualName(node.Name.Text);
-
-            return SyntaxFactory.UsingDirective(
-               SyntaxFactory.NameEquals(node.Name.Text),
-               SyntaxFactory.ParseName(fromDoc.GetPackageName() + "." + typeName));
+            if (fromDoc != null)
+            {
+                string typeName = node.PropertyName != null ? fromDoc.GetExportActualName(node.PropertyName.Text) : fromDoc.GetExportActualName(node.Name.Text);
+                return SyntaxFactory.UsingDirective(
+                   SyntaxFactory.NameEquals(node.Name.Text),
+                   SyntaxFactory.ParseName(fromDoc.GetPackageName() + "." + typeName));
+            }
+            return null;
         }
     }
 }
