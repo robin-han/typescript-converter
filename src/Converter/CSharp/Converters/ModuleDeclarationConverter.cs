@@ -14,30 +14,25 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ModuleDeclaration module)
         {
-            ModuleBlock mb = this.GetModuleBlock(module);
-            if (mb == null)
+            string ns = this.GetNamespace(module);
+            if (this.Context.Config.NamespaceMappings.ContainsKey(ns))
             {
-                return SyntaxFactory
-                    .NamespaceDeclaration(SyntaxFactory.ParseName(module.Name.Text))
-                    .AddMembers(module.Body.ToCsNode<MemberDeclarationSyntax>());
+                ns = this.Context.Config.NamespaceMappings[ns];
             }
-
-            string ns = string.Empty;
-            if (!string.IsNullOrEmpty(this.Context.Config.Namespace))
+            else if (!string.IsNullOrEmpty(this.Context.Config.Namespace))
             {
                 ns = this.Context.Config.Namespace;
             }
-            else
+
+            NamespaceDeclarationSyntax nsSyntax = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(ns));
+            ModuleBlock mb = this.GetModuleBlock(module);
+            if (mb != null)
             {
-                ns = this.GetNamespace(module);
-                if (this.Context.Config.NamespaceMappings.ContainsKey(ns))
-                {
-                    ns = this.Context.Config.NamespaceMappings[ns];
-                }
+                nsSyntax = nsSyntax
+                    .AddUsings(mb.TypeAliases.ToCsNodes<UsingDirectiveSyntax>())
+                    .WithMembers(mb.ToCsNode<SyntaxList<MemberDeclarationSyntax>>());
             }
-            return SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(ns))
-                .AddUsings(mb.TypeAliases.ToCsNodes<UsingDirectiveSyntax>())
-                .WithMembers(mb.ToCsNode<SyntaxList<MemberDeclarationSyntax>>());
+            return nsSyntax;
         }
 
         private string GetNamespace(ModuleDeclaration module)

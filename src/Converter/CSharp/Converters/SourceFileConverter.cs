@@ -53,7 +53,8 @@ namespace TypeScript.Converter.CSharp
                 }
             }
 
-            if (typeAliasStatements.Count > 0 || typeStatements.Count > 0)
+            bool isExternalModule = (typeAliasStatements.Count > 0 || typeStatements.Count > 0);
+            if (isExternalModule)
             {
                 string ns = sourceFile.Document.GetPackageName();
                 if (!string.IsNullOrEmpty(ns))
