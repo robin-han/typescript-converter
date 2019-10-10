@@ -7,6 +7,8 @@ namespace TypeScript.Syntax
 {
     public class ArrayType : Node
     {
+        private Node _elementType = null;
+
         #region Properties
         public override NodeKind Kind
         {
@@ -15,8 +17,18 @@ namespace TypeScript.Syntax
 
         public Node ElementType
         {
-            get;
-            private set;
+            get
+            {
+                return this._elementType;
+            }
+            internal set
+            {
+                this._elementType = value;
+                if (this._elementType != null)
+                {
+                    this._elementType.Parent = this;
+                }
+            }
         }
 
         public bool IsParams

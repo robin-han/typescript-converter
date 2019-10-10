@@ -202,8 +202,8 @@ namespace TypeScript.Syntax.Analysis
                 return false;
             }
 
-            type1 = TypeHelper.NormalizeUnionType(type1);
-            type2 = TypeHelper.NormalizeUnionType(type2);
+            type1 = TypeHelper.TrimNullUnionType(type1);
+            type2 = TypeHelper.TrimNullUnionType(type2);
             string name1 = this.NormalizeTypeName(type1.Text);
             string name2 = this.NormalizeTypeName(type2.Text);
             if (name1 == name2)

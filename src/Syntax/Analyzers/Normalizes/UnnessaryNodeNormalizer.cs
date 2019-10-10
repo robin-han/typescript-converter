@@ -40,15 +40,6 @@ namespace TypeScript.Syntax.Analysis
                         }
                         break;
 
-                    case NodeKind.TypeAliasDeclaration:
-                        TypeAliasDeclaration alias = statement as TypeAliasDeclaration;
-                        if (alias.Type.Kind != NodeKind.FunctionType)
-                        {
-                            module.Statements.RemoveAt(i);
-                            module.TypeAliases.Add(statement);
-                        }
-                        break;
-
                     case NodeKind.FunctionDeclaration:
                     case NodeKind.ClassDeclaration:
                         Declaration declaration = statement as Declaration;

@@ -46,8 +46,8 @@ namespace TypeScript.Syntax
             {
                 if (this.Project != null && !string.IsNullOrEmpty(this.Project.Path))
                 {
-                    string dir = System.IO.Path.GetDirectoryName(this.Path);
-                    string relativePath = System.IO.Path.GetRelativePath(this.Project.Path, dir);
+                    string docDirectory = System.IO.Path.GetDirectoryName(this.Path);
+                    string relativePath = System.IO.Path.GetRelativePath(this.Project.Path, docDirectory);
                     return (relativePath == "." ? string.Empty : relativePath);
                 }
                 return string.Empty;
@@ -87,187 +87,91 @@ namespace TypeScript.Syntax
         {
             get
             {
-                return this.Root.DescendantsOnce((n) =>
+                if ((this.Root is SourceFile sourceFile))
                 {
-                    return (
-                       n.Kind == NodeKind.ClassDeclaration
-                    || n.Kind == NodeKind.InterfaceDeclaration
-                    || n.Kind == NodeKind.EnumDeclaration
-                    || n.Kind == NodeKind.TypeAliasDeclaration);
-                });
+                    return sourceFile.TypeNodes;
+                }
+                return new List<Node>();
             }
         }
         #endregion
 
         #region Methods
         /// <summary>
-        /// Gets the export default node.
+        /// Gets the definition name of typename.
         /// </summary>
-        public string GetExportDefaultName()
+        /// <param name="typeName">The type name.</param>
+        /// <returns>The definition name.</returns>
+        public string GetTypeDefinitionName(string typeName)
         {
-            if (this.Root == null || this.Root.Kind != NodeKind.SourceFile)
+            Node definition = this.GetTypeDefinition(typeName);
+            if (definition != null)
             {
-                return string.Empty;
+                return definition.GetValue("NameText") as string;
             }
-
-            SourceFile source = this.Root as SourceFile;
-            foreach (Node statement in source.Statements)
-            {
-                switch (statement.Kind)
-                {
-                    case NodeKind.ClassDeclaration:
-                        ClassDeclaration classNode = statement as ClassDeclaration;
-                        if (classNode.HasModify(NodeKind.ExportKeyword) && classNode.HasModify(NodeKind.DefaultKeyword))
-                        {
-                            return classNode.Name.Text;
-                        }
-                        break;
-
-                    case NodeKind.InterfaceDeclaration:
-                        InterfaceDeclaration interfaceNode = statement as InterfaceDeclaration;
-                        if (interfaceNode.HasModify(NodeKind.ExportKeyword) && interfaceNode.HasModify(NodeKind.DefaultKeyword))
-                        {
-                            return interfaceNode.Name.Text;
-                        }
-                        break;
-
-                    case NodeKind.EnumDeclaration:
-                        EnumDeclaration enumNode = statement as EnumDeclaration;
-                        if (enumNode.HasModify(NodeKind.ExportKeyword) && enumNode.HasModify(NodeKind.DefaultKeyword))
-                        {
-                            return enumNode.Name.Text;
-                        }
-                        break;
-
-                    case NodeKind.ExportDeclaration:
-                        ExportDeclaration exportNode = statement as ExportDeclaration;
-                        foreach (ExportSpecifier specifier in ((NamedExports)exportNode.ExportClause).Elements)
-                        {
-                            if (specifier.Name.Text == "default")
-                            {
-                                string propertyName = specifier.PropertyName.Text;
-                                if (exportNode.ModuleSpecifier != null)
-                                {
-                                    Document fromDoc = source.Project.GetDocumentByPath(exportNode.ModulePath);
-                                    return (fromDoc != null ? fromDoc.GetExportActualName(propertyName): string.Empty);
-                                }
-                                else
-                                {
-                                    return propertyName;
-                                }
-                            }
-                        }
-                        break;
-
-                    case NodeKind.ExportAssignment:
-                        ExportAssignment assignmentNode = statement as ExportAssignment;
-                        return assignmentNode.Expression.Text;
-
-                    default:
-                        break;
-                }
-            }
-
-            return string.Empty;
+            return typeName;
         }
 
         /// <summary>
-        /// Gets the actual class, interface, enum name of export.
+        /// Gets type definition.
         /// </summary>
-        /// <param name="declarationName">The declaration name</param>
-        /// <returns>The export actual model name.</returns>
-        public string GetExportActualName(string declarationName)
+        /// <param name="typeName">The type name</param>
+        /// <returns>The type definition</returns>
+        public Node GetTypeDefinition(string typeName)
         {
-            if (this.Root == null || this.Root.Kind != NodeKind.SourceFile)
+            if (!(this.Root is SourceFile sourceFile))
             {
-                return string.Empty;
+                return null;
             }
 
-            SourceFile source = this.Root as SourceFile;
-            foreach (Node statement in source.Statements)
+            Node definition = sourceFile.GetOwnModuleTypeDefinition(typeName);
+            if (definition != null)
             {
-                switch (statement.Kind)
-                {
-                    case NodeKind.ClassDeclaration:
-                        ClassDeclaration classNode = statement as ClassDeclaration;
-                        if (classNode.Name.Text == declarationName && classNode.HasModify(NodeKind.ExportKeyword))
-                        {
-                            return declarationName;
-                        }
-                        break;
-
-                    case NodeKind.InterfaceDeclaration:
-                        InterfaceDeclaration interfaceNode = statement as InterfaceDeclaration;
-                        if (interfaceNode.Name.Text == declarationName && interfaceNode.HasModify(NodeKind.ExportKeyword))
-                        {
-                            return declarationName;
-                        }
-                        break;
-
-                    case NodeKind.EnumDeclaration:
-                        EnumDeclaration enumNode = statement as EnumDeclaration;
-                        if (enumNode.Name.Text == declarationName && enumNode.HasModify(NodeKind.ExportKeyword))
-                        {
-                            return declarationName;
-                        }
-                        break;
-
-                    case NodeKind.ExportDeclaration:
-                        ExportDeclaration exportNode = statement as ExportDeclaration;
-                        string actualName = this.GetExportDeclarationActualName(exportNode, declarationName);
-                        if (!string.IsNullOrEmpty(actualName))
-                        {
-                            return actualName;
-                        }
-                        break;
-
-                    case NodeKind.ExportAssignment:
-                        ExportAssignment assignmentNode = statement as ExportAssignment;
-                        if (assignmentNode.Expression.Text == declarationName)
-                        {
-                            return declarationName;
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
+                return definition;
             }
 
-            return String.Empty;
+            definition = sourceFile.GetImportModuleTypeDefinition(typeName);
+            if (definition != null)
+            {
+                return definition;
+            }
+
+            int index = this.Project == null ? -1 : this.Project.TypeNames.IndexOf(typeName);
+            if (index >= 0)
+            {
+                return this.Project.TypeNodes[index];
+            }
+
+            return null;
         }
 
         /// <summary>
-        /// Gets export declaration actual name.
+        /// Gets export type definition.
         /// </summary>
-        /// <param name="export">The export declaration.</param>
-        /// <param name="name">The export name</param>
-        /// <returns>The export actual model name.</returns>
-        private string GetExportDeclarationActualName(ExportDeclaration export, string name)
+        /// <param name="typeName">The export type name.</param>
+        /// <returns>The definition.</returns>
+        public Node GetExportTypeDefinition(string typeName)
         {
-            Document fromDoc = null;
-            if (export.ModuleSpecifier != null)
+            if (!(this.Root is SourceFile sourceFile))
             {
-                fromDoc = export.Project.GetDocumentByPath(export.ModulePath);
+                return null;
             }
 
-            if (export.ExportClause == null) // export * from './abc'
+            return sourceFile.GetExportModuleTypeDefinition(typeName);
+        }
+
+        /// <summary>
+        /// Gets the export default type definition.
+        /// </summary>
+        /// <returns></returns>
+        public Node GetExportDefaultTypeDefinition()
+        {
+            if (!(this.Root is SourceFile sourceFile))
             {
-                return (fromDoc != null ? fromDoc.GetExportActualName(name) : string.Empty);
+                return null;
             }
-            else
-            {
-                NamedExports namedExports = export.ExportClause as NamedExports;
-                foreach (ExportSpecifier specifier in namedExports.Elements)
-                {
-                    if (specifier.Name.Text == name)
-                    {
-                        string actualName = (specifier.PropertyName != null ? specifier.PropertyName.Text : specifier.Name.Text);
-                        return (fromDoc != null ? fromDoc.GetExportActualName(actualName) : actualName);
-                    }
-                }
-            }
-            return string.Empty;
+
+            return sourceFile.GetExportDefaultModuleTypeDefinition();
         }
         #endregion
     }

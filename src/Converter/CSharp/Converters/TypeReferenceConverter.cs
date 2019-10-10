@@ -44,6 +44,7 @@ namespace TypeScript.Converter.CSharp
                     return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
 
                 case "Array":
+                case "ReadonlyArray":
                     if (node.IsParams)
                     {
                         return SyntaxFactory
@@ -66,18 +67,6 @@ namespace TypeScript.Converter.CSharp
 
                 case "RegExpMatchArray":
                 case "RegExpExecArray":
-                    //if (this.Context.Config.PreferTypeScriptType)
-                    //{
-                    //    return SyntaxFactory
-                    //        .GenericName("Array")
-                    //        .AddTypeArgumentListArguments(SyntaxFactory.IdentifierName("String"));
-                    //}
-                    //else
-                    //{
-                    //    return SyntaxFactory
-                    //        .GenericName("List")
-                    //        .AddTypeArgumentListArguments(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword)));
-                    //}
                     return SyntaxFactory.IdentifierName("RegExpArray");
 
                 default:

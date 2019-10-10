@@ -11,7 +11,7 @@ namespace TypeScript.Syntax
         #region Fields
         private string _path;
         private List<Document> _documents;
-        private List<Document> _includedDocuments;
+        private List<Document> _includeDocuments;
 
         private (List<Node> nodes, List<string> names)? _typeNodes;
         private List<Type> _analyzerTypes;
@@ -22,7 +22,7 @@ namespace TypeScript.Syntax
         {
             this._path = path;
             this._documents = documents;
-            this._includedDocuments = includedDocuments;
+            this._includeDocuments = includedDocuments;
             this._typeNodes = null;
             this._analyzerTypes = null;
 
@@ -57,13 +57,13 @@ namespace TypeScript.Syntax
         }
 
         /// <summary>
-        /// Gets convert documents.
+        /// Gets transform documents.
         /// </summary>
-        public List<Document> IncludedDocuments
+        public List<Document> IncludeDocuments
         {
             get
             {
-                return this._includedDocuments;
+                return this._includeDocuments;
             }
         }
 
@@ -79,9 +79,9 @@ namespace TypeScript.Syntax
         }
 
         /// <summary>
-        /// Gets all types in the project.
+        /// Gets all type nodes in the project.
         /// </summary>
-        public List<Node> Types
+        public List<Node> TypeNodes
         {
             get
             {
@@ -92,14 +92,14 @@ namespace TypeScript.Syntax
 
         #region Methods
         /// <summary>
-        /// Add document to document collection
+        /// Add document to transform collection.
         /// </summary>
         /// <param name="doc">The document.</param>
-        public void AddConversionDocument(Document doc)
+        public void AddIncludeDocument(Document doc)
         {
-            if (!this.IncludedDocuments.Contains(doc))
+            if (!this.IncludeDocuments.Contains(doc))
             {
-                this.IncludedDocuments.Add(doc);
+                this.IncludeDocuments.Add(doc);
             }
         }
 
@@ -124,7 +124,7 @@ namespace TypeScript.Syntax
             int index = this.TypeNames.IndexOf(typeName);
             if (index >= 0)
             {
-                return this.Types[index].Document;
+                return this.TypeNodes[index].Document;
             }
             return null;
         }
@@ -141,12 +141,12 @@ namespace TypeScript.Syntax
                 return null;
             }
 
-            foreach (Node type in this.Types)
+            foreach (Node node in this.TypeNodes)
             {
-                if (type.Kind == NodeKind.ClassDeclaration)
+                if (node.Kind == NodeKind.ClassDeclaration)
                 {
-                    ClassDeclaration cls = type as ClassDeclaration;
-                    if (cls.Name != null && cls.Name.Text == name)
+                    ClassDeclaration cls = (ClassDeclaration)node;
+                    if (cls.NameText == name)
                     {
                         return cls;
                     }
@@ -167,14 +167,14 @@ namespace TypeScript.Syntax
                 return null;
             }
 
-            foreach (Node type in this.Types)
+            foreach (Node node in this.TypeNodes)
             {
-                if (type.Kind == NodeKind.InterfaceDeclaration)
+                if (node.Kind == NodeKind.InterfaceDeclaration)
                 {
-                    InterfaceDeclaration @interface = type as InterfaceDeclaration;
-                    if (@interface.Name != null && @interface.Name.Text == name)
+                    InterfaceDeclaration itfs = (InterfaceDeclaration)node;
+                    if (itfs.NameText == name)
                     {
-                        return @interface;
+                        return itfs;
                     }
                 }
             }
@@ -193,11 +193,13 @@ namespace TypeScript.Syntax
                 return null;
             }
 
+            Document document = classNode.Document;
             foreach (HeritageClause inherit in classNode.HeritageClauses)
             {
                 if (inherit.Token == NodeKind.ExtendsKeyword && inherit.Types.Count > 0)
                 {
-                    return this.GetClass(TypeHelper.GetName(inherit.Types[0].Text));
+                    string typeName = TypeHelper.ToShortName(inherit.Types[0].Text);
+                    return this.GetClass(document.GetTypeDefinitionName(typeName));
                 }
             }
             return null;
@@ -215,7 +217,7 @@ namespace TypeScript.Syntax
             {
                 if (baseNode.Kind == NodeKind.ClassDeclaration)
                 {
-                    ret.Add(baseNode as ClassDeclaration);
+                    ret.Add((ClassDeclaration)baseNode);
                 }
             }
             return ret;
@@ -233,7 +235,7 @@ namespace TypeScript.Syntax
             {
                 if (baseNode.Kind == NodeKind.InterfaceDeclaration)
                 {
-                    ret.Add(baseNode as InterfaceDeclaration);
+                    ret.Add((InterfaceDeclaration)baseNode);
                 }
             }
             return ret;
@@ -264,6 +266,8 @@ namespace TypeScript.Syntax
                     heritages.Enqueue(item);
                 }
             }
+
+            Document document = node.Document;
             while (heritages.Count > 0)
             {
                 HeritageClause inherit = heritages.Dequeue();
@@ -271,7 +275,8 @@ namespace TypeScript.Syntax
                 {
                     if (inherit.Token == NodeKind.ExtendsKeyword)
                     {
-                        ClassDeclaration baseClass = this.GetClass(TypeHelper.GetName(type.Text));
+                        string className = TypeHelper.ToShortName(type.Text);
+                        ClassDeclaration baseClass = this.GetClass(document.GetTypeDefinitionName(className));
                         if (baseClass != null)
                         {
                             ret.Add(baseClass);
@@ -283,7 +288,8 @@ namespace TypeScript.Syntax
                     }
                     else
                     {
-                        InterfaceDeclaration baseInterface = this.GetInterface(TypeHelper.GetName(type.Text));
+                        string interfaceName = TypeHelper.ToShortName(type.Text);
+                        InterfaceDeclaration baseInterface = this.GetInterface(document.GetTypeDefinitionName(interfaceName));
                         if (baseInterface != null)
                         {
                             ret.Add(baseInterface);
@@ -330,7 +336,8 @@ namespace TypeScript.Syntax
             }
 
             Node rootNode = nodes[index];
-            if (rootNode.Document != null && !this.IncludedDocuments.Contains(rootNode.Document))
+            Document document = rootNode.Document;
+            if (document == null && !this.IncludeDocuments.Contains(document))
             {
                 return;
             }
@@ -383,8 +390,9 @@ namespace TypeScript.Syntax
                 {
                     type = (type as ArrayType).ElementType;
                 }
-                string[] parts = type.Text.Split('.');
-                string name = parts[parts.Length - 1].Trim();
+                
+                string name = TypeHelper.ToShortName(type.Text);
+                name = document.GetTypeDefinitionName(name);
                 if (Regex.IsMatch(name, "^[_A-Za-z]+[_A-Za-z0-9]*$") && !result.Contains(name) && names.Contains(name))
                 {
                     result.Add(name);

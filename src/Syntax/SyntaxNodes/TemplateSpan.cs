@@ -1,36 +1,27 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json.Linq;
 
 namespace TypeScript.Syntax
 {
-    public class ImportSpecifier : Node
+    public class TemplateSpan : Node
     {
         #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.ImportSpecifier; }
+            get { return NodeKind.TemplateSpan; }
         }
 
-        public Node Name
+        public Node Expression
         {
             get;
             private set;
         }
 
-        public Node PropertyName
+        public Node Literal
         {
             get;
             private set;
-        }
-
-        public string DefinitionName
-        {
-            get
-            {
-                return (this.PropertyName != null ? this.PropertyName.Text : this.Name.Text);
-            }
         }
         #endregion
 
@@ -38,8 +29,8 @@ namespace TypeScript.Syntax
         {
             base.Init(jsonObj);
 
-            this.Name = null;
-            this.PropertyName = null;
+            this.Expression = null;
+            this.Literal = null;
         }
 
         public override void AddChild(Node childNode)
@@ -49,12 +40,12 @@ namespace TypeScript.Syntax
             string nodeName = childNode.NodeName;
             switch (nodeName)
             {
-                case "name":
-                    this.Name = childNode;
+                case "expression":
+                    this.Expression = childNode;
                     break;
 
-                case "propertyName":
-                    this.PropertyName = childNode;
+                case "literal":
+                    this.Literal = childNode;
                     break;
 
                 default:
@@ -64,4 +55,3 @@ namespace TypeScript.Syntax
         }
     }
 }
-

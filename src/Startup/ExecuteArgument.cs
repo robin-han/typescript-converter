@@ -46,18 +46,17 @@ namespace TypeScript.Converter
 
         public string GetSavePath(string sourcePath)
         {
-            string basePath = this.BasePath;
             string output = this.Output;
-
             if (File.Exists(output))
             {
                 return output;
             }
 
-            string path;
+            string basePath = this.BasePath;
+            string savePath = string.Empty;
             if (string.IsNullOrEmpty(basePath))
             {
-                path = Path.Combine(output, Path.GetFileNameWithoutExtension(sourcePath).Split('.')[0] + ".cs");
+                savePath = Path.Combine(output, Path.GetFileName(sourcePath).Split('.')[0] + ".cs");
             }
             else
             {
@@ -66,16 +65,16 @@ namespace TypeScript.Converter
                 {
                     relativePath = Path.GetFileName(sourcePath);
                 }
-                path = Path.Combine(output, relativePath.Split('.')[0] + ".cs");
+                savePath = Path.Combine(output, relativePath.Split('.')[0] + ".cs");
             }
 
-            string dirName = Path.GetDirectoryName(path);
+            string dirName = Path.GetDirectoryName(savePath);
             if (!string.IsNullOrEmpty(dirName) && !Directory.Exists(dirName))
             {
                 Directory.CreateDirectory(dirName);
             }
 
-            return path;
+            return savePath;
         }
 
         public static ExecuteArgument Create(List<CommandOption> options)

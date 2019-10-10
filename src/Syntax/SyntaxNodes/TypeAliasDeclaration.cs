@@ -31,10 +31,18 @@ namespace TypeScript.Syntax
             private set;
         }
 
+        public string NameText
+        {
+            get
+            {
+                return (this.Name != null ? this.Name.Text : string.Empty);
+            }
+        }
+
         public List<Node> TypeParameters
         {
             get;
-            set;
+            private set;
         }
 
         public Node Type

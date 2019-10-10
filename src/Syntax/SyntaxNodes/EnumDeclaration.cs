@@ -19,6 +19,14 @@ namespace TypeScript.Syntax
             private set;
         }
 
+        public string NameText
+        {
+            get
+            {
+                return (this.Name != null ? this.Name.Text : string.Empty);
+            }
+        }
+
         public List<Node> Modifiers
         {
             get;
@@ -35,6 +43,22 @@ namespace TypeScript.Syntax
         {
             get;
             private set;
+        }
+
+        public bool IsExport
+        {
+            get
+            {
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.ExportKeyword);
+            }
+        }
+
+        public bool IsDefault
+        {
+            get
+            {
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.DefaultKeyword);
+            }
         }
         #endregion
 

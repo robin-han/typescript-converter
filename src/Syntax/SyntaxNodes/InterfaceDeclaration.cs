@@ -31,6 +31,14 @@ namespace TypeScript.Syntax
             private set;
         }
 
+        public string NameText
+        {
+            get
+            {
+                return (this.Name != null ? this.Name.Text : string.Empty);
+            }
+        }
+
         public List<Node> TypeParameters
         {
             get;
@@ -59,6 +67,22 @@ namespace TypeScript.Syntax
                     types.AddRange(heritage.Types);
                 }
                 return types;
+            }
+        }
+
+        public bool IsExport
+        {
+            get
+            {
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.ExportKeyword);
+            }
+        }
+
+        public bool IsDefault
+        {
+            get
+            {
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.DefaultKeyword);
             }
         }
         #endregion

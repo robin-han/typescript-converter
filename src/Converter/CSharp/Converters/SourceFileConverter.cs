@@ -20,56 +20,33 @@ namespace TypeScript.Converter.CSharp
                 csCompilationUnit = csCompilationUnit.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(us)));
             }
 
-            List<Node> typeAliasStatements = new List<Node>();
-            List<Node> typeStatements = new List<Node>();
-            foreach (Node statement in this.FilterStatements(sourceFile.Statements))
+            csCompilationUnit = csCompilationUnit.AddMembers(sourceFile.MouduleDeclarations.ToCsNodes<MemberDeclarationSyntax>());
+            foreach (Node import in sourceFile.ImportDeclarations)
             {
-                switch (statement.Kind)
+                foreach (UsingDirectiveSyntax usingSyntax in import.ToCsNode<SyntaxList<UsingDirectiveSyntax>>())
                 {
-                    case NodeKind.ClassDeclaration:
-                    case NodeKind.InterfaceDeclaration:
-                    case NodeKind.EnumDeclaration:
-                        typeStatements.Add(statement);
-                        break;
-
-                    case NodeKind.TypeAliasDeclaration:
-                        typeAliasStatements.Add(statement);
-                        break;
-
-                    case NodeKind.ImportDeclaration:
-                        foreach (UsingDirectiveSyntax usingSyntax in statement.ToCsNode<SyntaxList<UsingDirectiveSyntax>>())
-                        {
-                            csCompilationUnit = csCompilationUnit.AddUsings(usingSyntax);
-                        }
-                        break;
-
-                    case NodeKind.ExportDeclaration:
-                    case NodeKind.ExportAssignment:
-                        break;
-
-                    default:
-                        csCompilationUnit = csCompilationUnit.AddMembers(statement.ToCsNode<MemberDeclarationSyntax>());
-                        break;
+                    csCompilationUnit = csCompilationUnit.AddUsings(usingSyntax);
                 }
             }
 
-            bool isExternalModule = (typeAliasStatements.Count > 0 || typeStatements.Count > 0);
-            if (isExternalModule)
+            List<Node> typeAliases = sourceFile.TypeAliases;
+            List<Node> typeDefinitions = this.FilterTypes(sourceFile.TypeDefinitions);
+            if (typeAliases.Count > 0 || typeDefinitions.Count > 0)
             {
                 string ns = sourceFile.Document.GetPackageName();
                 if (!string.IsNullOrEmpty(ns))
                 {
                     NamespaceDeclarationSyntax nsSyntaxNode = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(ns));
                     nsSyntaxNode = nsSyntaxNode
-                        .AddUsings(typeAliasStatements.ToCsNodes<UsingDirectiveSyntax>())
-                        .AddMembers(typeStatements.ToCsNodes<MemberDeclarationSyntax>());
+                        .AddUsings(typeAliases.ToCsNodes<UsingDirectiveSyntax>())
+                        .AddMembers(typeDefinitions.ToCsNodes<MemberDeclarationSyntax>());
                     csCompilationUnit = csCompilationUnit.AddMembers(nsSyntaxNode);
                 }
                 else
                 {
                     csCompilationUnit = csCompilationUnit
-                        .AddUsings(typeAliasStatements.ToCsNodes<UsingDirectiveSyntax>())
-                        .AddMembers(typeStatements.ToCsNodes<MemberDeclarationSyntax>());
+                        .AddUsings(typeAliases.ToCsNodes<UsingDirectiveSyntax>())
+                        .AddMembers(typeDefinitions.ToCsNodes<MemberDeclarationSyntax>());
                 }
             }
 

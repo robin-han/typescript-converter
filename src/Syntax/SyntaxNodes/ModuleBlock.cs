@@ -21,8 +21,18 @@ namespace TypeScript.Syntax
 
         public List<Node> TypeAliases
         {
-            get;
-            private set;
+            get
+            {
+                return this.Statements.FindAll(n => this.IsTypeAliasType(n));
+            }
+        }
+
+        public List<Node> TypeDefinitions
+        {
+            get
+            {
+                return this.Statements.FindAll(n => this.IsTypeNode(n));
+            }
         }
         #endregion
 
@@ -31,8 +41,6 @@ namespace TypeScript.Syntax
             base.Init(jsonObj);
 
             this.Statements = new List<Node>();
-
-            this.TypeAliases = new List<Node>();
         }
 
         public override void AddChild(Node childNode)
@@ -51,6 +59,7 @@ namespace TypeScript.Syntax
                     break;
             }
         }
+       
     }
 }
 

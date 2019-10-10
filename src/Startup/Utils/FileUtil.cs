@@ -45,7 +45,6 @@ namespace TypeScript.Converter
             {
                 bool excluded = false;
                 string path = NormalizeSlashes(file);
-
                 foreach (string exclude in excludes)
                 {
                     string excludePattern = ToRegexPattern(NormalizeSlashes(exclude));
@@ -60,6 +59,7 @@ namespace TypeScript.Converter
                     ret.Add(file);
                 }
             }
+
             return ret;
         }
 
@@ -73,14 +73,13 @@ namespace TypeScript.Converter
                     return string.Empty;
                 }
 
-                string p = NormalizeSlashes(path);
                 if (string.IsNullOrEmpty(basePath))
                 {
-                    basePath = p;
+                    basePath = NormalizeSlashes(Path.GetDirectoryName(path));
                 }
                 else
                 {
-                    string commonPath = GetCommonPath(basePath, p);
+                    string commonPath = GetCommonPath(basePath, NormalizeSlashes(path));
                     if (string.IsNullOrEmpty(commonPath))
                     {
                         return string.Empty;

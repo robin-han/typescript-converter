@@ -14,8 +14,8 @@ namespace TypeScript.Converter.CSharp
     {
         public SyntaxList<MemberDeclarationSyntax> Convert(ModuleBlock node)
         {
-            List<Node> statements = this.FilterStatements(node.Statements);
-            return SyntaxFactory.List(statements.ToCsNodes<MemberDeclarationSyntax>());
+            List<Node> typeNodes = this.FilterTypes(node.TypeDefinitions);
+            return SyntaxFactory.List(typeNodes.ToCsNodes<MemberDeclarationSyntax>());
         }
     }
 }

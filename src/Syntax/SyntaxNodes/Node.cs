@@ -367,6 +367,32 @@ namespace TypeScript.Syntax
             return string.Empty;
         }
 
+        protected bool IsTypeAliasType(Node node)
+        {
+            if (node.Kind == NodeKind.TypeAliasDeclaration)
+            {
+                return ((TypeAliasDeclaration)node).Type.Kind != NodeKind.FunctionType;
+            }
+            return false;
+        }
+
+        protected bool IsTypeNode(Node node)
+        {
+            switch (node.Kind)
+            {
+                case NodeKind.ClassDeclaration:
+                case NodeKind.InterfaceDeclaration:
+                case NodeKind.EnumDeclaration:
+                    return true;
+
+                case NodeKind.TypeAliasDeclaration:
+                    return !this.IsTypeAliasType(node);
+
+                default:
+                    return false;
+            }
+        }
+
         private bool IsIgnoredProperty(string propName)
         {
             return (propName == "Parent" || propName == "JsDoc");

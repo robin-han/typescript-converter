@@ -21,6 +21,13 @@ namespace TypeScript.Converter.CSharp
                     .ObjectCreationExpression(csType)
                     .AddArgumentListArguments();
             }
+            else if (node.Elements.Count == 1 && node.Elements[0].Kind == NodeKind.SpreadElement)
+            {
+                Node argument = ((SpreadElement)node.Elements[0]).Expression;
+                return SyntaxFactory
+                   .ObjectCreationExpression(csType)
+                   .AddArgumentListArguments(SyntaxFactory.Argument(argument.ToCsNode<ExpressionSyntax>()));
+            }
             else
             {
                 InitializerExpressionSyntax csInitilizerExprs = SyntaxFactory

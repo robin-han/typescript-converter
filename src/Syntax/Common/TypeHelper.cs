@@ -6,7 +6,7 @@ namespace TypeScript.Syntax
 {
     public static class TypeHelper
     {
-        public static Node NormalizeUnionType(Node type)
+        public static Node TrimNullUnionType(Node type)
         {
             if (type.Kind == NodeKind.UnionType)
             {
@@ -35,7 +35,7 @@ namespace TypeScript.Syntax
             return null;
         }
 
-        public static string GetName(string typeName)
+        public static string ToShortName(string typeName)
         {
             string ret = typeName;
             int genericIndex = typeName.IndexOf("<");
@@ -223,6 +223,7 @@ namespace TypeScript.Syntax
         {
             return GetIdentifierType(identifier, identifier.Text);
         }
+
         private static Node GetIdentifierType(Node startNode, string name)
         {
             Node parent = startNode.Parent;
@@ -393,9 +394,22 @@ namespace TypeScript.Syntax
                 return type;
             }
 
-            Node valueType = GetItemType(arrayLiteral);
-            Node arrayType = NodeHelper.CreateNode(NodeKind.ArrayType);
-            arrayType.AddChild(valueType);
+            if (arrayLiteral.Elements.Find(n => n.Kind == NodeKind.SpreadElement) is SpreadElement spreadElement)
+            {
+                type = GetNodeType(spreadElement.Expression);
+                if (type != null)
+                {
+                    return type;
+                }
+            }
+
+            ArrayType arrayType = (ArrayType)NodeHelper.CreateNode(NodeKind.ArrayType);
+            Node elementType = GetItemType(arrayLiteral);
+            if (elementType == null)
+            {
+                elementType = NodeHelper.CreateNode(NodeKind.AnyKeyword);
+            }
+            arrayType.ElementType = elementType;
             return arrayType;
         }
 
@@ -491,15 +505,13 @@ namespace TypeScript.Syntax
             }
             else if (elements.Count == 0 && value.Parent.Kind == NodeKind.ArrayLiteralExpression)
             {
-                Node arrarrType = GetNodeType(value.Parent);
+                Node arrarrType = GetArrayLiteralType((ArrayLiteralExpression)value.Parent);
                 if (arrarrType != null)
                 {
                     elementType = ((arrarrType as ArrayType).ElementType as ArrayType).ElementType;
                 }
             }
 
-            elementType = elementType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
-            elementType.Path = "elementType";
             return elementType;
         }
 
@@ -574,7 +586,7 @@ namespace TypeScript.Syntax
             if (newParent != null)
             {
                 int index = newParent.Arguments.IndexOf(node);
-                string clsName = TypeHelper.GetName(newParent.Type.Text);
+                string clsName = TypeHelper.ToShortName(newParent.Type.Text);
                 Project project = newParent.Project;
                 ClassDeclaration classDeclaration = project?.GetClass(clsName);
                 Constructor ctor = classDeclaration?.GetConstructor();

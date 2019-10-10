@@ -32,7 +32,7 @@ namespace TypeScript.Converter.CSharp
                 Node type = TypeHelper.GetNodeType(parent.Expression);
                 if (type != null)
                 {
-                    type = TypeHelper.NormalizeUnionType(type);
+                    type = TypeHelper.TrimNullUnionType(type);
                     if (TypeHelper.IsStringType(type))
                     {
                         text = "Length";

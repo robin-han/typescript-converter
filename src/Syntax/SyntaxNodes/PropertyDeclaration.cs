@@ -59,7 +59,7 @@ namespace TypeScript.Syntax
         {
             get
             {
-                return this.HasModify(NodeKind.PublicKeyword);
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.PublicKeyword);
             }
         }
 
@@ -67,7 +67,7 @@ namespace TypeScript.Syntax
         {
             get
             {
-                return this.HasModify(NodeKind.StaticKeyword);
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.StaticKeyword);
             }
         }
 
@@ -75,7 +75,7 @@ namespace TypeScript.Syntax
         {
             get
             {
-                return this.HasModify(NodeKind.ReadonlyKeyword);
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.ReadonlyKeyword);
             }
         }
 
@@ -83,7 +83,7 @@ namespace TypeScript.Syntax
         {
             get
             {
-                return this.HasModify(NodeKind.PrivateKeyword);
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.PrivateKeyword);
             }
         }
 

@@ -141,7 +141,7 @@ namespace TypeScript.Converter
         private bool ConfirmConvert(List<Document> tsDocs)
         {
             DateTime startTime = DateTime.Now;
-            this.Log(string.Format("Starting search lost nodes and find not implement node types."));
+            this.Log(string.Format("Starting search lost nodes and not implement node types."));
 
             this.PrintLostNodes(tsDocs);
             List<string> unSupportedNodes = DocumentUtil.GetNotImplementNodeTypes(tsDocs);
@@ -168,7 +168,7 @@ namespace TypeScript.Converter
         /// <param name="arg">Execute argument.</param>
         private void Convert(ConverterContext context, ExecuteArgument arg)
         {
-            List<Document> avaiableDocs = this.FilterDocuments(context.Project.IncludedDocuments, context.Config.ExcludeTypes);
+            List<Document> avaiableDocs = this.FilterDocuments(context.Project.IncludeDocuments, context.Config.ExcludeTypes);
 
             // analyze
             DateTime startTime = DateTime.Now;
@@ -228,7 +228,7 @@ namespace TypeScript.Converter
                     Document doc = project.GetDocumentByType(sample);
                     if (doc != null)
                     {
-                        project.AddConversionDocument(doc);
+                        project.AddIncludeDocument(doc);
                     }
                 }
                 List<string> avaiableTypes = project.GetReferences(config.Samples.ToArray());

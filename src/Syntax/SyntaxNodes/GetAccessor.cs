@@ -65,7 +65,7 @@ namespace TypeScript.Syntax
         {
             get
             {
-                return this.HasModify(NodeKind.StaticKeyword);
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.StaticKeyword);
             }
         }
 
@@ -73,7 +73,7 @@ namespace TypeScript.Syntax
         {
             get
             {
-                return this.HasModify(NodeKind.PrivateKeyword);
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.PrivateKeyword);
             }
         }
 
@@ -81,10 +81,9 @@ namespace TypeScript.Syntax
         {
             get
             {
-                return this.HasModify(NodeKind.AbstractKeyword);
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.AbstractKeyword);
             }
         }
-
         #endregion
 
         public override void Init(JObject jsonObj)

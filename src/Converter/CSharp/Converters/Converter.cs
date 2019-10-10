@@ -127,11 +127,11 @@ namespace TypeScript.Converter.CSharp
         }
 
         /// <summary>
-        /// Filter statements.
+        /// Filter types.
         /// </summary>
         /// <param name="statements"></param>
         /// <returns></returns>
-        protected List<Node> FilterStatements(List<Node> statements)
+        protected List<Node> FilterTypes(List<Node> statements)
         {
             List<string> excluteTypes = this.Context.Config.ExcludeTypes;
             if (excluteTypes.Count == 0)
@@ -144,16 +144,16 @@ namespace TypeScript.Converter.CSharp
                 switch (statement.Kind)
                 {
                     case NodeKind.ClassDeclaration:
-                        return !excluteTypes.Contains((statement as ClassDeclaration).Name.Text);
+                        return !excluteTypes.Contains((statement as ClassDeclaration).NameText);
 
                     case NodeKind.InterfaceDeclaration:
-                        return !excluteTypes.Contains((statement as InterfaceDeclaration).Name.Text);
+                        return !excluteTypes.Contains((statement as InterfaceDeclaration).NameText);
 
                     case NodeKind.EnumDeclaration:
-                        return !excluteTypes.Contains((statement as EnumDeclaration).Name.Text);
+                        return !excluteTypes.Contains((statement as EnumDeclaration).NameText);
 
                     case NodeKind.TypeAliasDeclaration:
-                        return !excluteTypes.Contains((statement as TypeAliasDeclaration).Name.Text);
+                        return !excluteTypes.Contains((statement as TypeAliasDeclaration).NameText);
 
                     default:
                         return true;

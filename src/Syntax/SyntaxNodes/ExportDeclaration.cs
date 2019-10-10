@@ -29,6 +29,11 @@ namespace TypeScript.Syntax
         {
             get
             {
+                if (this.ModuleSpecifier == null)
+                {
+                    return string.Empty;
+                }
+
                 string dir = System.IO.Path.GetDirectoryName(this.Document.Path);
                 string path = System.IO.Path.Combine(dir, this.ModuleSpecifier.Text);
                 return System.IO.Path.Combine(path);
@@ -63,6 +68,87 @@ namespace TypeScript.Syntax
                     this.ProcessUnknownNode(childNode);
                     break;
             }
+        }
+
+        public Node GetDefaultTypeDefinition()
+        {
+            return this.GetTypeDefinition("default");
+        }
+
+        public Node GetTypeDefinition(string typeName)
+        {
+            if (this.ModuleSpecifier == null)
+            {
+                return this.GetOwnTypeDefinition(typeName);
+            }
+            else
+            {
+                return this.GetFromTypeDefinition(typeName);
+            }
+        }
+
+        private Node GetOwnTypeDefinition(string typeName)
+        {
+            ExportSpecifier specifier = this.GetExportSpecifier(typeName);
+            if (specifier == null)
+            {
+                return null;
+            }
+
+            SourceFile sourceFile = this.Ancestor(NodeKind.SourceFile) as SourceFile;
+            Node definition = sourceFile.GetOwnModuleTypeDefinition(specifier.DefinitionName);
+            if (definition != null)
+            {
+                return definition;
+            }
+
+            definition = sourceFile.GetImportModuleTypeDefinition(specifier.DefinitionName);
+            if (definition != null)
+            {
+                return definition;
+            }
+
+            return null;
+        }
+
+        private Node GetFromTypeDefinition(string typeName)
+        {
+            Document fromDoc = this.Project.GetDocumentByPath(this.ModulePath);
+            if (fromDoc == null)
+            {
+                return null;
+            }
+
+            if (this.ExportClause == null) // export * from './abc'
+            {
+                return fromDoc.GetExportTypeDefinition(typeName);
+            }
+
+            ExportSpecifier specifier = this.GetExportSpecifier(typeName);
+            if (specifier != null)
+            {
+                return fromDoc.GetExportTypeDefinition(specifier.DefinitionName);
+            }
+            return null;
+        }
+
+        private ExportSpecifier GetExportSpecifier(string typeName)
+        {
+            if (this.ExportClause == null)
+            {
+                return null;
+            }
+
+            NamedExports namedExports = (NamedExports)this.ExportClause;
+            foreach (ExportSpecifier specifier in namedExports.Elements)
+            {
+                if (specifier.Name.Text == typeName)
+                {
+                    return specifier;
+                }
+            }
+
+            return null;
         }
     }
 }

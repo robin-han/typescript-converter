@@ -44,6 +44,26 @@ namespace TypeScript.Syntax
                     break;
             }
         }
+
+        public Node GetTypeDefinition() // export default AA;
+        {
+            string typeName = this.Expression.Text;
+
+            SourceFile sourceFile = this.Ancestor(NodeKind.SourceFile) as SourceFile;
+            Node definition = sourceFile.GetOwnModuleTypeDefinition(typeName);
+            if (definition != null)
+            {
+                return definition;
+            }
+
+            definition = sourceFile.GetImportModuleTypeDefinition(typeName);
+            if (definition != null)
+            {
+                return definition;
+            }
+
+            return null;
+        }
     }
 }
 

@@ -31,6 +31,14 @@ namespace TypeScript.Syntax
             private set;
         }
 
+        public string NameText
+        {
+            get
+            {
+                return (this.Name != null ? this.Name.Text : string.Empty);
+            }
+        }
+
         public List<Node> TypeParameters
         {
             get;
@@ -49,38 +57,19 @@ namespace TypeScript.Syntax
             private set;
         }
 
-        public List<Node> BaseTypes
+        public bool IsExport
         {
             get
             {
-                bool hasBaseClass = false;
-                List<Node> types = new List<Node>();
-                foreach (HeritageClause heritage in this.HeritageClauses)
-                {
-                    if (heritage.Text.Contains("extends"))
-                    {
-                        hasBaseClass = true;
-                        types.InsertRange(0, heritage.Types);
-                    }
-                    else
-                    {
-                        types.AddRange(heritage.Types);
-                    }
-                }
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.ExportKeyword);
+            }
+        }
 
-                //make all class has the base object
-                if (!hasBaseClass)
-                {
-                    types.Insert(0, NodeHelper.CreateNode("{ " +
-                        "kind: \"ExpressionWithTypeArguments \", " +
-                        "expression: { " +
-                           "kind: \"Identifier\", " +
-                           "text: \"Object\"" +
-                        "}" +
-                    "}"));
-                }
-
-                return types;
+        public bool IsDefault
+        {
+            get
+            {
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.DefaultKeyword);
             }
         }
         #endregion
@@ -132,6 +121,39 @@ namespace TypeScript.Syntax
                     this.ProcessUnknownNode(childNode);
                     break;
             }
+        }
+
+
+        public List<Node> GetBaseTypes(bool alwaysObject = false)
+        {
+            bool hasBaseClass = false;
+            List<Node> types = new List<Node>();
+            foreach (HeritageClause heritage in this.HeritageClauses)
+            {
+                if (heritage.Text.Contains("extends"))
+                {
+                    hasBaseClass = true;
+                    types.InsertRange(0, heritage.Types);
+                }
+                else
+                {
+                    types.AddRange(heritage.Types);
+                }
+            }
+
+            //make all class has the base object
+            if (alwaysObject && !hasBaseClass)
+            {
+                types.Insert(0, NodeHelper.CreateNode("{ " +
+                    "kind: \"ExpressionWithTypeArguments \", " +
+                    "expression: { " +
+                       "kind: \"Identifier\", " +
+                       "text: \"Object\"" +
+                    "}" +
+                "}"));
+            }
+
+            return types;
         }
 
         public Constructor GetConstructor()

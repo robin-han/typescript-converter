@@ -24,6 +24,14 @@ namespace TypeScript.Syntax
             get;
             private set;
         }
+
+        public string DefinitionName
+        {
+            get
+            {
+                return (this.PropertyName != null ? this.PropertyName.Text : this.Name.Text);
+            }
+        }
         #endregion
 
         public override void Init(JObject jsonObj)

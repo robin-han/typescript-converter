@@ -31,6 +31,62 @@ namespace TypeScript.Syntax
             private set;
         }
 
+        public List<Node> TypeAliases
+        {
+            get
+            {
+                return this.Statements.FindAll(n => this.IsTypeAliasType(n));
+            }
+        }
+
+        public List<Node> TypeDefinitions
+        {
+            get
+            {
+                return this.Statements.FindAll(n => this.IsTypeNode(n));
+            }
+        }
+
+        public List<Node> ImportDeclarations
+        {
+            get
+            {
+                return this.Statements.FindAll(n => n.Kind == NodeKind.ImportDeclaration);
+            }
+        }
+
+        public List<Node> ExportDeclarations
+        {
+            get
+            {
+                return this.Statements.FindAll(n => n.Kind == NodeKind.ExportDeclaration);
+            }
+        }
+
+        public Node ExportAssignment
+        {
+            get
+            {
+                return this.Statements.Find(n => n.Kind == NodeKind.ExportAssignment);
+            }
+        }
+
+        public List<Node> MouduleDeclarations
+        {
+            get
+            {
+                return this.Statements.FindAll(n => n.Kind == NodeKind.ModuleDeclaration);
+            }
+        }
+
+        public List<Node> TypeNodes
+        {
+            get
+            {
+                return this.DescendantsOnce((n) => this.IsTypeNode(n));
+            }
+        }
+
         #region Ignored Properties
         private List<object> BindDiagnostics { get; set; }
         private int LanguageVersion { get; set; }
@@ -52,6 +108,7 @@ namespace TypeScript.Syntax
 
         #endregion
 
+        #region Methods
         public override void Init(JObject jsonObj)
         {
             base.Init(jsonObj);
@@ -88,6 +145,80 @@ namespace TypeScript.Syntax
         {
             return childNode.NodeName != "externalModuleIndicator";
         }
+
+        public Node GetExportDefaultModuleTypeDefinition()
+        {
+            foreach (Node type in this.TypeDefinitions)
+            {
+                if (type.HasModify(NodeKind.ExportKeyword) && type.HasModify(NodeKind.DefaultKeyword))
+                {
+                    return type;
+                }
+            }
+
+            foreach (ExportDeclaration export in this.ExportDeclarations)
+            {
+                Node defaultDefnition = export.GetDefaultTypeDefinition();
+                if (defaultDefnition != null)
+                {
+                    return defaultDefnition;
+                }
+            }
+
+            Node exportAssignment = this.ExportAssignment;
+            if (exportAssignment != null)
+            {
+                return ((ExportAssignment)exportAssignment).GetTypeDefinition();
+            }
+
+            return null;
+        }
+
+        public Node GetExportModuleTypeDefinition(string typeName)
+        {
+            Node definition = this.GetOwnModuleTypeDefinition(typeName);
+            if (definition != null && definition.HasModify(NodeKind.ExportKeyword))
+            {
+                return definition;
+            }
+
+            foreach (ExportDeclaration export in this.ExportDeclarations)
+            {
+                definition = export.GetTypeDefinition(typeName);
+                if (definition != null)
+                {
+                    return definition;
+                }
+            }
+
+            return null;
+        }
+
+        public Node GetOwnModuleTypeDefinition(string typeName)
+        {
+            foreach (Node type in this.TypeDefinitions)
+            {
+                if (type.GetValue("NameText") as string == typeName)
+                {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        public Node GetImportModuleTypeDefinition(string typeName)
+        {
+            foreach (ImportDeclaration import in this.ImportDeclarations)
+            {
+                Node defination = import.GetTypeDefinition(typeName);
+                if (defination != null)
+                {
+                    return defination;
+                }
+            }
+            return null;
+        }
+        #endregion
     }
 }
 

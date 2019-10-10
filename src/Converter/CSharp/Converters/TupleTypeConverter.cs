@@ -14,18 +14,41 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(TupleType node) // let a: [number, string] = [1, "hello"];
         {
-            if (this.Context.Config.PreferTypeScriptType)
+            GenericNameSyntax generic = this.Context.Config.PreferTypeScriptType
+                ? SyntaxFactory.GenericName("Array")
+                : SyntaxFactory.GenericName("List");
+
+            Node elementType = this.GetElementType(node);
+            if (elementType != null)
             {
-                return SyntaxFactory
-                    .GenericName("Array")
-                    .AddTypeArgumentListArguments(SyntaxFactory.IdentifierName("Object"));
+                generic = generic.AddTypeArgumentListArguments(elementType.ToCsNode<TypeSyntax>());
             }
             else
             {
-                return SyntaxFactory
-                    .GenericName("List")
-                    .AddTypeArgumentListArguments(SyntaxFactory.IdentifierName("object"));
+                generic = this.Context.Config.PreferTypeScriptType
+                    ? generic.AddTypeArgumentListArguments(SyntaxFactory.IdentifierName("Object"))
+                    : generic.AddTypeArgumentListArguments(SyntaxFactory.IdentifierName("object"));
             }
+
+            return generic;
+        }
+
+        private Node GetElementType(TupleType node)
+        {
+            string type = null;
+            foreach (Node item in node.ElementTypes)
+            {
+                string elementType = TypeHelper.ToShortName(item.Text);
+                if (type == null)
+                {
+                    type = elementType;
+                }
+                else if (type != elementType)
+                {
+                    return null;
+                }
+            }
+            return type == null ? null : node.ElementTypes[0];
         }
     }
 

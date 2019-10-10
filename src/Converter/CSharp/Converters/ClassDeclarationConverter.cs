@@ -32,7 +32,7 @@ namespace TypeScript.Converter.CSharp
                 }
             }
 
-            List<Node> baseTypes = node.BaseTypes;
+            List<Node> baseTypes = node.GetBaseTypes(this.Context.Config.PreferTypeScriptType);
             if (baseTypes.Count > 0)
             {
                 csClass = csClass.AddBaseListTypes(baseTypes.ToCsNodes<BaseTypeSyntax>());

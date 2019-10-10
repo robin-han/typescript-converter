@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,18 +16,40 @@ namespace TypeScript.Converter.CSharp
         public CSharpSyntaxNode Convert(UnionType node)
         {
             List<Node> types = node.Types;
-            if (types.Count == 2)
+            if (types.Count == 2 && this.HasNullType(types))
             {
-                if (types[0].Kind == NodeKind.NullKeyword)
+                Node type = TypeHelper.TrimNullUnionType(node);
+                if (this.IsNullableType(type))
                 {
-                    return types[1].ToCsNode<TypeSyntax>();
+                    return SyntaxFactory.NullableType(type.ToCsNode<TypeSyntax>());
                 }
-                else if (types[1].Kind == NodeKind.NullKeyword)
+                else
                 {
-                    return types[0].ToCsNode<TypeSyntax>();
+                    return type.ToCsNode<TypeSyntax>();
                 }
             }
             return SyntaxFactory.IdentifierName("dynamic");
+        }
+
+        private bool HasNullType(List<Node> types)
+        {
+            return types.Any(type => type.Kind == NodeKind.NullKeyword);
+        }
+
+        private bool IsNullableType(Node type)
+        {
+            if (type.Kind == NodeKind.NumberKeyword && !this.Context.Config.PreferTypeScriptType)
+            {
+                return true;
+            }
+
+            Node definition = type.Document.GetTypeDefinition(TypeHelper.ToShortName(type.Text));
+            if (definition != null && definition.Kind == NodeKind.EnumDeclaration)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

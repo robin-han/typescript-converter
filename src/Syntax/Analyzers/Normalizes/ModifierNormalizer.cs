@@ -37,17 +37,6 @@ namespace TypeScript.Syntax.Analysis
             {
                 modifiers.Add(NodeHelper.CreateNode(NodeKind.PublicKeyword));
             }
-
-            if (node.HasJsDocTag("csoverride") && !node.HasModify(NodeKind.OverrideKeyword))
-            {
-                modifiers.Add(NodeHelper.CreateNode(NodeKind.OverrideKeyword));
-            }
-            if (node.HasJsDocTag("csnew") && !node.HasModify(NodeKind.NewKeyword))
-            {
-                modifiers.Add(NodeHelper.CreateNode(NodeKind.NewKeyword));
-            }
         }
-
-
     }
 }

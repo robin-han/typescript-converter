@@ -34,7 +34,7 @@ namespace TypeScript.Converter.CSharp
                         csName))
                     .AddArgumentListArguments();
             }
-            else if (TypeHelper.GetName(node.Type.Text) == "DataValueType")
+            else if (TypeHelper.ToShortName(node.Type.Text) == "DataValueType")
             {
                 GenericNameSyntax csName = SyntaxFactory.GenericName("As");
                 csName = csName.AddTypeArgumentListArguments(node.Type.ToCsNode<TypeSyntax>());

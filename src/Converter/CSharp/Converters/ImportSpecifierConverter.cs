@@ -9,16 +9,24 @@ namespace TypeScript.Converter.CSharp
 {
     public class ImportSpecifierConverter : Converter
     {
-        public CSharpSyntaxNode Convert(ImportSpecifier node)
+        public CSharpSyntaxNode Convert(ImportSpecifier specifier)
         {
-            ImportDeclaration import = node.Ancestor(NodeKind.ImportDeclaration) as ImportDeclaration;
-            Document fromDoc = node.Project.GetDocumentByPath(import.ModulePath);
-            if (fromDoc != null)
+            ImportDeclaration import = specifier.Ancestor(NodeKind.ImportDeclaration) as ImportDeclaration;
+            Document fromDoc = import?.FromDocument;
+            Node definition = fromDoc?.GetExportTypeDefinition(specifier.DefinitionName);
+            if (definition != null)
             {
-                string typeName = node.PropertyName != null ? fromDoc.GetExportActualName(node.PropertyName.Text) : fromDoc.GetExportActualName(node.Name.Text);
-                return SyntaxFactory.UsingDirective(
-                   SyntaxFactory.NameEquals(node.Name.Text),
-                   SyntaxFactory.ParseName(fromDoc.GetPackageName() + "." + typeName));
+                List<Node> genericParameters = definition.GetValue("TypeParameters") as List<Node>;
+                if (genericParameters != null && genericParameters.Count > 0) // generic use using.
+                {
+                    return SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(definition.Document.GetPackageName()));
+                }
+                else
+                {
+                    return SyntaxFactory.UsingDirective(
+                       SyntaxFactory.NameEquals(specifier.Name.Text),
+                       SyntaxFactory.ParseName(definition.Document.GetPackageName() + "." + definition.GetValue("NameText")));
+                }
             }
             return null;
         }

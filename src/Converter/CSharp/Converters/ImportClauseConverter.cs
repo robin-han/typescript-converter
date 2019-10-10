@@ -13,15 +13,16 @@ namespace TypeScript.Converter.CSharp
         public SyntaxList<UsingDirectiveSyntax> Convert(ImportClause node)
         {
             SyntaxList<UsingDirectiveSyntax> usings = new SyntaxList<UsingDirectiveSyntax>();
-            if (node.Name != null)
+            if (node.Name != null) // default
             {
                 ImportDeclaration import = node.Ancestor(NodeKind.ImportDeclaration) as ImportDeclaration;
-                Syntax.Document fromDoc = node.Project.GetDocumentByPath(import.ModulePath);
-                if (fromDoc != null)
+                Syntax.Document fromDoc = import?.FromDocument;
+                Node definition = fromDoc?.GetExportDefaultTypeDefinition();
+                if (definition != null)
                 {
                     UsingDirectiveSyntax usignSyntax = SyntaxFactory.UsingDirective(
                         SyntaxFactory.NameEquals(node.Name.Text),
-                        SyntaxFactory.ParseName(fromDoc.GetPackageName() + "." + fromDoc.GetExportDefaultName()));
+                        SyntaxFactory.ParseName(definition.Document.GetPackageName() + "." + definition.GetValue("NameText")));
                     usings = usings.Add(usignSyntax);
                 }
             }
