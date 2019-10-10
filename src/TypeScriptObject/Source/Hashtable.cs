@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace TypeScriptObject
+namespace TypeScript.CSharp
 {
     public class Hashtable<TKey, TValue> : Object, IEnumerable<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>
     {

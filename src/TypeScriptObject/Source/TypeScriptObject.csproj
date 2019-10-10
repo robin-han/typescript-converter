@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>TypeScriptObject</RootNamespace>
+    <RootNamespace>TypeScript.CSharp</RootNamespace>
   </PropertyGroup>
 
 </Project>

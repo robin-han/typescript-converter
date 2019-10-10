@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TypeScriptObject
+namespace TypeScript.CSharp
 {
     public class Array<T> : Object, IEnumerable<T>
     {

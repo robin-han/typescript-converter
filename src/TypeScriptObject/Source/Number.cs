@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TypeScriptObject
+namespace TypeScript.CSharp
 {
     public class Number : Object
     {

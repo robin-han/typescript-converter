@@ -4,7 +4,7 @@ using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace TypeScriptObject
+namespace TypeScript.CSharp
 {
     public class String : Object
     {

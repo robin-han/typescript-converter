@@ -1,4 +1,4 @@
-﻿namespace TypeScriptObject
+﻿namespace TypeScript.CSharp
 {
     public class Object
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace TypeScriptObject.Tests
+namespace TypeScript.CSharp.Tests
 {
     [TestClass]
     public class BooleanTest : TestBase

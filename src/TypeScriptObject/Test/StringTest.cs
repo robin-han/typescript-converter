@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Text.RegularExpressions;
 
-namespace TypeScriptObject.Tests
+namespace TypeScript.CSharp.Tests
 {
     [TestClass]
     public class StringTest : TestBase

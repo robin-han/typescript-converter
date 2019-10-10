@@ -1,5 +1,5 @@
 using System.Linq;
-using TypeScriptObject;
+using TypeScript.CSharp;
 
 namespace Demo
 {

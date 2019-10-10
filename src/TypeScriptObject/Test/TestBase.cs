@@ -1,4 +1,4 @@
-﻿namespace TypeScriptObject.Tests
+﻿namespace TypeScript.CSharp.Tests
 {
     public class TestBase
     {
