@@ -16,16 +16,21 @@ namespace TypeScript.Converter.CSharp
             Node definition = fromDoc?.GetExportTypeDefinition(specifier.DefinitionName);
             if (definition != null)
             {
+                string definitionPackage = definition.Document.GetPackageName();
+                string package = import.Document.GetPackageName();
+                string name = specifier.Name.Text;
+                string propertyName = (string)definition.GetValue("NameText");
+
                 List<Node> genericParameters = definition.GetValue("TypeParameters") as List<Node>;
-                if (genericParameters != null && genericParameters.Count > 0) // generic use using.
+                if (genericParameters != null && genericParameters.Count > 0 && package != definitionPackage) // generic use using.
                 {
-                    return SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(definition.Document.GetPackageName()));
+                    return SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(definitionPackage));
                 }
-                else
+                else if (package != definitionPackage || name != propertyName)
                 {
                     return SyntaxFactory.UsingDirective(
-                       SyntaxFactory.NameEquals(specifier.Name.Text),
-                       SyntaxFactory.ParseName(definition.Document.GetPackageName() + "." + definition.GetValue("NameText")));
+                       SyntaxFactory.NameEquals(name),
+                       SyntaxFactory.ParseName($"{definitionPackage}.{propertyName}"));
                 }
             }
             return null;

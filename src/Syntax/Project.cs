@@ -267,7 +267,6 @@ namespace TypeScript.Syntax
                 }
             }
 
-            Document document = node.Document;
             while (heritages.Count > 0)
             {
                 HeritageClause inherit = heritages.Dequeue();
@@ -276,7 +275,7 @@ namespace TypeScript.Syntax
                     if (inherit.Token == NodeKind.ExtendsKeyword)
                     {
                         string className = TypeHelper.ToShortName(type.Text);
-                        ClassDeclaration baseClass = this.GetClass(document.GetTypeDefinitionName(className));
+                        ClassDeclaration baseClass = this.GetClass(type.Document.GetTypeDefinitionName(className));
                         if (baseClass != null)
                         {
                             ret.Add(baseClass);
@@ -289,7 +288,7 @@ namespace TypeScript.Syntax
                     else
                     {
                         string interfaceName = TypeHelper.ToShortName(type.Text);
-                        InterfaceDeclaration baseInterface = this.GetInterface(document.GetTypeDefinitionName(interfaceName));
+                        InterfaceDeclaration baseInterface = this.GetInterface(type.Document.GetTypeDefinitionName(interfaceName));
                         if (baseInterface != null)
                         {
                             ret.Add(baseInterface);
@@ -337,7 +336,7 @@ namespace TypeScript.Syntax
 
             Node rootNode = nodes[index];
             Document document = rootNode.Document;
-            if (document == null && !this.IncludeDocuments.Contains(document))
+            if (document == null || !this.IncludeDocuments.Contains(document))
             {
                 return;
             }

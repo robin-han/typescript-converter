@@ -107,7 +107,7 @@ namespace TypeScript.Syntax
             Node definition = this.GetTypeDefinition(typeName);
             if (definition != null)
             {
-                return definition.GetValue("NameText") as string;
+                return (string)definition.GetValue("NameText");
             }
             return typeName;
         }

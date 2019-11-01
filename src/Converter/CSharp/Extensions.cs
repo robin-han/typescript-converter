@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Text;
 
@@ -14,24 +15,13 @@ namespace TypeScript.Converter.CSharp
     {
         internal static string GetPackageName(this Syntax.Document doc)
         {
-            string ns1 = ConverterContext.Current.Config.Namespace;
-            string ns2 = doc.RelativePath.Replace("\\", ".");
-            if (!string.IsNullOrEmpty(ns1) && !string.IsNullOrEmpty(ns2))
+            string configNs = ConverterContext.Current.Config.Namespace;
+            if (!string.IsNullOrEmpty(configNs))
             {
-                return ns1 + "." + ns2;
+                return configNs;
             }
-            else if (!string.IsNullOrEmpty(ns1))
-            {
-                return ns1;
-            }
-            else if (!string.IsNullOrEmpty(ns2))
-            {
-                return ns2;
-            }
-            else
-            {
-                return string.Empty;
-            }
+
+            return doc.RelativePath.Replace(Path.DirectorySeparatorChar, '.');
         }
     }
     #endregion

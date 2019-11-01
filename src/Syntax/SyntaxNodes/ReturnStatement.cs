@@ -7,6 +7,8 @@ namespace TypeScript.Syntax
 {
     public class ReturnStatement : Statement
     {
+        private Node _expression;
+
         #region Properties
         public override NodeKind Kind
         {
@@ -15,8 +17,18 @@ namespace TypeScript.Syntax
 
         public Node Expression
         {
-            get;
-            private set;
+            get
+            {
+                return this._expression;
+            }
+            internal set
+            {
+                this._expression = value;
+                if (this._expression != null)
+                {
+                    this._expression.Parent = this;
+                }
+            }
         }
         #endregion
 

@@ -234,19 +234,20 @@ namespace TypeScript.Syntax
                 {
                     case NodeKind.Block:
                         Block block = parent as Block;
-                        foreach (var statement in block.Statements)
+                        Node bvType = GetVariableStatementType(block.Statements, name);
+                        if (bvType != null)
                         {
-                            if (statement.Kind != NodeKind.VariableStatement)
-                            {
-                                continue;
-                            }
+                            return bvType;
+                        }
 
-                            VariableDeclarationList declarationList = (statement as VariableStatement).DeclarationList as VariableDeclarationList;
-                            VariableDeclarationNode declarationNode = declarationList.Declarations[0] as VariableDeclarationNode;
-                            if (declarationNode.Name.Text == name)
-                            {
-                                return declarationNode.Type;
-                            }
+                        break;
+
+                    case NodeKind.CaseClause:
+                        CaseClause caseClause = parent as CaseClause;
+                        Node ccType = GetVariableStatementType(caseClause.Statements, name);
+                        if (ccType != null)
+                        {
+                            return ccType;
                         }
                         break;
 
@@ -310,6 +311,25 @@ namespace TypeScript.Syntax
             return null;
         }
 
+        private static Node GetVariableStatementType(List<Node> statements, string name)
+        {
+            foreach (var statement in statements)
+            {
+                if (statement.Kind != NodeKind.VariableStatement)
+                {
+                    continue;
+                }
+
+                VariableDeclarationList declarationList = (statement as VariableStatement).DeclarationList as VariableDeclarationList;
+                VariableDeclarationNode declarationNode = declarationList.Declarations[0] as VariableDeclarationNode;
+                if (declarationNode.Name.Text == name)
+                {
+                    return declarationNode.Type;
+                }
+            }
+            return null;
+        }
+
         private static Node GetPropertyAccessType(Node accessNode)
         {
             Node tailNode = GetPropertyAccessMember(accessNode);
@@ -336,11 +356,11 @@ namespace TypeScript.Syntax
                 {
                     classNode = accessNode.Ancestor(NodeKind.ClassDeclaration);
                 }
-                else if (memberName == "super")
+                else if (i== 0 && memberName == "super")
                 {
                     ClassDeclaration thisClassNode = accessNode.Ancestor(NodeKind.ClassDeclaration) as ClassDeclaration;
                     classNode = thisClassNode == null ? null : project.GetBaseClass(thisClassNode);
-                    if (classNode != null && accessNames.Length == 1)
+                    if (classNode != null)
                     {
                         return (classNode as ClassDeclaration).GetConstructor();
                     }
