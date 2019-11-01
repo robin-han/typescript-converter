@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace TypeScript.Syntax
 {
@@ -17,6 +18,14 @@ namespace TypeScript.Syntax
         {
             get;
             private set;
+        }
+
+        public bool HasNullType
+        {
+            get
+            {
+                return this.Types.Any(type => type.Kind == NodeKind.NullKeyword);
+            }
         }
         #endregion
 

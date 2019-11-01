@@ -20,10 +20,18 @@ namespace TypeScript.Converter.CSharp
                 Node definition = fromDoc?.GetExportDefaultTypeDefinition();
                 if (definition != null)
                 {
-                    UsingDirectiveSyntax usignSyntax = SyntaxFactory.UsingDirective(
-                        SyntaxFactory.NameEquals(node.Name.Text),
-                        SyntaxFactory.ParseName(definition.Document.GetPackageName() + "." + definition.GetValue("NameText")));
-                    usings = usings.Add(usignSyntax);
+                    string definitionPackage = definition.Document.GetPackageName();
+                    string package = import.Document.GetPackageName();
+                    string name = node.Name.Text;
+                    string propertyName = (string)definition.GetValue("NameText");
+
+                    if (package != definitionPackage || name != propertyName)
+                    {
+                        UsingDirectiveSyntax usingSyntax = SyntaxFactory.UsingDirective(
+                            SyntaxFactory.NameEquals(name),
+                            SyntaxFactory.ParseName($"{definitionPackage}.{propertyName}"));
+                        usings = usings.Add(usingSyntax);
+                    }
                 }
             }
 
@@ -32,7 +40,11 @@ namespace TypeScript.Converter.CSharp
                 switch (node.NamedBindings.Kind)
                 {
                     case NodeKind.NamespaceImport:
-                        usings = usings.Add(node.NamedBindings.ToCsNode<UsingDirectiveSyntax>());
+                        UsingDirectiveSyntax usingSyntax = node.NamedBindings.ToCsNode<UsingDirectiveSyntax>();
+                        if (usingSyntax != null)
+                        {
+                            usings = usings.Add(usingSyntax);
+                        }
                         break;
 
                     case NodeKind.NamedImports:

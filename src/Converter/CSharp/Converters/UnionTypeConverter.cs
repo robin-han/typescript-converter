@@ -15,8 +15,7 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(UnionType node)
         {
-            List<Node> types = node.Types;
-            if (types.Count == 2 && this.HasNullType(types))
+            if (node.Types.Count == 2 && node.HasNullType)
             {
                 Node type = TypeHelper.TrimNullUnionType(node);
                 if (this.IsNullableType(type))
@@ -29,11 +28,6 @@ namespace TypeScript.Converter.CSharp
                 }
             }
             return SyntaxFactory.IdentifierName("dynamic");
-        }
-
-        private bool HasNullType(List<Node> types)
-        {
-            return types.Any(type => type.Kind == NodeKind.NullKeyword);
         }
 
         private bool IsNullableType(Node type)

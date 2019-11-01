@@ -9,9 +9,9 @@ namespace TypeScript.Converter
 {
     class FileUtil
     {
-        private static readonly string directorySeparator = "/";
-        private static readonly string backSlash = "\\";
-        private static readonly string tsJsonFileExtension = "*.ts.json";
+        private static readonly string DirectorySeparator = "/";
+        private static readonly string BackSlash = "\\";
+        private static readonly string TsJsonFileExtension = "*.ts.json";
 
         public static List<string> GetTsJsonFiles(string input)
         {
@@ -94,9 +94,8 @@ namespace TypeScript.Converter
         {
             List<string> sameParts = new List<string>();
 
-            string separator = directorySeparator;
-            string[] parts1 = path1.Split(separator);
-            string[] parts2 = path2.Split(separator);
+            string[] parts1 = path1.Split(DirectorySeparator);
+            string[] parts2 = path2.Split(DirectorySeparator);
             int count = Math.Min(parts1.Length, parts2.Length);
             for (int i = 0; i < count; i++)
             {
@@ -106,13 +105,13 @@ namespace TypeScript.Converter
                 }
             }
 
-            return string.Join(separator, sameParts);
+            return string.Join(DirectorySeparator, sameParts);
         }
 
         private static List<string> GetDirectoryFiles(string path, SearchOption searchOption = SearchOption.AllDirectories)
         {
             List<string> files = new List<string>();
-            string[] fs = Directory.GetFiles(path, tsJsonFileExtension, searchOption);
+            string[] fs = Directory.GetFiles(path, TsJsonFileExtension, searchOption);
             foreach (var f in fs)
             {
                 files.Add(Path.GetFullPath(f));
@@ -124,7 +123,7 @@ namespace TypeScript.Converter
         {
             string pathSegment;
             string nextPath;
-            int separatorIndex = path.IndexOf(directorySeparator);
+            int separatorIndex = path.IndexOf(DirectorySeparator);
             if (separatorIndex == -1)
             {
                 pathSegment = path;
@@ -163,9 +162,9 @@ namespace TypeScript.Converter
             //
             if (dirInfo == null)
             {
-                if (Directory.Exists(pathSegment + directorySeparator))
+                if (Directory.Exists(pathSegment + DirectorySeparator))
                 {
-                    dirInfo = Directory.CreateDirectory(pathSegment + directorySeparator);
+                    dirInfo = Directory.CreateDirectory(pathSegment + DirectorySeparator);
                     return GetWildcardFiles(nextPath, dirInfo);
                 }
                 return null;
@@ -207,7 +206,7 @@ namespace TypeScript.Converter
 
         private static string NormalizeSlashes(string path)
         {
-            return path.Replace(backSlash, directorySeparator);
+            return path.Replace(BackSlash, DirectorySeparator);
         }
 
         private static bool HasWildcard(string path)
@@ -229,11 +228,11 @@ namespace TypeScript.Converter
 
             string ret = string.Empty;
             string path2 = path.Replace(".", "\\.");
-            foreach (string pathSegment in path2.Split(directorySeparator))
+            foreach (string pathSegment in path2.Split(DirectorySeparator))
             {
                 if (!string.IsNullOrEmpty(ret))
                 {
-                    ret += directorySeparator;
+                    ret += DirectorySeparator;
                 }
 
                 if (pathSegment == "**")
