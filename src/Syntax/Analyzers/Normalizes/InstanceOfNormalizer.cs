@@ -12,8 +12,8 @@ namespace TypeScript.Syntax.Analysis
 
             switch (node.Kind)
             {
-                case NodeKind.IfStatement:
-                    this.NormalizeInstanceOf(node as IfStatement);
+                case NodeKind.InstanceOfKeyword:
+                    this.NormalizeInstanceOf(node.Parent as BinaryExpression);
                     break;
 
                 default:
@@ -21,73 +21,96 @@ namespace TypeScript.Syntax.Analysis
             }
         }
 
-        private void NormalizeInstanceOf(IfStatement ifStatement)
+        private void NormalizeInstanceOf(BinaryExpression instanceOf)
         {
-            List<Node> inOfs = ifStatement.Expression.DescendantsAndSelf(n =>
-                n.Kind == NodeKind.BinaryExpression &&
-                (n as BinaryExpression).OperatorToken.Kind == NodeKind.InstanceOfKeyword);
-
-            List<Node> instanceofs = new List<Node>();
-            inOfs.ForEach(n1 =>
+            Node leftNode = instanceOf.Left;
+            Node leftNodeType = TypeHelper.GetNodeType(leftNode);
+            if (leftNodeType != null && TypeHelper.ToShortName(leftNodeType.Text) == "DataValueType")
             {
-                if (inOfs.Find(n2 => (n2 != n1 && (n1 as BinaryExpression).Left.Text.Trim() == (n2 as BinaryExpression).Left.Text.Trim())) == null)
-                {
-                    instanceofs.Add(n1);
-                }
-            });
+                PropertyAccessExpression newLeft = NodeHelper.CreateNode(NodeKind.PropertyAccessExpression) as PropertyAccessExpression;
+                newLeft.Parent = leftNode.Parent;
+                leftNode.Parent = newLeft;
 
-            foreach (BinaryExpression instanceof in instanceofs)
+                newLeft.Expression = leftNode;
+                newLeft.Name = NodeHelper.CreateNode(NodeKind.Identifier, "Value");
+                instanceOf.Left = newLeft;
+                return;
+            }
+
+            NodeKind variableKind = instanceOf.Left.Kind;
+            string variableName = instanceOf.Left.Text.Trim();
+            string typeName = instanceOf.Right.Text;
+            List<Node> asNodes = new List<Node>();
+            Node parent = instanceOf.Parent;
+            while (parent != null)
             {
-                Node leftNode = instanceof.Left;
-                Node leftNodeType = TypeHelper.GetNodeType(leftNode);
-                if (leftNodeType != null && TypeHelper.ToShortName(leftNodeType.Text) == "DataValueType")
+                if (parent.Kind == NodeKind.Block || parent.Kind == NodeKind.CaseBlock)
                 {
-                    PropertyAccessExpression newLeft = NodeHelper.CreateNode(NodeKind.PropertyAccessExpression) as PropertyAccessExpression;
-                    newLeft.Parent = leftNode.Parent;
-                    leftNode.Parent = newLeft;
-
-                    newLeft.Expression = leftNode;
-                    newLeft.Name = NodeHelper.CreateNode(NodeKind.Identifier, "Value");
-                    instanceof.Left = newLeft;
-                    continue;
+                    break;
                 }
-
-                NodeKind variableKind = instanceof.Left.Kind;
-                string variableName = instanceof.Left.Text.Trim();
-                string typeName = instanceof.Right.Text;
-
-                List<Node> asNodes = new List<Node>();
-                asNodes.AddRange(ifStatement.Expression.DescendantsAndSelf(n => n.Kind == variableKind && n.Text.Trim() == variableName).FindAll(n => n.Parent != instanceof));
-                asNodes.AddRange(ifStatement.ThenStatement.Descendants(n => n.Kind == variableKind && n.Text.Trim() == variableName));
-                foreach (Node asNode in asNodes)
+                else if (parent.Kind == NodeKind.IfStatement)
                 {
-                    switch (asNode.Kind)
+                    List<Node> multiInstanceOf = (parent as IfStatement).Expression.DescendantsAndSelf(n =>
                     {
-                        case NodeKind.Identifier:
-                            if (asNode.Parent.Kind == NodeKind.PropertyAccessExpression)
-                            {
-                                if (asNode == (asNode.Parent as PropertyAccessExpression).Expression)
-                                {
-                                    (asNode as Identifier).As = typeName;
-                                }
-                            }
-                            else
+                        if (n.Kind == NodeKind.BinaryExpression && n != instanceOf)
+                        {
+                            BinaryExpression binary = n as BinaryExpression;
+                            return (binary.OperatorToken.Kind == NodeKind.InstanceOfKeyword && binary.Left.Text.Trim() == variableName);
+                        }
+                        return false;
+                    });
+                    if (multiInstanceOf.Count == 0)
+                    {
+                        asNodes.AddRange((parent as IfStatement).ThenStatement.Descendants(n => n.Kind == variableKind && n.Text.Trim() == variableName));
+                    }
+                    break;
+                }
+                else if (parent.Kind == NodeKind.BinaryExpression)
+                {
+                    BinaryExpression binaryExpr = parent as BinaryExpression;
+                    bool instanceOfIsLeftNode = (binaryExpr.Left.DescendantsAndSelfOnce(n => n == instanceOf).Count > 0);
+                    if (instanceOfIsLeftNode)
+                    {
+                        asNodes.AddRange(binaryExpr.Right.Descendants(n =>
+                        {
+                            bool isInInstanceOf = (n.Parent.Kind == NodeKind.BinaryExpression && (n.Parent as BinaryExpression).OperatorToken.Kind == NodeKind.InstanceOfKeyword);
+                            return (n.Kind == variableKind && n.Text.Trim() == variableName && !isInInstanceOf);
+                        }));
+                    }
+                }
+                parent = parent.Parent;
+            }
+
+            foreach (Node asNode in asNodes)
+            {
+                switch (asNode.Kind)
+                {
+                    case NodeKind.Identifier:
+                        if (asNode.Parent.Kind == NodeKind.PropertyAccessExpression)
+                        {
+                            if (asNode == (asNode.Parent as PropertyAccessExpression).Expression)
                             {
                                 (asNode as Identifier).As = typeName;
                             }
-                            break;
+                        }
+                        else
+                        {
+                            (asNode as Identifier).As = typeName;
+                        }
+                        break;
 
-                        case NodeKind.PropertyAccessExpression:
+                    case NodeKind.PropertyAccessExpression:
+                        if (!(asNode.Parent.Kind == NodeKind.BinaryExpression && (asNode.Parent as BinaryExpression).Left == asNode))
+                        {
                             (asNode as PropertyAccessExpression).As = typeName;
-                            break;
+                        }
+                        break;
 
-                        default:
-                            break;
-                    }
+                    default:
+                        break;
                 }
             }
         }
-
     }
 }
 

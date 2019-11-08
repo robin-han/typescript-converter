@@ -69,6 +69,7 @@ namespace TypeScript.Converter
             {
                 Project project = new Project(arg.BasePath, documents, includedDocuments);
                 ConverterContext context = this.CreateConverterContext(project, arg.Config);
+                this.ClearOutput(arg);
                 this.Convert(context, arg);
             }
             return 0;
@@ -159,6 +160,45 @@ namespace TypeScript.Converter
                 }
             }
             return true;
+        }
+
+        /// <summary>
+        /// Clear output directory's files which not in input files.
+        /// </summary>
+        private void ClearOutput(ExecuteArgument arg)
+        {
+            if (!Directory.Exists(arg.Output) || !Directory.Exists(arg.BasePath))
+            {
+                return;
+            }
+
+            List<string> deleteFiles = new List<string>();
+            List<string> allInputFiles = arg.AllFiles;
+            var inputDirectories = Directory.GetDirectories(arg.BasePath);
+            var outputDirectories = Directory.GetDirectories(arg.Output).Where(dir1 =>
+            {
+                return inputDirectories.Any(dir2 => Path.GetFileName(dir2) == Path.GetFileName(dir1));
+            });
+            foreach (string dir in outputDirectories)
+            {
+                var existFiles = Directory.GetFiles(dir, "*.*", SearchOption.AllDirectories)
+                    .Where(s => s.EndsWith(".cs"))
+                    .Select(s => Path.GetRelativePath(dir, s));
+
+                foreach (string file in existFiles)
+                {
+                    string file2 = file.Substring(0, file.LastIndexOf('.')) + ".ts.json";
+                    if (!allInputFiles.Exists(f => f.EndsWith(file2)))
+                    {
+                        deleteFiles.Add(Path.Combine(dir, file));
+                    }
+                }
+            }
+
+            foreach (string file in deleteFiles)
+            {
+                File.Delete(file);
+            }
         }
 
         /// <summary>
