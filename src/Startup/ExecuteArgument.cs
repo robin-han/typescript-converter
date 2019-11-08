@@ -106,8 +106,8 @@ namespace TypeScript.Converter
             string output = string.Empty;
             List<string> allFiles = new List<string>();
             List<string> exclusion = new List<string>();
-
-            //input source
+            List<string> topInputs = new List<string>();
+            // all files
             if (sourceOption.HasValue())
             {
                 string input = sourceOption.Value();
@@ -118,18 +118,35 @@ namespace TypeScript.Converter
                     return null;
                 }
                 allFiles.AddRange(inputFiles);
+                topInputs.Add(input);
             }
             if (configOption.HasValue() || !sourceOption.HasValue())
             {
-                allFiles.AddRange(config.Include);
+                foreach (string include in config.Include)
+                {
+                    List<string> inputFiles = FileUtil.GetTsJsonFiles(include);
+                    if (inputFiles == null)
+                    {
+                        Console.WriteLine(string.Format("Cannot find include file or directory {0}", include));
+                        return null;
+                    }
+                    allFiles.AddRange(inputFiles);
+                    topInputs.Add(include);
+                }
             }
-            //base path
+
+            // base path
             if (!config.FlatOutput)
             {
                 basePath = FileUtil.GetBasePath(allFiles);
+                // adjust base path
+                if (topInputs.Count == 1 && Directory.Exists(topInputs[0]) && basePath.StartsWith(FileUtil.NormalizePath(topInputs[0])))
+                {
+                    basePath = topInputs[0];
+                }
             }
 
-            //exclusion
+            // exclusion
             if (excludeOption.HasValue())
             {
                 exclusion.Add(excludeOption.Value());
@@ -139,10 +156,10 @@ namespace TypeScript.Converter
                 exclusion.AddRange(config.Exclude);
             }
 
-            //output
+            // output
             output = outOption.HasValue() ? outOption.Value() : config.Output;
 
-            //
+            // files
             List<string> files = FileUtil.FilterFiles(allFiles, exclusion);
 
             return new ExecuteArgument()

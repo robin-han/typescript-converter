@@ -27,7 +27,7 @@ namespace TypeScript.Converter
 
             if (HasWildcard(input))
             {
-                return GetWildcardFiles(NormalizeSlashes(input), null);
+                return GetWildcardFiles(NormalizePath(input), null);
             }
 
             return null;
@@ -44,10 +44,10 @@ namespace TypeScript.Converter
             foreach (string file in files)
             {
                 bool excluded = false;
-                string path = NormalizeSlashes(file);
+                string path = NormalizePath(file);
                 foreach (string exclude in excludes)
                 {
-                    string excludePattern = ToRegexPattern(NormalizeSlashes(exclude));
+                    string excludePattern = ToRegexPattern(NormalizePath(exclude));
                     if (Regex.IsMatch(path, excludePattern))
                     {
                         excluded = true;
@@ -75,11 +75,11 @@ namespace TypeScript.Converter
 
                 if (string.IsNullOrEmpty(basePath))
                 {
-                    basePath = NormalizeSlashes(Path.GetDirectoryName(path));
+                    basePath = NormalizePath(Path.GetDirectoryName(path));
                 }
                 else
                 {
-                    string commonPath = GetCommonPath(basePath, NormalizeSlashes(path));
+                    string commonPath = GetCommonPath(basePath, NormalizePath(path));
                     if (string.IsNullOrEmpty(commonPath))
                     {
                         return string.Empty;
@@ -88,6 +88,11 @@ namespace TypeScript.Converter
                 }
             }
             return basePath;
+        }
+
+        public static string NormalizePath(string path)
+        {
+            return path.Replace(BackSlash, DirectorySeparator);
         }
 
         private static string GetCommonPath(string path1, string path2)
@@ -202,11 +207,6 @@ namespace TypeScript.Converter
             }
 
             return files;
-        }
-
-        private static string NormalizeSlashes(string path)
-        {
-            return path.Replace(BackSlash, DirectorySeparator);
         }
 
         private static bool HasWildcard(string path)

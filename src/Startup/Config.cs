@@ -119,35 +119,35 @@ namespace TypeScript.Converter
             JObject jsonConfig = JObject.Parse(File.ReadAllText(configFile));
             this.Init();
 
-            //output
+            // output
             JToken jsonOutput = jsonConfig["output"];
             if (jsonOutput != null)
             {
                 this.Output = jsonOutput.ToObject<string>();
             }
 
-            //flatOutput
+            // flatOutput
             JToken jsonFlatten = jsonConfig["flatOutput"];
             if (jsonFlatten != null)
             {
                 this.FlatOutput = jsonFlatten.ToObject<bool>();
             }
 
-            //perfer typescript type
+            // perfer typescript type
             JToken jsonPerferType = jsonConfig["preferTypeScriptType"];
             if (jsonPerferType != null)
             {
                 this.PreferTypeScriptType = jsonPerferType.ToObject<bool>();
             }
 
-            //namesapce
+            // namesapce
             JToken jsonNamespace = jsonConfig["namespace"];
             if (jsonNamespace != null)
             {
                 this.Namespace = jsonNamespace.ToObject<string>();
             }
 
-            //usings
+            // usings
             JToken jsonUsings = jsonConfig["usings"];
             if (jsonUsings != null)
             {
@@ -157,7 +157,7 @@ namespace TypeScript.Converter
                 }
             }
 
-            //namesapce mappings
+            // namesapce mappings
             JToken jsonNSMappings = jsonConfig["namespaceMappings"];
             if (jsonNSMappings != null)
             {
@@ -167,7 +167,7 @@ namespace TypeScript.Converter
                 }
             }
 
-            //omitted qualified names
+            // omitted qualified names
             JToken jsonOmittedNames = jsonConfig["omittedQualifiedNames"];
             if (jsonOmittedNames != null)
             {
@@ -177,7 +177,7 @@ namespace TypeScript.Converter
                 }
             }
 
-            //exclude
+            // exclude
             JToken jsonExclude = jsonConfig["exclude"];
             if (jsonExclude != null)
             {
@@ -187,23 +187,17 @@ namespace TypeScript.Converter
                 }
             }
 
-            //include
+            // include
             JToken jsonInclude = jsonConfig["include"];
             if (jsonInclude != null)
             {
                 foreach (JToken item in jsonInclude)
                 {
-                    string include = item.ToObject<string>();
-                    List<string> files = FileUtil.GetTsJsonFiles(include);
-                    if (files == null)
-                    {
-                        return string.Format("Cannot find include file or directory {0}", include);
-                    }
-                    this.Include.AddRange(files);
+                    this.Include.Add(item.ToObject<string>());
                 }
             }
 
-            //samples
+            // samples
             JToken jsonSamples = jsonConfig["samples"];
             if (jsonSamples != null)
             {
