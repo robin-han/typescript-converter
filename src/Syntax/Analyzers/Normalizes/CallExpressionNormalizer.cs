@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace TypeScript.Syntax.Analysis
 {
@@ -44,15 +45,15 @@ namespace TypeScript.Syntax.Analysis
                     "}" +
                 "}");
 
-                List<Node> arguments = new List<Node>();
-                callExpr.Arguments.RemoveAt(1);
+                callExpr.RemoveArgumentAt(1);
+                List<Node> newArguments = new List<Node>();
                 foreach (var arg in callExpr.Arguments)
                 {
-                    arguments.Add(NodeHelper.CreateNode(arg.TsNode));
+                    newArguments.Add(NodeHelper.CreateNode(arg.TsNode));
                 }
-                callExpr.Arguments.Clear();
-                callExpr.Arguments.AddRange(arguments);
-                callExpr.TypeArguments.Add(typeArgument);
+                callExpr.ClearArguments();
+                callExpr.AddArguments(newArguments);
+                callExpr.AddTypeArgument(typeArgument);
             }
         }
     }

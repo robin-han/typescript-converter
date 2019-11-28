@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TypeScript.Syntax
 {
-    internal class NodeHelper
+    public class NodeHelper
     {
         public static Node CreateNode(NodeKind kind, string text = "")
         {

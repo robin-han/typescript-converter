@@ -19,7 +19,7 @@ namespace TypeScript.Syntax
             private set;
         }
 
-        public Node Body
+        public Block Body
         {
             get;
             private set;
@@ -49,7 +49,7 @@ namespace TypeScript.Syntax
                     break;
 
                 case "body":
-                    this.Body = childNode;
+                    this.Body = (Block)childNode;
                     break;
 
                 default:

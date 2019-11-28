@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace TypeScript.Syntax.Analysis
 {
@@ -21,10 +23,45 @@ namespace TypeScript.Syntax.Analysis
                     this.NormalizeConstructor(node as Constructor);
                     break;
 
+                case NodeKind.ClassDeclaration:
+                    this.AddLostConstructor(node as ClassDeclaration);
+                    break;
+
                 default:
                     break;
             }
+        }
 
+        private void AddLostConstructor(ClassDeclaration classNode)
+        {
+            Constructor constructor = classNode.GetConstructor();
+            List<ClassDeclaration> baseClasses = classNode.Project.GetInheritClasses(classNode);
+            if (constructor == null && baseClasses.Count > 0)
+            {
+                var baseClass = baseClasses.Find(c =>
+                {
+                    var ctor = c.GetConstructor();
+                    return (ctor != null && ctor.Parameters.Count > 0);
+                });
+
+                if (baseClass != null)
+                {
+                    Constructor baseCtor = baseClass.GetConstructor();
+                    Constructor newCtor = (Constructor)NodeHelper.CreateNode((JObject)baseCtor.TsNode.DeepClone());
+
+                    CallExpression baseNode = (CallExpression)NodeHelper.CreateNode(NodeKind.CallExpression);
+                    baseNode.Expression = NodeHelper.CreateNode(NodeKind.SuperKeyword);
+                    foreach (Parameter parameter in baseCtor.Parameters)
+                    {
+                        baseNode.AddArgument(NodeHelper.CreateNode(NodeKind.Identifier, parameter.Name.Text));
+                    }
+
+                    newCtor.Base = baseNode;
+                    newCtor.Body.ClearStatements();
+                    ModifierNormalizer.NormalizeModify(newCtor);
+                    classNode.InsertMember(0, newCtor);
+                }
+            }
         }
 
         private void NormalizeConstructor(Constructor ctorNode)
@@ -46,9 +83,9 @@ namespace TypeScript.Syntax.Analysis
             props.Reverse();
             foreach (PropertyDeclaration prop in props)
             {
-                ExpressionStatement statement = NodeHelper.CreateNode(this.GetInitPropertyStatementString(prop.Name.Text)) as ExpressionStatement;
+                ExpressionStatement statement = (ExpressionStatement)NodeHelper.CreateNode(this.GetInitPropertyStatementString(prop.Name.Text));
                 (statement.Expression as BinaryExpression).Right = prop.Initializer;
-                ctorBlock.Statements.Insert(0, statement);
+                ctorBlock.InsertStatement(0, statement);
             }
         }
 
@@ -95,18 +132,12 @@ namespace TypeScript.Syntax.Analysis
 
         private void RemoveBaseStatement(Constructor ctorNode)
         {
-            List<Node> statements = (ctorNode.Body as Block).Statements;
-            for (int i = 0; i < statements.Count; i++)
+            Node baseInvokeStatement = ctorNode.Body.Statements.Find(s => this.IsBaseConstructor(s));
+            if (baseInvokeStatement != null)
             {
-                Node statement = statements[i];
-                if (this.IsBaseConstructor(statement))
-                {
-                    ctorNode.Body.RemoveChild(statement);
-                    Node baseNode = NodeHelper.CreateNode(statement.TsNode);
-                    baseNode.Parent = ctorNode;
-                    ctorNode.Base = baseNode;
-                    break;
-                }
+                ctorNode.Body.RemoveStatement(baseInvokeStatement);
+                Node baseNode = NodeHelper.CreateNode(baseInvokeStatement.TsNode);
+                ctorNode.Base = baseNode;
             }
         }
 

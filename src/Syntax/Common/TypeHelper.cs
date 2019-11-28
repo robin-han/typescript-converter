@@ -1,11 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace TypeScript.Syntax
 {
     public static class TypeHelper
     {
+        public static bool IsSameType(Node type1, Node type2)
+        {
+            if (type1 == null && type2 == null)
+            {
+                return true;
+            }
+            if (type1 == null || type2 == null)
+            {
+                return false;
+            }
+
+            type1 = TrimNullUnionType(type1);
+            type2 = TrimNullUnionType(type2);
+            string name1 = GetNormalizedTypeName(type1);
+            string name2 = GetNormalizedTypeName(type2);
+            if (name1 == name2)
+            {
+                return true;
+            }
+            if (Regex.IsMatch(name1, "^T\\d*$") || Regex.IsMatch(name2, "^T\\d*$")) //TODO: compare generic type
+            {
+                return true;
+            }
+            return false;
+        }
+
         public static Node TrimNullUnionType(Node type)
         {
             if (type.Kind == NodeKind.UnionType)
@@ -191,6 +218,7 @@ namespace TypeScript.Syntax
                     return node.GetValue("Type") as Node;
             }
         }
+
 
         private static Node GetElementAccessType(ElementAccessExpression elementAccess)
         {
@@ -460,7 +488,7 @@ namespace TypeScript.Syntax
                         elementType = GetNodeType(initValue);
                     }
                     elementType = elementType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
-                    elementType.Path = "type";
+                    elementType.NodeName = "type";
 
                     Node propSignature = NodeHelper.CreateNode(NodeKind.PropertySignature);
                     propSignature.AddChild(prop.Name.TsNode);
@@ -531,6 +559,9 @@ namespace TypeScript.Syntax
                     elementType = ((arrarrType as ArrayType).ElementType as ArrayType).ElementType;
                 }
             }
+
+            elementType = elementType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
+            elementType.NodeName = "elementType";
 
             return elementType;
         }
@@ -688,6 +719,49 @@ namespace TypeScript.Syntax
                 accessNames[i] = name.Trim();
             }
             return accessNames;
+        }
+
+        private static string GetNormalizedTypeName(Node type)
+        {
+            string name = "";
+            if (type.Kind == NodeKind.TypeLiteral)
+            {
+                List<string> itemTypes = new List<string>();
+                foreach (Node item in (type as TypeLiteral).Members)
+                {
+                    if (item.Kind == NodeKind.PropertySignature)
+                    {
+                        PropertySignature psItem = item as PropertySignature;
+                        string questionToken = psItem.QuestionToken != null ? "?" : "";
+                        itemTypes.Add($"{psItem.Name.Text}{questionToken}:{psItem.Type.Text}");
+                    }
+                    else
+                    {
+                        itemTypes.Add(item.Text);
+                    }
+                }
+                name = string.Join(',', itemTypes);
+            }
+            else
+            {
+                name = type.Text;
+            }
+
+            string ret = "";
+            string[] parts = name.TrimEnd(';').Split(" ", StringSplitOptions.RemoveEmptyEntries);
+            foreach (var part in parts)
+            {
+                int index = part.LastIndexOf('.');
+                if (index >= 0)
+                {
+                    ret += part.Substring(index + 1);
+                }
+                else
+                {
+                    ret += part;
+                }
+            }
+            return ret.Replace(" ", "");
         }
     }
 }

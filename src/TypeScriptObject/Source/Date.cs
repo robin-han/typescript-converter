@@ -20,6 +20,15 @@ namespace TypeScript.CSharp
         {
         }
 
+        public Date(String dateString)
+        {
+            if (!DateTime.TryParse(dateString, out DateTime dateTime))
+            {
+                throw new ArgumentException("Invalide Date");
+            }
+            this.__value__ = this._dt = dateTime;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Date"/> class.
         /// </summary>

@@ -17,7 +17,7 @@ namespace TypeScript.Syntax.Analysis
                 case NodeKind.SetAccessor:
                 case NodeKind.PropertyDeclaration:
                 case NodeKind.Constructor:
-                    this.NormalizeModify(node);
+                    NormalizeModify(node);
                     break;
 
                 default:
@@ -25,7 +25,7 @@ namespace TypeScript.Syntax.Analysis
             }
         }
 
-        private void NormalizeModify(Node node)
+        public static void NormalizeModify(Node node)
         {
             List<Node> modifiers = node.GetValue("Modifiers") as List<Node>;
             if (modifiers == null)

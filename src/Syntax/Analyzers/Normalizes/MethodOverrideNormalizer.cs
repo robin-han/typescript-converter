@@ -62,7 +62,7 @@ namespace TypeScript.Syntax.Analysis
 
             bool sameSignature = this.IsSameSignature(method, baseMethod);
             Node baseClass = baseMethod.Parent;
-            if ((baseClass.Kind == NodeKind.InterfaceDeclaration || baseMethod.HasModify(NodeKind.AbstractKeyword)) && !sameSignature)
+            if (baseMethod.HasModify(NodeKind.AbstractKeyword) && !sameSignature)
             {
                 //Error: Must has same signature with its base
             }
@@ -105,6 +105,7 @@ namespace TypeScript.Syntax.Analysis
                 return null;
             }
 
+            Node baseMethod = null;
             List<Node> baseTypes = project.GetInherits(classNode);
             foreach (Node baseType in baseTypes)
             {
@@ -112,29 +113,29 @@ namespace TypeScript.Syntax.Analysis
                 {
                     case NodeKind.ClassDeclaration:
                         List<Node> baseMethods = (baseType as ClassDeclaration).GetMembers(methodName);
+                        if (baseMethods.Count == 0)
+                        {
+                            break;
+                        }
 
                         if (method.Kind == NodeKind.MethodDeclaration)
                         {
                             Node mostLike = baseMethods.Find(
-                                b => b.Kind == NodeKind.MethodDeclaration &&
+                                b => b.Kind == method.Kind &&
                                 (b as MethodDeclaration).Parameters.Count == (method as MethodDeclaration).Parameters.Count);
-
                             if (mostLike != null)
                             {
                                 return mostLike;
                             }
+
+                            if (baseMethod == null)
+                            {
+                                baseMethod = baseMethods[0];
+                            }
                         }
-                        if (baseMethods.Count > 0)
+                        else
                         {
                             return baseMethods[0];
-                        }
-                        break;
-
-                    case NodeKind.InterfaceDeclaration:
-                        Node baseMethod = (baseType as InterfaceDeclaration).GetMember(methodName);
-                        if (baseMethod != null)
-                        {
-                            return baseMethod;
                         }
                         break;
 
@@ -143,7 +144,7 @@ namespace TypeScript.Syntax.Analysis
                 }
             }
 
-            return null;
+            return baseMethod;
         }
 
         private bool IsSameSignature(Node method, Node baseMethod)
@@ -193,28 +194,8 @@ namespace TypeScript.Syntax.Analysis
         {
             Node type1 = node1.GetValue("Type") as Node;
             Node type2 = node2.GetValue("Type") as Node;
-            if (type1 == null && type2 == null)
-            {
-                return true;
-            }
-            if (type1 == null || type2 == null)
-            {
-                return false;
-            }
 
-            type1 = TypeHelper.TrimNullUnionType(type1);
-            type2 = TypeHelper.TrimNullUnionType(type2);
-            string name1 = this.NormalizeTypeName(type1.Text);
-            string name2 = this.NormalizeTypeName(type2.Text);
-            if (name1 == name2)
-            {
-                return true;
-            }
-            if (Regex.IsMatch(name1, "^T\\d*$") || Regex.IsMatch(name2, "^T\\d*$")) //TODO: compare generic type
-            {
-                return true;
-            }
-            return false;
+            return TypeHelper.IsSameType(type1, type2);
         }
 
         private bool IsSameTypeParameters(Node method1, Node method2)
@@ -277,35 +258,5 @@ namespace TypeScript.Syntax.Analysis
             return true;
         }
 
-        private string NormalizeClassName(string name)
-        {
-            string ret = name;
-            int genericIndex = name.IndexOf("<");
-            if (genericIndex >= 0)
-            {
-                ret = name.Substring(0, genericIndex);
-            }
-            string[] parts = ret.Split('.');
-            return parts[parts.Length - 1].Trim();
-        }
-
-        private string NormalizeTypeName(string name)
-        {
-            string ret = "";
-            string[] parts = name.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-            foreach (var part in parts)
-            {
-                int index = part.LastIndexOf('.');
-                if (index >= 0)
-                {
-                    ret += part.Substring(index + 1);
-                }
-                else
-                {
-                    ret += part;
-                }
-            }
-            return ret.Replace(" ", "");
-        }
     }
 }

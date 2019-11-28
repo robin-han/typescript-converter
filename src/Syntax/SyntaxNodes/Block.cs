@@ -51,6 +51,33 @@ namespace TypeScript.Syntax
             }
         }
 
+
+        public void AddStatement(Node statement)
+        {
+            statement.Parent = this;
+            this.Statements.Add(statement);
+        }
+
+        public void InsertStatement(int index, Node statement)
+        {
+            statement.Parent = this;
+            this.Statements.Insert(index, statement);
+        }
+
+        public void ClearStatements()
+        {
+            this.Statements.Clear();
+        }
+
+        public void RemoveStatement(Node statement)
+        {
+            this.Statements.Remove(statement);
+        }
+
+        public void RemoveStatementAt(int index)
+        {
+            this.Statements.RemoveAt(index);
+        }
     }
 }
 

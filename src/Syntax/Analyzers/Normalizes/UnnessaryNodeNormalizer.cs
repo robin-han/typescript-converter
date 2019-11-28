@@ -58,21 +58,18 @@ namespace TypeScript.Syntax.Analysis
 
         private void RemoveClassMembers(ClassDeclaration classNode)
         {
-            for (int i = 0; i < classNode.Members.Count; i++)
+            classNode.RemoveAllMembers(member =>
             {
-                Node member = classNode.Members[i];
-
                 switch (member.Kind)
                 {
                     case NodeKind.SemicolonClassElement: //;
                     case NodeKind.IndexSignature: //ley
-                        classNode.Members.RemoveAt(i--);
-                        break;
+                        return true;
 
                     default:
-                        break;
+                        return false;
                 }
-            }
+            });
         }
     }
 

@@ -215,6 +215,36 @@ namespace TypeScript.Syntax
             return ret;
         }
 
+        public void AddMember(Node member)
+        {
+            member.Parent = this;
+            this.Members.Add(member);
+        }
+
+        public void InsertMember(int index, Node member)
+        {
+            member.Parent = this;
+            this.Members.Insert(index, member);
+        }
+
+        public void InsertMembers(int index, List<Node> members)
+        {
+            foreach (var mem in members)
+            {
+                mem.Parent = this;
+            }
+            this.Members.InsertRange(index, members);
+        }
+
+        public void RemoveMemberAt(int index)
+        {
+            this.Members.RemoveAt(index);
+        }
+
+        public int RemoveAllMembers(Predicate<Node> match)
+        {
+            return this.Members.RemoveAll(match);
+        }
     }
 }
 

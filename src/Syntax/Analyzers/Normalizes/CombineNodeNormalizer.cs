@@ -47,11 +47,11 @@ namespace TypeScript.Syntax.Analysis
                     getSestAccessor.Parent = classNode;
                     getSestAccessor.AddChild(getAccessor.TsNode);
                     getSestAccessor.AddChild(setAccessor.TsNode);
-                    classNode.Members.Insert(i++, getSestAccessor);
+                    classNode.InsertMember(i++, getSestAccessor);
                 }
             }
 
-            classNode.Members.RemoveAll(m => removedNodes.IndexOf(m) >= 0);
+            classNode.RemoveAllMembers(m => removedNodes.IndexOf(m) >= 0);
         }
         #endregion
     }
