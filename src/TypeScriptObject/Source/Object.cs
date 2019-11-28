@@ -12,6 +12,11 @@
         /// 
         /// </summary>
         public static readonly Number NaN = Number.NaN;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static readonly Number Infinity = Number.POSITIVE_INFINITY;
         #endregion
 
         #region Fields
@@ -20,6 +25,7 @@
         /// </summary>
         protected object __value__;
         #endregion
+
 
         #region Operator Implicit
         /// <summary>
@@ -46,6 +52,58 @@
         public static bool operator !=(Object obj1, Object obj2)
         {
             return !Equals(obj1, obj2);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static bool operator ==(object obj1, Object obj2)
+        {
+            if (obj1 is Undefined)
+            {
+                return IsUndefined(obj2) || IsNull(obj2);
+            }
+
+            return Equals(ToObject(obj1), obj2);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static bool operator !=(object obj1, Object obj2)
+        {
+            if (obj1 is Undefined)
+            {
+                return !(IsUndefined(obj2) || IsNull(obj2));
+            }
+
+            return !Equals(ToObject(obj1), obj2);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static bool operator ==(Object obj1, object obj2)
+        {
+            if (obj2 is Undefined)
+            {
+                return IsUndefined(obj1) || IsNull(obj1);
+            }
+
+            return Equals(obj1, ToObject(obj2));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static bool operator !=(Object obj1, object obj2)
+        {
+            if (obj2 is Undefined)
+            {
+                return !(IsUndefined(obj1) || IsNull(obj1));
+            }
+
+            return !Equals(obj1, ToObject(obj2));
         }
         #endregion
 
@@ -223,7 +281,7 @@
         /// </summary>
         public static Number ToNumber(object obj)
         {
-            String name = TypeOf(obj);
+            string name = TypeOf(obj);
             if (name == "number")
             {
                 return Number.parseFloat((Number)obj);
@@ -233,6 +291,35 @@
                 return Number.parseFloat((String)obj);
             }
             return NaN;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static Object ToObject(object obj)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+
+            switch (obj.GetType().FullName)
+            {
+                case "System.Double":
+                case "System.Int32":
+                case "System.Int64":
+                    return (Number)System.Convert.ToDouble(obj);
+
+                case "System.String":
+                    return (String)System.Convert.ToString(obj);
+
+                case "System.DateTime":
+                    return (Date)System.Convert.ToDateTime(obj);
+
+                default:
+                    return obj as Object;
+
+            }
         }
 
         /// <summary>

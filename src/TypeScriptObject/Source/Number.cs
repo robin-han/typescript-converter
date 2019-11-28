@@ -154,6 +154,18 @@ namespace TypeScript.CSharp
         /// <summary>
         /// 
         /// </summary>
+        public static implicit operator Number(double? value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            return new Number(value.Value);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static implicit operator double(Number num)
         {
             return Convert.ToDouble(num.__value__);
