@@ -116,14 +116,10 @@ namespace TypeScript.Syntax.Analysis
                     if (this.CanSeparate(method))
                     {
                         changedMethods.Add(method);
-                        classNode.Members.RemoveAt(i);
+                        classNode.RemoveMemberAt(i);
 
                         List<Node> newMembers = this.Separate(method);
-                        foreach (var mem in newMembers)
-                        {
-                            mem.Parent = classNode;
-                        }
-                        classNode.Members.InsertRange(i++, newMembers);
+                        classNode.InsertMembers(i++, newMembers);
                     }
                 }
             }
@@ -151,14 +147,10 @@ namespace TypeScript.Syntax.Analysis
                 if (CanSeparate(method))
                 {
                     int index = @interface.Members.IndexOf(method);
-                    @interface.Members.RemoveAt(index);
+                    @interface.RemoveMemberAt(index);
 
                     List<Node> newMembers = this.Separate(method);
-                    foreach (var mem in newMembers)
-                    {
-                        mem.Parent = @interface;
-                    }
-                    @interface.Members.InsertRange(index, newMembers);
+                    @interface.InsertMembers(index, newMembers);
                 }
             }
         }
@@ -184,26 +176,72 @@ namespace TypeScript.Syntax.Analysis
             }
             else
             {
-                JObject getMethod = new JObject(method.TsNode);
-                getMethod["parameters"][0].Remove();
-                getMethod["body"]["statements"] = getMethod["body"]["statements"][0]["thenStatement"]["statements"];
-                newMembers.Add(NodeHelper.CreateNode(getMethod));
+                if (method.Body.Statements.Count > 0 && method.Body.Statements[0].Kind == NodeKind.IfStatement) // If (arguments....)
+                {
+                    IfStatement ifStatement = method.Body.Statements[0] as IfStatement;
+                    bool ifStatementIsGet = this.IfStatementIsGet(ifStatement);
 
-                JObject setMethod = new JObject(method.TsNode);
-                setMethod.Remove("type");
-                (setMethod["parameters"][0] as JObject).Remove("questionToken");
-                JToken elseStatement = setMethod["body"]["statements"][0]["elseStatement"];
-                if (elseStatement["kind"].ToObject<string>() == "Block")
-                {
-                    setMethod["body"]["statements"] = elseStatement = elseStatement["statements"];
+                    // then
+                    JObject thenTsNode = new JObject(method.TsNode);
+                    if (ifStatementIsGet)
+                    {
+                        thenTsNode["parameters"][0].Remove();
+                    }
+                    else
+                    {
+                        thenTsNode.Remove("type");
+                        (thenTsNode["parameters"][0] as JObject).Remove("questionToken");
+                    }
+                    thenTsNode["body"]["statements"] = thenTsNode["body"]["statements"][0]["thenStatement"]["statements"];
+                    newMembers.Add(NodeHelper.CreateNode(thenTsNode));
+
+                    // else
+                    JObject elseTsNode = new JObject(method.TsNode);
+                    if (ifStatementIsGet)
+                    {
+                        elseTsNode.Remove("type");
+                        (elseTsNode["parameters"][0] as JObject).Remove("questionToken");
+                    }
+                    else
+                    {
+                        elseTsNode["parameters"][0].Remove();
+                    }
+                    JToken elseStatement = elseTsNode["body"]["statements"][0]["elseStatement"];
+                    bool hasElseStatement = elseStatement != null;
+                    if (hasElseStatement)
+                    {
+                        if (elseStatement["kind"].ToObject<string>() == "Block")
+                        {
+                            elseTsNode["body"]["statements"] = elseStatement = elseStatement["statements"];
+                        }
+                        else
+                        {
+                            elseTsNode["body"]["statements"][0] = elseStatement;
+                        }
+                    }
+                    MethodDeclaration elseMethod = NodeHelper.CreateNode(elseTsNode) as MethodDeclaration;
+                    elseMethod.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+                    if (!hasElseStatement)
+                    {
+                        elseMethod.Body.RemoveStatementAt(0);
+                    }
+                    newMembers.Add(elseMethod);
                 }
-                else
-                {
-                    setMethod["body"]["statements"][0] = elseStatement;
-                }
-                MethodDeclaration newSet = NodeHelper.CreateNode(setMethod) as MethodDeclaration;
-                newSet.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
-                newMembers.Add(newSet);
+                //else
+                //{
+                //    JObject getMethodTsNode = new JObject(method.TsNode);
+                //    getMethodTsNode["parameters"][0].Remove();
+                //    getMethodTsNode["body"]["statements"] = getMethodTsNode["body"]["statements"];
+                //    newMembers.Add(NodeHelper.CreateNode(getMethodTsNode));
+
+                //    JObject setMethodTsNode = new JObject(method.TsNode);
+                //    setMethodTsNode.Remove("type");
+                //    (setMethodTsNode["parameters"][0] as JObject).Remove("questionToken");
+                //    MethodDeclaration setMethod = NodeHelper.CreateNode(setMethodTsNode) as MethodDeclaration;
+                //    setMethod.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+                //    setMethod.Body.ClearStatements();
+                //    newMembers.Add(setMethod);
+                //}
             }
 
             return newMembers;
@@ -233,38 +271,48 @@ namespace TypeScript.Syntax.Analysis
             }
 
             Parameter parameter = method.Parameters[0] as Parameter;
-            Block body = method.Body as Block;
-
-            if (method.IsAbstract && parameter.IsOptional)
+            bool sameType = TypeHelper.IsSameType(parameter.Type, method.Type);
+            if (method.IsAbstract && parameter.IsOptional && sameType)
             {
                 return true;
             }
 
-            if (!parameter.IsOptional || body == null || body.Statements.Count != 1 || body.Statements[0].Kind != NodeKind.IfStatement)
+            Block body = method.Body;
+            if (parameter.IsOptional && sameType && body.Statements.Count == 1 && body.Statements[0].Kind == NodeKind.IfStatement)
             {
-                return false;
+                IfStatement ifStatement = body.Statements[0] as IfStatement;
+                return (this.IfStatementIsGet(ifStatement) || this.IfStatementIsSet(ifStatement));
             }
 
-            IfStatement ifStatement = body.Statements[0] as IfStatement;
-            if (ifStatement.ElseStatement == null)
-            {
-                return false;
-            }
-            string exprText = ifStatement.Expression.Text.Replace(" ", "");
-            return (exprText == "arguments.length<=0" || exprText == "arguments.length==0" || exprText == "arguments.length===0");
+            return false;
         }
 
         private bool CanSeparate(MethodSignature method)
         {
-            if (method.Parameters.Count == 1)
+            if (method.Parameters.Count != 1)
             {
-                Parameter parameter = method.Parameters[0] as Parameter;
-                if (parameter.IsOptional && parameter.Type.Text == method.Type.Text)
-                {
-                    return true;
-                }
+                return false;
             }
+
+            Parameter parameter = method.Parameters[0] as Parameter;
+            if (parameter.IsOptional && TypeHelper.IsSameType(parameter.Type, method.Type))
+            {
+                return true;
+            }
+
             return false;
+        }
+
+        private bool IfStatementIsGet(IfStatement ifStatement)
+        {
+            string exprText = ifStatement.Expression.Text.Replace(" ", "");
+            return (exprText == "arguments.length<=0" || exprText == "arguments.length==0" || exprText == "arguments.length===0");
+        }
+
+        private bool IfStatementIsSet(IfStatement ifStatement)
+        {
+            string exprText = ifStatement.Expression.Text.Replace(" ", "");
+            return (exprText == "arguments.length>0");
         }
         #endregion
     }

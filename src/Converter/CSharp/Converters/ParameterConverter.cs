@@ -18,6 +18,10 @@ namespace TypeScript.Converter.CSharp
             TypeSyntax csType = node.Type.ToCsNode<TypeSyntax>();
 
             Node initializer = node.Initializer;
+            if (node.IsOptional && initializer == null)
+            {
+                initializer = NodeHelper.CreateNode(NodeKind.NullKeyword);
+            }
             if (initializer != null)
             {
                 csParameter = csParameter.WithDefault(SyntaxFactory.EqualsValueClause(initializer.ToCsNode<ExpressionSyntax>()));

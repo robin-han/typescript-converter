@@ -20,16 +20,20 @@ namespace TypeScript.Converter.CSharp
             }
 
             ConstructorDeclarationSyntax csCtor = SyntaxFactory.ConstructorDeclaration(tsClassNode.Name.Text);
-
             csCtor = csCtor.AddModifiers(node.Modifiers.ToCsNodes<SyntaxToken>());
             csCtor = csCtor.AddParameterListParameters(node.Parameters.ToCsNodes<ParameterSyntax>());
 
-            ExpressionStatement baseNode = node.Base as ExpressionStatement;
+            CallExpression baseNode =
+                node.Base is ExpressionStatement
+                ? ((ExpressionStatement)node.Base).Expression as CallExpression
+                : node.Base as CallExpression;
+
             if (baseNode != null)
             {
-                ArgumentSyntax[] csArgs = this.ToArgumentList((baseNode.Expression as CallExpression).Arguments);
+                ArgumentSyntax[] csArgs = this.ToArgumentList(baseNode.Arguments);
                 csCtor = csCtor.WithInitializer(SyntaxFactory.ConstructorInitializer(SyntaxKind.BaseConstructorInitializer).AddArgumentListArguments(csArgs));
             }
+
             if (node.JsDoc.Count > 0)
             {
                 csCtor = csCtor.WithLeadingTrivia(SyntaxFactory.Trivia(node.JsDoc[0].ToCsNode<DocumentationCommentTriviaSyntax>()));

@@ -11,6 +11,7 @@ namespace TypeScript.Syntax
     public class Node
     {
         #region Fields
+        private string _nodeName = null;
         private string _text = null;
         private Document _document = null;
         #endregion
@@ -84,13 +85,18 @@ namespace TypeScript.Syntax
         public string Path
         {
             get;
-            internal set;
+            private set;
         }
 
         public string NodeName
         {
             get
             {
+                if (this._nodeName != null)
+                {
+                    return this._nodeName;
+                }
+
                 string name = this.Path.Split(".").Last();
                 Match match = Regex.Match(name, @"(.*)\[\d+\]"); ;
                 if (match.Success)
@@ -99,17 +105,22 @@ namespace TypeScript.Syntax
                 }
                 return name;
             }
+            internal set
+            {
+                this._nodeName = value;
+            }
         }
 
         public string Text
         {
             get
             {
-                if (this._text == null)
+                if (this._text != null)
                 {
-                    this._text = this.GetText();
+                    return this._text;
                 }
-                return this._text;
+
+                return this.GetText();
             }
             internal set
             {

@@ -59,7 +59,13 @@ namespace TypeScript.Syntax
                     break;
             }
         }
-       
+
+        public void AddTypeAlias(Node node)
+        {
+            node.Parent = this;
+            this.TypeAliases.Add(node);
+        }
+
     }
 }
 

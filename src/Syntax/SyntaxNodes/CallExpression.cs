@@ -77,6 +77,42 @@ namespace TypeScript.Syntax
                     break;
             }
         }
+
+        #region TypeArguments
+        public void AddTypeArgument(Node typeArgument)
+        {
+            typeArgument.Parent = this;
+            this.TypeArguments.Add(typeArgument);
+        }
+        #endregion
+
+        #region Arguments
+        public void AddArgument(Node argument)
+        {
+            argument.Parent = this;
+            this.Arguments.Add(argument);
+        }
+
+        public void AddArguments(IEnumerable<Node> arguments)
+        {
+            foreach (var argument in arguments)
+            {
+                argument.Parent = this;
+            }
+            this.Arguments.AddRange(arguments);
+        }
+
+        public void RemoveArgumentAt(int index)
+        {
+            this.Arguments.RemoveAt(index);
+        }
+
+        public void ClearArguments()
+        {
+            this.Arguments.Clear();
+        }
+        #endregion
+
     }
 }
 
