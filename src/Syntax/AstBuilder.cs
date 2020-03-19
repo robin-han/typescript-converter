@@ -17,7 +17,7 @@ namespace TypeScript.Syntax
         {
             JObject jsonObject = JObject.Parse(File.ReadAllText(path));
             Node root = this.Build(jsonObject);
-            return new Document(path, root);
+            return new Document(path, (SourceFile)root);
         }
 
         public Node Build(JToken jsonToken)

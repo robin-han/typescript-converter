@@ -132,7 +132,7 @@ namespace TypeScript.CSharp
                 {
                     throw new ArgumentException("length must be integer.");
                 }
-                
+
                 int count = this._list.Count;
                 if (newCount < count)
                 {
@@ -201,7 +201,7 @@ namespace TypeScript.CSharp
         /// <summary>
         /// 
         /// </summary>
-        public static implicit operator T[] (Array<T> array)
+        public static implicit operator T[](Array<T> array)
         {
             return array == null ? null : array._list.ToArray();
         }
@@ -487,6 +487,17 @@ namespace TypeScript.CSharp
         /// <summary>
         /// 
         /// </summary>
+        public Array<T> filter(Func<T, int, bool> predicate)
+        {
+            this.CheckUndefined();
+
+            var items = this._list.Where(predicate);
+            return new Array<T>(items);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public T find(Predicate<T> match)
         {
             this.CheckUndefined();
@@ -654,6 +665,18 @@ namespace TypeScript.CSharp
             this.CheckUndefined();
 
             this.InternalAddRange(items);
+
+            return this._list.Count;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Number push(T item)
+        {
+            this.CheckUndefined();
+
+            this.InternalAdd(item);
 
             return this._list.Count;
         }
@@ -977,7 +1000,7 @@ namespace TypeScript.CSharp
             int count = (int)deleteCount;
             Array<T> ret = items.GetRange(index, count);
             items.RemoveRange(index, count);
-            items.AddRange(addItems);
+            items.InsertRange(index, addItems);
             return ret;
         }
 
@@ -1000,6 +1023,38 @@ namespace TypeScript.CSharp
             return this;
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public override String toString()
+        {
+            List<string> stringItems = new List<string>();
+            foreach (T item in this._list)
+            {
+                if (IsNull(item))
+                {
+                    stringItems.Add("");
+                }
+                else if (item is Object)
+                {
+                    if (IsUndefined(item as Object))
+                    {
+                        stringItems.Add("");
+                    }
+                    else
+                    {
+                        stringItems.Add((item as Object).toString());
+                    }
+                }
+                else
+                {
+                    stringItems.Add(item.ToString());
+                }
+            }
+            return string.Join(",", stringItems);
+        }
         #region Private Methods
         private void InternalAdd(T item)
         {

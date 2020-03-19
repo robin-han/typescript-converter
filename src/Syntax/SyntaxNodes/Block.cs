@@ -52,15 +52,21 @@ namespace TypeScript.Syntax
         }
 
 
-        public void AddStatement(Node statement)
+        public void AddStatement(Node statement, bool changeParent = true)
         {
-            statement.Parent = this;
+            if (changeParent)
+            {
+                statement.Parent = this;
+            }
             this.Statements.Add(statement);
         }
 
-        public void InsertStatement(int index, Node statement)
+        public void InsertStatement(int index, Node statement, bool changeParent = true)
         {
-            statement.Parent = this;
+            if (changeParent)
+            {
+                statement.Parent = this;
+            }
             this.Statements.Insert(index, statement);
         }
 

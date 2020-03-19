@@ -79,6 +79,24 @@ namespace TypeScript.CSharp
         #endregion
 
         #region Public Method
+
+        ///<summary>
+        ///
+        ///</summary>
+        public override String toString()
+        {
+            CheckUndefined();
+
+            if ((bool)this.__value__ == true)
+            {
+                return "true";
+            }
+            else
+            {
+                return "false";
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>

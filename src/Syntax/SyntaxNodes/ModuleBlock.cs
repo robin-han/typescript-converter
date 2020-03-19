@@ -60,9 +60,12 @@ namespace TypeScript.Syntax
             }
         }
 
-        public void AddTypeAlias(Node node)
+        public void AddTypeAlias(Node node, bool changeParent = true)
         {
-            node.Parent = this;
+            if (changeParent)
+            {
+                node.Parent = this;
+            }
             this.TypeAliases.Add(node);
         }
 

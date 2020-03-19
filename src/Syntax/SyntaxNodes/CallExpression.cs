@@ -7,8 +7,6 @@ namespace TypeScript.Syntax
 {
     public class CallExpression : Expression
     {
-        private Node _expression;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -17,18 +15,8 @@ namespace TypeScript.Syntax
 
         public Node Expression
         {
-            get
-            {
-                return this._expression;
-            }
-            internal set
-            {
-                this._expression = value;
-                if (this._expression != null)
-                {
-                    this._expression.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public List<Node> TypeArguments
@@ -78,26 +66,44 @@ namespace TypeScript.Syntax
             }
         }
 
-        #region TypeArguments
-        public void AddTypeArgument(Node typeArgument)
+        public void SetExpression(Node expression, bool changeParent = true)
         {
-            typeArgument.Parent = this;
+            this.Expression = expression;
+            if (changeParent && this.Expression != null)
+            {
+                this.Expression.Parent = this;
+            }
+        }
+
+        #region TypeArguments
+        public void AddTypeArgument(Node typeArgument, bool changeParent = true)
+        {
+            if (changeParent)
+            {
+                typeArgument.Parent = this;
+            }
             this.TypeArguments.Add(typeArgument);
         }
         #endregion
 
         #region Arguments
-        public void AddArgument(Node argument)
+        public void AddArgument(Node argument, bool changeParent = true)
         {
-            argument.Parent = this;
+            if (changeParent)
+            {
+                argument.Parent = this;
+            }
             this.Arguments.Add(argument);
         }
 
-        public void AddArguments(IEnumerable<Node> arguments)
+        public void AddArguments(IEnumerable<Node> arguments, bool changeParent = true)
         {
-            foreach (var argument in arguments)
+            if (changeParent)
             {
-                argument.Parent = this;
+                foreach (var argument in arguments)
+                {
+                    argument.Parent = this;
+                }
             }
             this.Arguments.AddRange(arguments);
         }

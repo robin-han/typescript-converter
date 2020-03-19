@@ -65,16 +65,17 @@ namespace TypeScript.Syntax
                     {
                         if (prop.GetValue(this) is Node node && !children.Contains(node))
                         {
-                            if (node.Parent != this) { node.Parent = this; };
-                            children.Add(node);
+                            if (node.Parent == this)
+                            {
+                                children.Add(node);
+                            }
                         }
                     }
                     else if (TypeHelper.IsNodeListType(propType))
                     {
                         if (prop.GetValue(this) is List<Node> nodes && nodes.Count > 0)
                         {
-                            nodes.ForEach(n => { if (n.Parent != this) { n.Parent = this; } });
-                            children.AddRange(nodes);
+                            nodes.ForEach(n => { if (n.Parent == this) { children.Add(n); } });
                         }
                     }
                 }

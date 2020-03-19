@@ -73,7 +73,8 @@ namespace TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = TypeHelper.GetNodeType(node);
+                Node type = TypeHelper.GetNodeType(node);
+                node.SetType(type, type.Parent == null);
             }
         }
 
@@ -81,7 +82,7 @@ namespace TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+                node.SetType(NodeHelper.CreateNode(NodeKind.VoidKeyword));
             }
         }
 
@@ -89,7 +90,7 @@ namespace TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = NodeHelper.CreateNode(NodeKind.AnyKeyword);
+                node.SetType(NodeHelper.CreateNode(NodeKind.AnyKeyword));
             }
         }
 
@@ -98,7 +99,7 @@ namespace TypeScript.Syntax.Analysis
             if (node.Type == null)
             {
                 Node type = node.GetAccessor.Type ?? node.SetAccessor.Parameters[0].Type;
-                node.Type = type;
+                node.SetType(type, false);
             }
         }
 
@@ -106,7 +107,7 @@ namespace TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = NodeHelper.CreateNode(NodeKind.AnyKeyword);
+                node.SetType(NodeHelper.CreateNode(NodeKind.AnyKeyword));
             }
         }
 
@@ -114,7 +115,7 @@ namespace TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+                node.SetType(NodeHelper.CreateNode(NodeKind.VoidKeyword));
             }
         }
 
@@ -122,7 +123,7 @@ namespace TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+                node.SetType(NodeHelper.CreateNode(NodeKind.VoidKeyword));
             }
         }
 
@@ -130,7 +131,8 @@ namespace TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = TypeHelper.GetNodeType(node);
+                Node type = TypeHelper.GetNodeType(node);
+                node.SetType(type, type.Parent == null);
             }
         }
 
@@ -138,7 +140,7 @@ namespace TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = NodeHelper.CreateNode(NodeKind.AnyKeyword);
+                node.SetType(NodeHelper.CreateNode(NodeKind.AnyKeyword));
             }
         }
 
@@ -152,7 +154,7 @@ namespace TypeScript.Syntax.Analysis
                     type = TypeHelper.GetNodeType(node.Initializer);
                 }
                 type = type ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
-                node.Type = type;
+                node.SetType(type, type.Parent == null);
             }
         }
 
@@ -160,7 +162,7 @@ namespace TypeScript.Syntax.Analysis
         {
             if (node.Type == null)
             {
-                node.Type = NodeHelper.CreateNode(NodeKind.AnyKeyword);
+                node.SetType(NodeHelper.CreateNode(NodeKind.AnyKeyword));
             }
         }
 
@@ -175,11 +177,11 @@ namespace TypeScript.Syntax.Analysis
                     {
                         this.Visit(variableNode);
                     }
-                    node.Type = variableNode.Type;
+                    node.SetType(variableNode.Type, false);
                 }
                 else
                 {
-                    node.Type = NodeHelper.CreateNode(NodeKind.AnyKeyword);
+                    node.SetType(NodeHelper.CreateNode(NodeKind.AnyKeyword));
                 }
             }
         }
@@ -190,7 +192,7 @@ namespace TypeScript.Syntax.Analysis
             {
                 if (node.Parent.Kind == NodeKind.CatchClause)
                 {
-                    node.Type = NodeHelper.CreateNode(NodeKind.Identifier, "Exception");
+                    node.SetType(NodeHelper.CreateNode(NodeKind.Identifier, "Exception"));
                 }
                 else
                 {
@@ -201,7 +203,7 @@ namespace TypeScript.Syntax.Analysis
                     }
                     type = type ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
 
-                    node.Type = type;
+                    node.SetType(type, type.Parent == null);
                 }
             }
         }

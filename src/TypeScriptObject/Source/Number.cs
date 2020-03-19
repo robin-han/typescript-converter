@@ -467,7 +467,7 @@ namespace TypeScript.CSharp
         /// </summary>
         /// <param name="provider"></param>
         /// <returns></returns>
-        public String ToString(IFormatProvider provider)
+        public string ToString(IFormatProvider provider)
         {
             this.CheckUndefined();
 
@@ -499,6 +499,20 @@ namespace TypeScript.CSharp
             return ToDouble(this).ToString(format, provider);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public override String toString()
+        {
+            this.CheckUndefined();
+
+            if (IsNaN(this))
+            {
+                return "NaN";
+            }
+
+            return this.__value__.ToString();
+        }
         #endregion
 
         #region Public Methods

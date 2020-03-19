@@ -70,6 +70,14 @@ namespace TypeScript.Converter.CSharp
                     return SyntaxFactory.IdentifierName("RegExpArray");
 
                 default:
+                    // Default Generic Type
+                    string GenericTypeHeader = "DefaultGenericType_";
+                    if (typeText.StartsWith(GenericTypeHeader))
+                    {
+                        string genericType = typeText.Substring(GenericTypeHeader.Length);
+                        return SyntaxFactory.ReturnStatement(SyntaxFactory.DefaultExpression(SyntaxFactory.IdentifierName(genericType)));
+                    }
+
                     return node.TypeName.ToCsNode<TypeSyntax>();
             }
         }

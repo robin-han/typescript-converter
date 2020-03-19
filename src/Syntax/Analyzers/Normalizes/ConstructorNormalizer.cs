@@ -50,13 +50,13 @@ namespace TypeScript.Syntax.Analysis
                     Constructor newCtor = (Constructor)NodeHelper.CreateNode((JObject)baseCtor.TsNode.DeepClone());
 
                     CallExpression baseNode = (CallExpression)NodeHelper.CreateNode(NodeKind.CallExpression);
-                    baseNode.Expression = NodeHelper.CreateNode(NodeKind.SuperKeyword);
+                    baseNode.SetExpression(NodeHelper.CreateNode(NodeKind.SuperKeyword));
                     foreach (Parameter parameter in baseCtor.Parameters)
                     {
                         baseNode.AddArgument(NodeHelper.CreateNode(NodeKind.Identifier, parameter.Name.Text));
                     }
 
-                    newCtor.Base = baseNode;
+                    newCtor.SetBase(baseNode);
                     newCtor.Body.ClearStatements();
                     ModifierNormalizer.NormalizeModify(newCtor);
                     classNode.InsertMember(0, newCtor);
@@ -84,7 +84,7 @@ namespace TypeScript.Syntax.Analysis
             foreach (PropertyDeclaration prop in props)
             {
                 ExpressionStatement statement = (ExpressionStatement)NodeHelper.CreateNode(this.GetInitPropertyStatementString(prop.Name.Text));
-                (statement.Expression as BinaryExpression).Right = prop.Initializer;
+                (statement.Expression as BinaryExpression).SetRight(prop.Initializer, false);
                 ctorBlock.InsertStatement(0, statement);
             }
         }
@@ -137,7 +137,7 @@ namespace TypeScript.Syntax.Analysis
             {
                 ctorNode.Body.RemoveStatement(baseInvokeStatement);
                 Node baseNode = NodeHelper.CreateNode(baseInvokeStatement.TsNode);
-                ctorNode.Base = baseNode;
+                ctorNode.SetBase(baseNode);
             }
         }
 

@@ -17,6 +17,7 @@ namespace TypeScript.Converter.CSharp
             string text = node.Text;
             if (!string.IsNullOrEmpty(text))
             {
+                text = text.Replace("{", "{{").Replace("}", "}}").Replace("\"", "\\\"");
                 SyntaxToken textToken = SyntaxFactory.Token(SyntaxTriviaList.Empty, SyntaxKind.InterpolatedStringTextToken, text, text, SyntaxTriviaList.Empty);
                 return SyntaxFactory.InterpolatedStringText(textToken);
             }

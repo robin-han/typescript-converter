@@ -68,6 +68,21 @@ namespace TypeScript.Syntax
             }
         }
 
+
+        public ModuleBlock GetModuleBlock()
+        {
+            ModuleDeclaration md = this;
+            while (md != null)
+            {
+                if (md.Body.Kind == NodeKind.ModuleBlock)
+                {
+                    return md.Body as ModuleBlock;
+                }
+                md = md.Body as ModuleDeclaration;
+            }
+            return null;
+        }
+
     }
 }
 

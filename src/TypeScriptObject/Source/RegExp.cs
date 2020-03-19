@@ -39,20 +39,40 @@ namespace TypeScript.CSharp
         #endregion
 
         #region Properties
-        public string flags { get; }
+        public string flags
+        {
+            get;
+            private set;
+        }
 
-        public bool ignoreCase { get; }
+        public bool ignoreCase
+        {
+            get;
+            private set;
+        }
 
-        public bool multiline { get; }
+        public bool multiline
+        {
+            get;
+            private set;
+        }
 
-        public bool global { get; }
+        public bool global
+        {
+            get;
+            private set;
+        }
 
         public string source
         {
             get { return this.pattern; }
         }
 
-        public int lastIndex { get; private set; }
+        public int lastIndex
+        {
+            get;
+            private set;
+        }
         #endregion
 
         #region Methods
@@ -93,7 +113,14 @@ namespace TypeScript.CSharp
                 RegExpArray ret = new RegExpArray();
                 foreach (Group g in match.Groups)
                 {
-                    ret.Add(g.Value);
+                    if (g.Success)
+                    {
+                        ret.Add(g.Value);
+                    }
+                    else
+                    {
+                        ret.Add(null);
+                    }
                 }
                 ret.input = input;
                 ret.index = match.Index;

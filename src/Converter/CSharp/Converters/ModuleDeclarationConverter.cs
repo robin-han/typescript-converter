@@ -25,7 +25,7 @@ namespace TypeScript.Converter.CSharp
             }
 
             NamespaceDeclarationSyntax nsSyntax = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(ns));
-            ModuleBlock mb = this.GetModuleBlock(module);
+            ModuleBlock mb = module.GetModuleBlock();
             if (mb != null)
             {
                 nsSyntax = nsSyntax
@@ -45,20 +45,6 @@ namespace TypeScript.Converter.CSharp
                 md = md.Body as ModuleDeclaration;
             }
             return string.Join('.', parts);
-        }
-
-        private ModuleBlock GetModuleBlock(ModuleDeclaration module)
-        {
-            ModuleDeclaration md = module;
-            while (md != null)
-            {
-                if (md.Body.Kind == NodeKind.ModuleBlock)
-                {
-                    return md.Body as ModuleBlock;
-                }
-                md = md.Body as ModuleDeclaration;
-            }
-            return null;
         }
     }
 }

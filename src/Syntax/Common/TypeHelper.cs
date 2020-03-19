@@ -26,10 +26,11 @@ namespace TypeScript.Syntax
             {
                 return true;
             }
-            if (Regex.IsMatch(name1, "^T\\d*$") || Regex.IsMatch(name2, "^T\\d*$")) //TODO: compare generic type
+            if (Regex.IsMatch(name1, "^T\\d*$|TKey|<.*>$") || Regex.IsMatch(name2, "^T\\d*$|TKey|<.*>$")) //TODO: compare generic type
             {
                 return true;
             }
+
             return false;
         }
 
@@ -384,7 +385,7 @@ namespace TypeScript.Syntax
                 {
                     classNode = accessNode.Ancestor(NodeKind.ClassDeclaration);
                 }
-                else if (i== 0 && memberName == "super")
+                else if (i == 0 && memberName == "super")
                 {
                     ClassDeclaration thisClassNode = accessNode.Ancestor(NodeKind.ClassDeclaration) as ClassDeclaration;
                     classNode = thisClassNode == null ? null : project.GetBaseClass(thisClassNode);
@@ -457,7 +458,7 @@ namespace TypeScript.Syntax
             {
                 elementType = NodeHelper.CreateNode(NodeKind.AnyKeyword);
             }
-            arrayType.ElementType = elementType;
+            arrayType.SetElementType(elementType, elementType.Parent == null);
             return arrayType;
         }
 

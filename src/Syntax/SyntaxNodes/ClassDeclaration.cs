@@ -215,23 +215,32 @@ namespace TypeScript.Syntax
             return ret;
         }
 
-        public void AddMember(Node member)
+        public void AddMember(Node member, bool changeParent = true)
         {
-            member.Parent = this;
+            if (changeParent)
+            {
+                member.Parent = this;
+            }
             this.Members.Add(member);
         }
 
-        public void InsertMember(int index, Node member)
+        public void InsertMember(int index, Node member, bool changeParent = true)
         {
-            member.Parent = this;
+            if (changeParent)
+            {
+                member.Parent = this;
+            }
             this.Members.Insert(index, member);
         }
 
-        public void InsertMembers(int index, List<Node> members)
+        public void InsertMembers(int index, List<Node> members, bool changeParent = true)
         {
-            foreach (var mem in members)
+            if (changeParent)
             {
-                mem.Parent = this;
+                foreach (var mem in members)
+                {
+                    mem.Parent = this;
+                }
             }
             this.Members.InsertRange(index, members);
         }

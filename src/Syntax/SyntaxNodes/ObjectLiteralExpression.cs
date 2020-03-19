@@ -7,8 +7,6 @@ namespace TypeScript.Syntax
 {
     public class ObjectLiteralExpression : Expression
     {
-        private Node _type;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -29,18 +27,8 @@ namespace TypeScript.Syntax
 
         public Node Type
         {
-            get
-            {
-                return this._type;
-            }
-            internal set
-            {
-                this._type = value;
-                if (this._type != null)
-                {
-                    this._type.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
         #endregion
 
@@ -68,6 +56,15 @@ namespace TypeScript.Syntax
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;
+            }
+        }
+
+        public void SetType(Node type, bool changeParent = true)
+        {
+            this.Type = type;
+            if (changeParent && this.Type != null)
+            {
+                this.Type.Parent = this;
             }
         }
 

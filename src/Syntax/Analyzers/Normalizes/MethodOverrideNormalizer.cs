@@ -65,6 +65,7 @@ namespace TypeScript.Syntax.Analysis
             if (baseMethod.HasModify(NodeKind.AbstractKeyword) && !sameSignature)
             {
                 //Error: Must has same signature with its base
+                method.AddModify(NodeKind.OverrideKeyword);
             }
             else if (baseClass.Kind == NodeKind.ClassDeclaration)
             {

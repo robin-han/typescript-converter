@@ -29,6 +29,16 @@ namespace TypeScript.Converter.CSharp
                 }
                 return csObjNewExpr.WithInitializer(csInitExpr).AddArgumentListArguments();
             }
+
+
+            if (node.TypeArguments.Count > 0)
+            {
+                return SyntaxFactory
+                .ObjectCreationExpression(SyntaxFactory
+                    .GenericName(this.StripType(node.Type.Text))
+                    .AddTypeArgumentListArguments(node.TypeArguments.ToCsNodes<TypeSyntax>()))
+                .AddArgumentListArguments(this.ToArgumentList(node.Arguments));
+            }
             else
             {
                 return SyntaxFactory

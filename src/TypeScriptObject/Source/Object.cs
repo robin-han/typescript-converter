@@ -224,7 +224,7 @@
             }
             return base.ToString();
         }
-
+        
         #endregion
 
         #region Public Methods
@@ -235,6 +235,22 @@
         {
             return this as Array<T>;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>        
+        public virtual String toString()
+        {
+            return "[object Object]";
+        }
+
+        // /// <summary>
+        // /// 
+        // /// </summary>        
+        // public Object valueOf()
+        // {
+        //     return this;
+        // }
 
         /// <summary>
         /// 
@@ -281,6 +297,7 @@
         /// </summary>
         public static Number ToNumber(object obj)
         {
+            obj = ToObject(obj);
             string name = TypeOf(obj);
             if (name == "number")
             {
@@ -316,9 +333,11 @@
                 case "System.DateTime":
                     return (Date)System.Convert.ToDateTime(obj);
 
+                case "System.Boolean":
+                    return (Boolean)System.Convert.ToBoolean(obj);
+
                 default:
                     return obj as Object;
-
             }
         }
 
@@ -387,6 +406,7 @@
         #endregion
 
         #region Private Methods
+        // [System.Diagnostics.Conditional("DEBUG")]
         protected void CheckUndefined()
         {
             if (IsUndefined(this))

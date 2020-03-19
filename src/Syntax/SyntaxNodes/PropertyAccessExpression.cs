@@ -7,9 +7,6 @@ namespace TypeScript.Syntax
 {
     public class PropertyAccessExpression : Expression
     {
-        private Node _expression;
-        private Node _name;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -18,34 +15,14 @@ namespace TypeScript.Syntax
 
         public Node Expression
         {
-            get
-            {
-                return this._expression;
-            }
-            internal set
-            {
-                this._expression = value;
-                if (this._expression != null)
-                {
-                    this._expression.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public Node Name
         {
-            get
-            {
-                return this._name;
-            }
-            internal set
-            {
-                this._name = value;
-                if (this._name != null)
-                {
-                    this._name.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public string As
@@ -81,6 +58,24 @@ namespace TypeScript.Syntax
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;
+            }
+        }
+
+        public void SetExpression(Node expression, bool changeParent = true)
+        {
+            this.Expression = expression;
+            if (changeParent && this.Expression != null)
+            {
+                this.Expression.Parent = this;
+            }
+        }
+
+        public void SetName(Node name, bool changeParent = true)
+        {
+            this.Name = name;
+            if (changeParent && this.Name != null)
+            {
+                this.Name.Parent = this;
             }
         }
     }
