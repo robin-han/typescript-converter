@@ -60,6 +60,29 @@ namespace TypeScript.CSharp
         /// Initializes a new instance of the <see cref="Date"/> class.
         /// </summary>
         /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="hour">The hour.</param>
+        /// <param name="day">The day.</param>
+        public Date(Number year, Number month, Number day, Number hour) : this(year, month, day, hour, 0, 0)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Date"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="hour">The hour.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="min">The min.</param>
+        public Date(Number year, Number month, Number day, Number hour, Number min) : this(year, month, day, hour, min, 0)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Date"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
         /// <param name="month">The month (0 ~ 11).</param>
         /// <param name="day">The day.</param>
         /// <param name="hour">The hour.</param>
@@ -512,7 +535,7 @@ namespace TypeScript.CSharp
         /// <summary>
         /// 
         /// </summary>
-        public String toString()
+        public override String toString()
         {
             var date = this._dt.ToLongDateString();
             var time = this._dt.ToLongTimeString();

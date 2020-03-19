@@ -211,8 +211,8 @@ namespace TypeScript.CSharp
                 return -1;
             }
 
-            int index = GetText(this).LastIndexOf(GetText(str));
-            fromIndex = fromIndex < 0 ? 0 : 0;
+            int index = ((string)this).LastIndexOf(str);
+            fromIndex = fromIndex < 0 ? 0 : fromIndex;
             if (index >= 0 && fromIndex >= index)
             {
                 return index;
@@ -705,7 +705,7 @@ namespace TypeScript.CSharp
         /// <summary>
         /// 
         /// </summary>
-        public String toString()
+        public override String toString()
         {
             this.CheckUndefined();
 
@@ -726,7 +726,13 @@ namespace TypeScript.CSharp
         /// </summary>
         public static String fromCharCode(Number charCode)
         {
-            return Char.ConvertFromUtf32((int)charCode);
+            int codeValue = (int)charCode;
+            // U+D800 ~ U+DFFF
+            if (55296 <= codeValue && codeValue <= 57343)
+            {
+                return ((Char)codeValue).ToString();
+            }
+            return Char.ConvertFromUtf32(codeValue);
         }
 
         /// <summary>
