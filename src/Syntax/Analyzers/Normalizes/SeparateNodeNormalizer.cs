@@ -160,18 +160,18 @@ namespace TypeScript.Syntax.Analysis
             List<Node> newMembers = new List<Node>();
             if (method.IsAbstract)
             {
-                (method.Parameters[0] as Parameter).QuestionToken = null;
+                (method.Parameters[0] as Parameter).SetQuestionToken(null);
                 MethodDeclaration newGet = NodeHelper.CreateNode(NodeKind.MethodDeclaration) as MethodDeclaration;
                 newGet.Modifiers.AddRange(method.Modifiers);
-                newGet.Name = method.Name;
-                newGet.Type = method.Type;
+                newGet.SetName(NodeHelper.CreateNode(method.Name.TsNode));
+                newGet.SetType(NodeHelper.CreateNode(method.Type.TsNode));
                 newMembers.Add(newGet);
 
                 MethodDeclaration newSet = NodeHelper.CreateNode(NodeKind.MethodDeclaration) as MethodDeclaration;
                 newSet.Modifiers.AddRange(method.Modifiers);
-                newSet.Name = method.Name;
+                newSet.SetName(NodeHelper.CreateNode(method.Name.TsNode));
                 newSet.Parameters.AddRange(method.Parameters);
-                newSet.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+                newSet.SetType(NodeHelper.CreateNode(NodeKind.VoidKeyword));
                 newMembers.Add(newSet);
             }
             else
@@ -220,7 +220,7 @@ namespace TypeScript.Syntax.Analysis
                         }
                     }
                     MethodDeclaration elseMethod = NodeHelper.CreateNode(elseTsNode) as MethodDeclaration;
-                    elseMethod.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+                    elseMethod.SetType(NodeHelper.CreateNode(NodeKind.VoidKeyword));
                     if (!hasElseStatement)
                     {
                         elseMethod.Body.RemoveStatementAt(0);
@@ -252,8 +252,8 @@ namespace TypeScript.Syntax.Analysis
             List<Node> newMembers = new List<Node>();
 
             MethodSignature setMethod = NodeHelper.CreateNode(method.TsNode) as MethodSignature;
-            (setMethod.Parameters[0] as Parameter).QuestionToken = null;
-            setMethod.Type = NodeHelper.CreateNode(NodeKind.VoidKeyword);
+            (setMethod.Parameters[0] as Parameter).SetQuestionToken(null);
+            setMethod.SetType(NodeHelper.CreateNode(NodeKind.VoidKeyword));
             newMembers.Add(setMethod);
 
             MethodSignature getMethod = NodeHelper.CreateNode(method.TsNode) as MethodSignature;

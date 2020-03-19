@@ -16,7 +16,8 @@ namespace TypeScript.Converter.CSharp
         {
             List<Node> properties = node.Properties;
             Node type = node.Type;
-            if (type.Kind == NodeKind.TypeLiteral && properties.Count >= 2)
+
+            if (type.Kind == NodeKind.TypeLiteral && properties.Count >= 2 && (type as TypeLiteral).Members[0].Kind != NodeKind.IndexSignature)
             {
                 return SyntaxFactory.TupleExpression().AddArguments(properties.ToCsNodes<ArgumentSyntax>());
             }

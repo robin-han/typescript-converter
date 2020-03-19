@@ -7,8 +7,6 @@ namespace TypeScript.Syntax
 {
     public class Constructor : Node
     {
-        private Node _base;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -41,18 +39,8 @@ namespace TypeScript.Syntax
 
         public Node Base
         {
-            get
-            {
-                return this._base;
-            }
-            internal set
-            {
-                this._base = value;
-                if (this._base != null)
-                {
-                    this._base.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
         #endregion
 
@@ -95,6 +83,15 @@ namespace TypeScript.Syntax
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;
+            }
+        }
+
+        public void SetBase(Node baseNode, bool changeParent = true)
+        {
+            this.Base = baseNode;
+            if (changeParent && this.Base != null)
+            {
+                this.Base.Parent = this;
             }
         }
     }

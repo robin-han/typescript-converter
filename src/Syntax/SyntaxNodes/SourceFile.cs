@@ -83,7 +83,44 @@ namespace TypeScript.Syntax
         {
             get
             {
-                return this.DescendantsOnce((n) => this.IsTypeNode(n));
+                List<Node> typeNodes = new List<Node>();
+                typeNodes.AddRange(this.Statements.FindAll(n =>
+                {
+                    return this.IsTypeNode(n);
+                }));
+                this.MouduleDeclarations.ForEach(m =>
+                {
+                    ModuleBlock mBlock = ((ModuleDeclaration)m).GetModuleBlock();
+                    if (mBlock != null)
+                    {
+                        typeNodes.AddRange(mBlock.Statements.FindAll(n =>
+                        {
+                            return this.IsTypeNode(n);
+                        }));
+                    }
+                });
+                return typeNodes;
+            }
+        }
+
+        public List<Node> GlobalFunctions
+        {
+            get
+            {
+                List<Node> funcs = new List<Node>();
+                funcs.AddRange(this.Statements.FindAll(n =>
+                {
+                    return n.Kind == NodeKind.FunctionDeclaration;
+                }));
+                this.MouduleDeclarations.ForEach(m =>
+                {
+                    ModuleBlock mBlock = ((ModuleDeclaration)m).GetModuleBlock();
+                    if (mBlock != null)
+                    {
+                        funcs.AddRange(mBlock.Statements.FindAll(n => n.Kind == NodeKind.FunctionDeclaration));
+                    }
+                });
+                return funcs;
             }
         }
 
@@ -146,6 +183,10 @@ namespace TypeScript.Syntax
             return childNode.NodeName != "externalModuleIndicator";
         }
 
+        /// <summary>
+        /// Gets the export default type definition.
+        /// </summary>
+        /// <returns></returns>
         public Node GetExportDefaultModuleTypeDefinition()
         {
             foreach (Node type in this.TypeDefinitions)
@@ -174,6 +215,11 @@ namespace TypeScript.Syntax
             return null;
         }
 
+        /// <summary>
+        /// Gets export type definition.
+        /// </summary>
+        /// <param name="typeName">The export type name.</param>
+        /// <returns>The definition.</returns>
         public Node GetExportModuleTypeDefinition(string typeName)
         {
             Node definition = this.GetOwnModuleTypeDefinition(typeName);

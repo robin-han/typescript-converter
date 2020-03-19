@@ -8,11 +8,10 @@ namespace TypeScript.Syntax
     public class ExpressionWithTypeArguments : Node
     {
         #region Fields
-        private Node _expression;
         private Node _type = null;
         #endregion
 
-        #region Properties
+        #region Propertie
         public override NodeKind Kind
         {
             get { return NodeKind.ExpressionWithTypeArguments; }
@@ -20,18 +19,8 @@ namespace TypeScript.Syntax
 
         public Node Expression
         {
-            get
-            {
-                return this._expression;
-            }
-            internal set
-            {
-                this._expression = value;
-                if (this._expression != null)
-                {
-                    this._expression.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public List<Node> TypeArguments
@@ -48,7 +37,9 @@ namespace TypeScript.Syntax
                 {
                     if (this.Expression.Kind == NodeKind.PropertyAccessExpression)
                     {
-                        this._type = this.Expression.ToQualifiedName();
+                        Node type = this.Expression.ToQualifiedName();
+                        type.Parent = this;
+                        this._type = type;
                     }
                     else
                     {
@@ -89,6 +80,14 @@ namespace TypeScript.Syntax
             }
         }
 
+        public void SetBase(Node baseNode, bool changeParent = true)
+        {
+            this.Expression = baseNode;
+            if (changeParent && this.Expression != null)
+            {
+                this.Expression.Parent = this;
+            }
+        }
     }
 }
 

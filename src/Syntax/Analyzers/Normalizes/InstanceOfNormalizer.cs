@@ -31,9 +31,9 @@ namespace TypeScript.Syntax.Analysis
                 newLeft.Parent = leftNode.Parent;
                 leftNode.Parent = newLeft;
 
-                newLeft.Expression = leftNode;
-                newLeft.Name = NodeHelper.CreateNode(NodeKind.Identifier, "Value");
-                instanceOf.Left = newLeft;
+                newLeft.SetExpression(leftNode);
+                newLeft.SetName(NodeHelper.CreateNode(NodeKind.Identifier, "Value"));
+                instanceOf.SetLeft(newLeft);
                 return;
             }
 

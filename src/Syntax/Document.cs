@@ -9,13 +9,13 @@ namespace TypeScript.Syntax
     public class Document
     {
         #region Fields
-        private Node _root;
+        private SourceFile _root;
         private string _path;
         private Project _project;
         #endregion
 
         #region Constructor
-        public Document(string path, Node root)
+        public Document(string path, SourceFile root)
         {
             this._path = path;
             this._root = root;
@@ -57,7 +57,7 @@ namespace TypeScript.Syntax
         /// <summary>
         /// Gets the document's root node.
         /// </summary>
-        public Node Root
+        public SourceFile Root
         {
             get
             {
@@ -87,11 +87,18 @@ namespace TypeScript.Syntax
         {
             get
             {
-                if ((this.Root is SourceFile sourceFile))
-                {
-                    return sourceFile.TypeNodes;
-                }
-                return new List<Node>();
+                return this.Root.TypeNodes;
+            }
+        }
+
+        /// <summary>
+        /// Gets all global functions in the document
+        /// </summary>
+        public List<Node> GlobalFunctions
+        {
+            get
+            {
+                return this.Root.GlobalFunctions;
             }
         }
         #endregion
@@ -119,10 +126,7 @@ namespace TypeScript.Syntax
         /// <returns>The type definition</returns>
         public Node GetTypeDefinition(string typeName)
         {
-            if (!(this.Root is SourceFile sourceFile))
-            {
-                return null;
-            }
+            SourceFile sourceFile = this.Root;
 
             Node definition = sourceFile.GetOwnModuleTypeDefinition(typeName);
             if (definition != null)
@@ -152,12 +156,7 @@ namespace TypeScript.Syntax
         /// <returns>The definition.</returns>
         public Node GetExportTypeDefinition(string typeName)
         {
-            if (!(this.Root is SourceFile sourceFile))
-            {
-                return null;
-            }
-
-            return sourceFile.GetExportModuleTypeDefinition(typeName);
+            return this.Root.GetExportModuleTypeDefinition(typeName);
         }
 
         /// <summary>
@@ -166,12 +165,7 @@ namespace TypeScript.Syntax
         /// <returns></returns>
         public Node GetExportDefaultTypeDefinition()
         {
-            if (!(this.Root is SourceFile sourceFile))
-            {
-                return null;
-            }
-
-            return sourceFile.GetExportDefaultModuleTypeDefinition();
+            return this.Root.GetExportDefaultModuleTypeDefinition();
         }
         #endregion
     }

@@ -15,6 +15,7 @@ namespace TypeScript.Syntax
 
         private (List<Node> nodes, List<string> names)? _typeNodes;
         private List<Type> _analyzerTypes;
+        private List<Node> _globalFunctions;
         #endregion
 
         #region Constructor
@@ -25,6 +26,7 @@ namespace TypeScript.Syntax
             this._includeDocuments = includedDocuments;
             this._typeNodes = null;
             this._analyzerTypes = null;
+            this._globalFunctions = null;
 
             foreach (Document doc in documents)
             {
@@ -86,6 +88,22 @@ namespace TypeScript.Syntax
             get
             {
                 return this.GetAllTypes().nodes;
+            }
+        }
+
+        /// <summary>
+        /// Get all global functions in the project.
+        /// </summary>
+        /// <returns></returns>
+        public List<Node> GlobalFunctions
+        {
+            get
+            {
+                if (this._globalFunctions == null)
+                {
+                    this._globalFunctions = this.GetGlobalFunctions();
+                }
+                return this._globalFunctions;
             }
         }
         #endregion
@@ -430,6 +448,20 @@ namespace TypeScript.Syntax
 
             this._typeNodes = (nodes, names);
             return (nodes, names);
+        }
+
+        /// <summary>
+        /// Gets all global functions in the project.
+        /// </summary>
+        /// <returns></returns>
+        private List<Node> GetGlobalFunctions()
+        {
+            List<Node> nodes = new List<Node>();
+            foreach (Document doc in this.Documents)
+            {
+                nodes.AddRange(doc.GlobalFunctions);
+            }
+            return nodes;
         }
 
         /// <summary>

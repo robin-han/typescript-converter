@@ -18,6 +18,17 @@ namespace TypeScript.Converter.CSharp
             {
                 return SyntaxFactory.ReturnStatement();
             }
+
+            // return default(T); for generic return type
+            if (node.Expression.Kind == NodeKind.NullKeyword)
+            {
+                MethodDeclaration method = node.Ancestor(NodeKind.MethodDeclaration) as MethodDeclaration;
+                if (method != null && method.IsGenericType)
+                {
+                    return SyntaxFactory.ReturnStatement(SyntaxFactory.DefaultExpression(SyntaxFactory.IdentifierName(method.Type.Text)));
+                }
+            }
+
             return SyntaxFactory.ReturnStatement(node.Expression.ToCsNode<ExpressionSyntax>());
         }
     }

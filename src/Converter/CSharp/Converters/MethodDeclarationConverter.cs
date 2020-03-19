@@ -14,9 +14,16 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(MethodDeclaration node)
         {
+            List<Node> modifiers = node.Modifiers;
+            if (this.Context.Config.PreferTypeScriptType && node.Name.Text == "toString" && !node.HasModify(NodeKind.OverrideKeyword))
+            {
+                modifiers = new List<Node>(modifiers);
+                modifiers.Add(NodeHelper.CreateNode(NodeKind.OverrideKeyword));
+            }
+
             MethodDeclarationSyntax csMethod = SyntaxFactory
                 .MethodDeclaration(node.Type.ToCsNode<TypeSyntax>(), node.Name.Text)
-                .AddModifiers(node.Modifiers.ToCsNodes<SyntaxToken>())
+                .AddModifiers(modifiers.ToCsNodes<SyntaxToken>())
                 .AddParameterListParameters(node.Parameters.ToCsNodes<ParameterSyntax>());
 
             if (node.JsDoc.Count > 0)

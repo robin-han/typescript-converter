@@ -1,19 +1,19 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
 namespace TypeScript.Syntax
 {
-    public class VariableDeclarationNode : Declaration
+    public class TypePredicate : Node
     {
         #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.VariableDeclaration; }
+            get { return NodeKind.TypePredicate; }
         }
 
-        public Node Name
+        public Node ParameterName
         {
             get;
             private set;
@@ -24,21 +24,13 @@ namespace TypeScript.Syntax
             get;
             private set;
         }
-
-        public Node Initializer
-        {
-            get;
-            private set;
-        }
         #endregion
 
         public override void Init(JObject jsonObj)
         {
             base.Init(jsonObj);
 
-            this.Name = null;
-            this.Initializer = null;
-
+            this.ParameterName = null;
             this.Type = null;
         }
 
@@ -49,16 +41,12 @@ namespace TypeScript.Syntax
             string nodeName = childNode.NodeName;
             switch (nodeName)
             {
-                case "name":
-                    this.Name = childNode;
+                case "parameterName":
+                    this.ParameterName = childNode;
                     break;
 
                 case "type":
                     this.Type = childNode;
-                    break;
-
-                case "initializer":
-                    this.Initializer = childNode;
                     break;
 
                 default:
@@ -66,16 +54,5 @@ namespace TypeScript.Syntax
                     break;
             }
         }
-
-        public void SetType(Node type, bool changeParent = true)
-        {
-            this.Type = type;
-            if (changeParent && this.Type != null)
-            {
-                this.Type.Parent = this;
-            }
-        }
-
     }
 }
-

@@ -7,10 +7,6 @@ namespace TypeScript.Syntax
 {
     public class BinaryExpression : Expression
     {
-        private Node _left;
-        private Node _operatorToken;
-        private Node _right;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -19,50 +15,20 @@ namespace TypeScript.Syntax
 
         public Node Left
         {
-            get
-            {
-                return this._left;
-            }
-            internal set
-            {
-                this._left = value;
-                if (this._left != null)
-                {
-                    this._left.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public Node OperatorToken
         {
-            get
-            {
-                return this._operatorToken;
-            }
-            internal set
-            {
-                this._operatorToken = value;
-                if (this._operatorToken != null)
-                {
-                    this._operatorToken.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public Node Right
         {
-            get
-            {
-                return this._right;
-            }
-            internal set
-            {
-                this._right = value;
-                if (this._right != null)
-                {
-                    this._right.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
         #endregion
 
@@ -97,6 +63,33 @@ namespace TypeScript.Syntax
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;
+            }
+        }
+
+        public void SetLeft(Node left, bool changeParent = true)
+        {
+            this.Left = left;
+            if (changeParent && this.Left != null)
+            {
+                this.Left.Parent = this;
+            }
+        }
+
+        public void SetOperatorToken(Node operatorToken, bool changeParent = true)
+        {
+            this.OperatorToken = operatorToken;
+            if (changeParent && this.OperatorToken != null)
+            {
+                this.OperatorToken.Parent = this;
+            }
+        }
+
+        public void SetRight(Node right, bool changeParent = true)
+        {
+            this.Right = right;
+            if (changeParent && this.Right != null)
+            {
+                this.Right.Parent = this;
             }
         }
     }

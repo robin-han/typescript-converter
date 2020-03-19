@@ -63,11 +63,6 @@ namespace TypeScript.Syntax
             }
         }
 
-        protected override string GetText()
-        {
-            return this.TypeName.Text;
-        }
-
     }
 }
 

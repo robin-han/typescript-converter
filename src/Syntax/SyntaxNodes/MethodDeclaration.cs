@@ -7,9 +7,6 @@ namespace TypeScript.Syntax
 {
     public class MethodDeclaration : Declaration
     {
-        private Node _name;
-        private Node _type;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -30,18 +27,8 @@ namespace TypeScript.Syntax
 
         public Node Name
         {
-            get
-            {
-                return this._name;
-            }
-            internal set
-            {
-                this._name = value;
-                if (this._name != null)
-                {
-                    this._name.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public List<Node> TypeParameters
@@ -58,18 +45,8 @@ namespace TypeScript.Syntax
 
         public Node Type
         {
-            get
-            {
-                return this._type;
-            }
-            internal set
-            {
-                this._type = value;
-                if (this._type != null)
-                {
-                    this._type.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public Block Body
@@ -99,6 +76,26 @@ namespace TypeScript.Syntax
             get
             {
                 return this.Modifiers.Exists(n => n.Kind == NodeKind.AbstractKeyword);
+            }
+        }
+
+        public bool IsGenericType
+        {
+            get
+            {
+                string typeText = this.Type.Text;
+                if (this.TypeParameters.Find(n => n.Text == typeText) != null)
+                {
+                    return true;
+                }
+
+                ClassDeclaration cls = this.Parent as ClassDeclaration;
+                if (cls.TypeParameters.Find(n => n.Text == typeText) != null)
+                {
+                    return true;
+                }
+
+                return false;
             }
         }
         #endregion
@@ -155,6 +152,24 @@ namespace TypeScript.Syntax
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;
+            }
+        }
+
+        public void SetType(Node type, bool changeParent = true)
+        {
+            this.Type = type;
+            if (changeParent && this.Type != null)
+            {
+                this.Type.Parent = this;
+            }
+        }
+
+        public void SetName(Node name, bool changeParent = true)
+        {
+            this.Name = name;
+            if (changeParent && this.Name != null)
+            {
+                this.Name.Parent = this;
             }
         }
     }

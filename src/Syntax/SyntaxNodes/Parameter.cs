@@ -7,10 +7,6 @@ namespace TypeScript.Syntax
 {
     public class Parameter : Node
     {
-        private Node _type;
-        private Node _questionToken;
-        private Node _initializer;
-
         #region Properties
         public override NodeKind Kind
         {
@@ -31,50 +27,20 @@ namespace TypeScript.Syntax
 
         public Node Type
         {
-            get
-            {
-                return this._type;
-            }
-            internal set
-            {
-                this._type = value;
-                if (this._type != null)
-                {
-                    this._type.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public Node QuestionToken
         {
-            get
-            {
-                return this._questionToken;
-            }
-            internal set
-            {
-                this._questionToken = value;
-                if (this._questionToken != null)
-                {
-                    this._questionToken.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public Node Initializer
         {
-            get
-            {
-                return this._initializer;
-            }
-            internal set
-            {
-                this._initializer = value;
-                if (this._initializer != null)
-                {
-                    this._initializer.Parent = this;
-                }
-            }
+            get;
+            private set;
         }
 
         public bool IsOptional
@@ -177,6 +143,32 @@ namespace TypeScript.Syntax
             }
         }
 
+        public void SetType(Node type, bool changeParent = true)
+        {
+            this.Type = type;
+            if (changeParent && this.Type != null)
+            {
+                this.Type.Parent = this;
+            }
+        }
+
+        public void SetQuestionToken(Node questionToken, bool changeParent = true)
+        {
+            this.QuestionToken = questionToken;
+            if (changeParent && this.QuestionToken != null)
+            {
+                this.QuestionToken.Parent = this;
+            }
+        }
+
+        public void SetInitializer(Node initializer, bool changeParent = true)
+        {
+            this.Initializer = initializer;
+            if (changeParent && this.Initializer != null)
+            {
+                this.Initializer.Parent = this;
+            }
+        }
     }
 }
 
