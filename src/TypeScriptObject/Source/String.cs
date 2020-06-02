@@ -153,6 +153,24 @@ namespace TypeScript.CSharp
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public String charAt(Number index)
+        {
+            this.CheckUndefined();
+
+            string text = GetText(this);
+            int pos = (int)index;
+            if (pos < 0 || pos >= text.Length)
+            {
+                return "";
+            }
+            return text[pos].ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public String concat(params String[] strs)
         {
             StringBuilder sb = new StringBuilder(GetText(this));

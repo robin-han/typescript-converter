@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TypeScript.CSharp
 {
-    public class Hashtable<TKey, TValue> : Object, IEnumerable<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>
+    public class Hashtable<TKey, TValue> : Object, IEnumerable<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IDictionary
     {
         #region Fields
         private Dictionary<TKey, TValue> _dic;
@@ -105,7 +105,7 @@ namespace TypeScript.CSharp
         /// <summary>
         /// 
         /// </summary>
-        public ICollection<TValue> Values
+        public Dictionary<TKey, TValue>.ValueCollection Values
         {
             get
             {
@@ -114,6 +114,7 @@ namespace TypeScript.CSharp
                 return this._dic.Values;
             }
         }
+
 
         /// <summary>
         /// 
@@ -135,9 +136,18 @@ namespace TypeScript.CSharp
         {
             get
             {
-                this.CheckUndefined();
+                return this.Keys;
+            }
+        }
 
-                return this._dic.Keys;
+        /// <summary>
+        /// 
+        /// </summary>
+        ICollection<TValue> IDictionary<TKey, TValue>.Values
+        {
+            get
+            {
+                return this.Values;
             }
         }
 
@@ -151,6 +161,79 @@ namespace TypeScript.CSharp
                 this.CheckUndefined();
 
                 return (this._dic as ICollection<KeyValuePair<TKey, TValue>>).IsReadOnly;
+            }
+        }
+
+        bool IDictionary.IsFixedSize
+        {
+            get
+            {
+                this.CheckUndefined();
+                return false;
+            }
+        }
+
+        bool IDictionary.IsReadOnly
+        {
+            get
+            {
+                this.CheckUndefined();
+                return false;
+            }
+        }
+
+        ICollection IDictionary.Keys
+        {
+            get
+            {
+                return this.Keys;
+            }
+        }
+
+        ICollection IDictionary.Values
+        {
+            get
+            {
+                return this.Values;
+            }
+        }
+
+        int ICollection.Count
+        {
+            get
+            {
+                return this.Count;
+            }
+        }
+
+        bool ICollection.IsSynchronized
+        {
+            get
+            {
+                this.CheckUndefined();
+                return false;
+            }
+        }
+
+        object ICollection.SyncRoot
+        {
+            get
+            {
+                this.CheckUndefined();
+
+                return (this._dic as ICollection).SyncRoot;
+            }
+        }
+
+        object IDictionary.this[object key]
+        {
+            get
+            {
+                return this[ConvertKey(key)];
+            }
+            set
+            {
+                this[ConvertKey(key)] = (TValue)value;
             }
         }
 
@@ -314,6 +397,79 @@ namespace TypeScript.CSharp
             return this;
         }
 
+        void IDictionary.Add(object key, object value)
+        {
+            this.Add(ConvertKey(key), (TValue)value);
+        }
+
+        void IDictionary.Clear()
+        {
+            this.Clear();
+        }
+
+        bool IDictionary.Contains(object key)
+        {
+            return this.ContainsKey(ConvertKey(key));
+        }
+
+        IDictionaryEnumerator IDictionary.GetEnumerator()
+        {
+            this.CheckUndefined();
+
+            return this._dic.GetEnumerator();
+        }
+
+        void IDictionary.Remove(object key)
+        {
+            this.Remove(ConvertKey(key));
+        }
+
+        void ICollection.CopyTo(System.Array array, int index)
+        {
+            this.CheckUndefined();
+
+            (this._dic as IDictionary).CopyTo(array, index);
+        }
+
+
+        private TKey ConvertKey(object key)
+        {
+            Type toKeyType = typeof(TKey);
+            Type keyType = key.GetType();
+
+            if (toKeyType == keyType)
+            {
+                return (TKey)key;
+            }
+
+            //
+            if (toKeyType == typeof(String) && keyType == typeof(string))
+            {
+                key = (String)(string)key;
+            }
+            else if (toKeyType == typeof(string) && keyType == typeof(String))
+            {
+                key = (string)(String)key;
+            }
+            else if (toKeyType == typeof(Number) && ObjectUtil.IsNumber(keyType))
+            {
+                key = (Number)ObjectUtil.ToDouble(key);
+            }
+            else if (ObjectUtil.IsNumber(toKeyType) && toKeyType != typeof(Number) && keyType == typeof(Number))
+            {
+                key = (double)(Number)key;
+            }
+            else if (toKeyType == typeof(Boolean) && keyType == typeof(bool))
+            {
+                key = (Boolean)(bool)key;
+            }
+            else if (toKeyType == typeof(bool) && keyType == typeof(Boolean))
+            {
+                key = (bool)(Boolean)key;
+            }
+
+            return (TKey)key;
+        }
         #endregion
 
     }

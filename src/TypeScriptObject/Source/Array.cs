@@ -22,7 +22,7 @@ namespace TypeScript.CSharp
         /// </summary>
         public Array()
         {
-            this.__value__ = _list = new List<T>();
+            this.__value__ = this._list = new List<T>();
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace TypeScript.CSharp
         /// </summary>
         public Array(Number length)
         {
-            this.__value__ = _list = new List<T>();
+            this.__value__ = this._list = new List<T>();
             this.length = length;
         }
 
@@ -40,22 +40,21 @@ namespace TypeScript.CSharp
         /// <param name="v"></param>
         public Array(T v)
         {
-            this.__value__ = _list = new List<T>();
-            _list.Add(v);
+            this.__value__ = this._list = new List<T>();
+            this._list.Add(v);
         }
 
         /// <summary>
-        /// 
+        /// Initialize a new instance with the items.
         /// </summary>
-        public Array(IEnumerable<T> objs)
+        public Array(IEnumerable<T> items)
         {
-            if (objs == null)
+            if (items == null)
             {
                 throw new ArgumentNullException();
             }
 
-            this.__value__ = _list = new List<T>();
-            _list.AddRange(objs);
+            this.__value__ = this._list = new List<T>(items);
         }
 
         /// <summary>
@@ -122,15 +121,10 @@ namespace TypeScript.CSharp
             {
                 this.CheckUndefined();
 
-                if (value < 0)
-                {
-                    throw new ArgumentException("value must be >=0");
-                }
-
                 int newCount = Convert.ToInt32((double)value);
-                if (newCount != (double)value)
+                if (value < 0 || newCount != (double)value)
                 {
-                    throw new ArgumentException("length must be integer.");
+                    throw new ArgumentException("length must be 0 or positive integer.");
                 }
 
                 int count = this._list.Count;
@@ -185,9 +179,16 @@ namespace TypeScript.CSharp
         /// <summary>
         /// 
         /// </summary>
-        public static implicit operator Array<T>(List<T> ts)
+        public static implicit operator Array<T>(List<T> list)
         {
-            return ts == null ? null : new Array<T>(ts);
+            if (list == null)
+            {
+                return null;
+            }
+
+            Array<T> arr = new Array<T>();
+            arr.__value__ = arr._list = list;
+            return arr;
         }
 
         /// <summary>
@@ -352,6 +353,11 @@ namespace TypeScript.CSharp
         /// <returns></returns>
         public override Array<U> AsArray<U>()
         {
+            if (typeof(U) == typeof(T))
+            {
+                return (this as Array<U>);
+            }
+
             Array<U> ret = new Array<U>();
             bool canAs = (this._list.Count > 0 ? this._list[0] is U : false);
             foreach (object item in this._list)
@@ -960,7 +966,7 @@ namespace TypeScript.CSharp
         /// </summary>
         public Array<T> sort(Func<T, T, Number> fn)
         {
-            ArrayCompare<T> compare = new ArrayCompare<T>(fn);
+            ArrayComparer<T> compare = new ArrayComparer<T>(fn);
             return this.sort(compare);
         }
 
@@ -969,7 +975,7 @@ namespace TypeScript.CSharp
         /// </summary>
         public Array<T> sort(Comparison<T> comparison)
         {
-            ArrayCompare<T> compare = new ArrayCompare<T>(comparison);
+            ArrayComparer<T> compare = new ArrayComparer<T>(comparison);
             return this.sort(compare);
         }
 
@@ -1147,9 +1153,10 @@ namespace TypeScript.CSharp
                 clearMethod.Invoke(this._from, new object[] { });
             }
         }
+
         private void InternalSort()
         {
-            this._list.Sort();
+            this._list = this._list.OrderBy(item => item).ToList();
 
             if (this._from != null)
             {
@@ -1157,16 +1164,44 @@ namespace TypeScript.CSharp
                 sortMethod.Invoke(this._from, new object[] { });
             }
         }
-        private void InternalCompareSort(IComparer<T> compare)
+        private void InternalCompareSort(IComparer<T> comparer)
         {
-            this._list.Sort(compare);
+            this._list = this._list.OrderBy(item => item, comparer).ToList();
 
             if (this._from != null)
             {
-                System.Reflection.MethodInfo compareSortMethod = this._from.GetType().GetMethod("InternalCompareSort", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                compareSortMethod.Invoke(this._from, new object[] { compare });
+                if (comparer is IComparer)
+                {
+                    System.Reflection.MethodInfo compareSortMethod = this._from.GetType().GetMethod("InternalCompareSort2", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    compareSortMethod.Invoke(this._from, new object[] { comparer });
+                }
+                else
+                {
+                    Type toType = this._from.GetType().GetProperty("ValueType").GetValue(this._from) as Type;
+                    throw new InvalidCastException(string.Format("Cannot cast from {0} to System.Collections.Generic.IComparer<{1}>", comparer.GetType(), toType));
+                }
             }
         }
+        private void InternalCompareSort2(IComparer comparer)
+        {
+            IComparer<T> orderByComparer = null;
+            if (comparer is IComparer<T>)
+            {
+                orderByComparer = (IComparer<T>)comparer;
+            }
+            else
+            {
+                orderByComparer = new ArrayComparer<T>(comparer);
+            }
+            this._list = this._list.OrderBy(item => item, orderByComparer).ToList();
+
+            if (this._from != null)
+            {
+                System.Reflection.MethodInfo compareSortMethod = this._from.GetType().GetMethod("InternalCompareSort2", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                compareSortMethod.Invoke(this._from, new object[] { comparer });
+            }
+        }
+
         private void InternalReverse()
         {
             this._list.Reverse();
@@ -1193,19 +1228,27 @@ namespace TypeScript.CSharp
         #endregion
     }
 
-    class ArrayCompare<T> : IComparer<T>
+
+
+    class ArrayComparer<T> : IComparer<T>, IComparer
     {
         private readonly Func<T, T, Number> _fn;
         private readonly Comparison<T> _comparison;
+        private readonly IComparer _comparer;
 
-        public ArrayCompare(Func<T, T, Number> fn)
+        public ArrayComparer(Func<T, T, Number> fn)
         {
             this._fn = fn ?? throw new ArgumentNullException("fn");
         }
 
-        public ArrayCompare(Comparison<T> comparison)
+        public ArrayComparer(Comparison<T> comparison)
         {
             this._comparison = comparison ?? throw new ArgumentNullException("comparison");
+        }
+
+        public ArrayComparer(IComparer comparer)
+        {
+            this._comparer = comparer;
         }
 
         public int Compare(T x, T y)
@@ -1218,6 +1261,10 @@ namespace TypeScript.CSharp
             else if (this._comparison != null)
             {
                 result = this._comparison(x, y);
+            }
+            else if (this._comparer != null)
+            {
+                result = this._comparer.Compare(x, y);
             }
 
             if (result > 0)
@@ -1233,23 +1280,25 @@ namespace TypeScript.CSharp
                 return 0;
             }
         }
+
+        public int Compare(object x, object y)
+        {
+            return this.Compare((T)x, (T)y);
+        }
+
     }
 
     public class Array : Array<object>
     {
         public Array(object arg)
         {
-            if (arg is Number)
+            if (ObjectUtil.IsNumber(arg))
             {
-                arg = (double)(Number)arg;
-            }
-
-            if (arg is double || arg is int || arg is long)
-            {
-                int length = Convert.ToInt32(arg);
-                if (length != Convert.ToDouble(arg))
+                double value = ObjectUtil.ToDouble(arg);
+                int length = Convert.ToInt32(value);
+                if (length < 0 || length != value)
                 {
-                    throw new ArgumentException("length must be integer.");
+                    throw new ArgumentException("length must be 0 or position integer.");
                 }
                 this.Length = length;
             }

@@ -21,11 +21,31 @@
 
         #region Fields
         /// <summary>
-        /// 
+        /// Indicates the underlying value.
         /// </summary>
-        protected object __value__;
+        private object _underlyingValue = null;
         #endregion
 
+        #region Properties
+        /// <summary>
+        /// Gets or sets the underlying value.
+        /// </summary>
+        protected object __value__
+        {
+            get
+            {
+                return this._underlyingValue;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new System.ArgumentNullException("value");
+                }
+                this._underlyingValue = value;
+            }
+        }
+        #endregion
 
         #region Operator Implicit
         /// <summary>
@@ -224,7 +244,7 @@
             }
             return base.ToString();
         }
-        
+
         #endregion
 
         #region Public Methods
@@ -293,17 +313,16 @@
         }
 
         /// <summary>
-        /// 
+        /// Represents javascript Number(...) function.
         /// </summary>
         public static Number ToNumber(object obj)
         {
             obj = ToObject(obj);
-            string name = TypeOf(obj);
-            if (name == "number")
+            if (obj is Number)
             {
                 return Number.parseFloat((Number)obj);
             }
-            if (name == "string")
+            if (obj is String)
             {
                 return Number.parseFloat((String)obj);
             }
@@ -313,32 +332,35 @@
         /// <summary>
         /// 
         /// </summary>
-        public static Object ToObject(object obj)
+        private static Object ToObject(object obj)
         {
             if (obj == null)
             {
                 return null;
             }
-
-            switch (obj.GetType().FullName)
+            if (obj is Object tsObj)
             {
-                case "System.Double":
-                case "System.Int32":
-                case "System.Int64":
-                    return (Number)System.Convert.ToDouble(obj);
-
-                case "System.String":
-                    return (String)System.Convert.ToString(obj);
-
-                case "System.DateTime":
-                    return (Date)System.Convert.ToDateTime(obj);
-
-                case "System.Boolean":
-                    return (Boolean)System.Convert.ToBoolean(obj);
-
-                default:
-                    return obj as Object;
+                return tsObj;
             }
+
+            if (ObjectUtil.IsPrimitiveNumber(obj))
+            {
+                return (Number)ObjectUtil.ToDouble(obj);
+            }
+            if (ObjectUtil.IsPrimitiveString(obj))
+            {
+                return (String)ObjectUtil.ToString(obj);
+            }
+            if (ObjectUtil.IsPrimitiveDate(obj))
+            {
+                return (Date)ObjectUtil.ToDateTime(obj);
+            }
+            if (ObjectUtil.IsPrimitiveBoolean(obj))
+            {
+                return (Boolean)ObjectUtil.ToBoolean(obj);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -352,60 +374,58 @@
             {
                 return "object";
             }
-            switch (obj.GetType().Name)
+            if (IsUndefined(obj))
             {
-                case "Undefined":
-                    return "undefined";
-
-                case "String":
-                    return "string";
-
-                case "Number":
-                case "Double":
-                case "Int32":
-                case "Int64":
-                    return "number";
-
-                case "Boolean":
-                    return "boolean";
-
-                default:
-                    return "object";
+                return "undefined";
             }
+
+            if (ObjectUtil.IsString(obj))
+            {
+                return "string";
+            }
+            if (ObjectUtil.IsNumber(obj))
+            {
+                return "number";
+            }
+            if (ObjectUtil.IsBoolean(obj))
+            {
+                return "boolean";
+            }
+
+            return "object";
         }
 
+        #region Internal and Private Methods
         /// <summary>
-        /// Get typescript object's actual value.
+        /// 
         /// </summary>
-        public static object GetValue(object obj)
+        internal static bool IsUndefined(object obj)
         {
-            Object tobj = obj as Object;
-            while (tobj != null)
-            {
-                obj = tobj.__value__;
-                tobj = obj as Object;
-            }
-            return obj;
+            object value = GetValue(obj);
+            return value is Undefined;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public static bool IsUndefined(Object obj)
-        {
-            return !IsNull(obj) && object.ReferenceEquals(obj.__value__, Undefined.Value);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static bool IsNull(object obj)
+        internal static bool IsNull(object obj)
         {
             return obj == null;
         }
         #endregion
 
-        #region Private Methods
+        /// <summary>
+        /// Get typescript object's underlying value.
+        /// </summary>
+        internal static object GetValue(object obj)
+        {
+            while ((obj is Object tsObj) && tsObj.__value__ != null)
+            {
+                obj = tsObj.__value__;
+            }
+            return obj;
+        }
+
         // [System.Diagnostics.Conditional("DEBUG")]
         protected void CheckUndefined()
         {

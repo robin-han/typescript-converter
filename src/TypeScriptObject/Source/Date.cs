@@ -547,7 +547,7 @@ namespace TypeScript.CSharp
         /// </summary>
         public String toUTCString()
         {
-            return this._dt.ToString();
+            return this._dt.ToUniversalTime().ToString("r");
         }
 
         /// <summary>

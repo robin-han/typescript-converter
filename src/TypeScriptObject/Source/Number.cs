@@ -130,6 +130,18 @@ namespace TypeScript.CSharp
         /// <summary>
         /// 
         /// </summary>
+        public static explicit operator int?(Number num)
+        {
+            if (num == null)
+            {
+                return null;
+            }
+            return Convert.ToInt32(num.__value__);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static explicit operator long(Number num)
         {
             return Convert.ToInt64(num.__value__);
@@ -138,8 +150,32 @@ namespace TypeScript.CSharp
         /// <summary>
         /// 
         /// </summary>
+        public static explicit operator long?(Number num)
+        {
+            if (num == null)
+            {
+                return null;
+            }
+            return Convert.ToInt64(num.__value__);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static explicit operator float(Number num)
         {
+            return Convert.ToSingle(num.__value__);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static explicit operator float?(Number num)
+        {
+            if (num == null)
+            {
+                return null;
+            }
             return Convert.ToSingle(num.__value__);
         }
 
@@ -168,6 +204,18 @@ namespace TypeScript.CSharp
         /// </summary>
         public static implicit operator double(Number num)
         {
+            return Convert.ToDouble(num.__value__);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static implicit operator double?(Number num)
+        {
+            if (num == null)
+            {
+                return null;
+            }
             return Convert.ToDouble(num.__value__);
         }
 
