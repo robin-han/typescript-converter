@@ -1,5 +1,5 @@
-# TypeScriptConverter: Convert TypeScript to CSharp
-TypeScript is a language convert tool, it first build typescript code to AST use typescript compiler, then convert the AST to csharp.
+# Convert TypeScript to CSharp
+TypeScript to CSharp is a language convert tool, it first build typescript code to AST use typescript compiler, then convert the AST to csharp.
 Now it can only convert typescript to csharp language, later it will support convert to java languate.
 The tool run on dotnet2.1
 
@@ -16,7 +16,7 @@ build.sh
 
 ## Demo
 After build, and switch to directory 'demo' and run follow command to convert.
-Folder 'input' is the typescript to convert and 'csharp' is the converted result.
+Folder 'input' is the typescript code and 'csharp' is the converted result.
 
 Windows
 ```bash
