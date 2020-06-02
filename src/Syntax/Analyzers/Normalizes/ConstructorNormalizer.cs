@@ -121,7 +121,7 @@ namespace TypeScript.Syntax.Analysis
                 if (member.Kind == NodeKind.PropertyDeclaration)
                 {
                     PropertyDeclaration prop = member as PropertyDeclaration;
-                    if (prop.Initializer != null && prop.IsPublic && !prop.IsStatic && !prop.IsReadonly)
+                    if (prop.Initializer != null && prop.IsPublic && !prop.IsStatic)
                     {
                         ret.Add(prop);
                     }

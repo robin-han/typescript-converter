@@ -75,6 +75,14 @@ namespace TypeScript.Syntax
             }
         }
 
+        public bool IsAbstract
+        {
+            get
+            {
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.AbstractKeyword);
+            }
+        }
+
         private Node QuestionToken { get; set; }
         #endregion
 

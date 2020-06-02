@@ -14,7 +14,8 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(PropertyAccessExpression node)
         {
-            if (node.Parent != null && node.Parent.Kind == NodeKind.EnumMember && node.Text.Trim() == "Number.MAX_VALUE")
+            Node parent = node.Parent;
+            if (parent != null && parent.Kind == NodeKind.EnumMember && node.Text.Trim() == "Number.MAX_VALUE")
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
@@ -23,14 +24,18 @@ namespace TypeScript.Converter.CSharp
             }
 
             SimpleNameSyntax csName = null;
-            List<Node> typeArguments = node.Parent == null ? null : node.Parent.GetValue("TypeArguments") as List<Node>;
-            if (typeArguments != null && typeArguments.Count > 0)
+            if (parent != null)
             {
-                csName = SyntaxFactory
-                    .GenericName(node.Name.Text)
-                    .AddTypeArgumentListArguments(typeArguments.ToCsNodes<TypeSyntax>());
+                Node expression = parent.GetValue("Expression") as Node;
+                List<Node> typeArguments = parent.GetValue("TypeArguments") as List<Node>;
+                if (expression != null && expression == node && typeArguments != null && typeArguments.Count > 0)
+                {
+                    csName = SyntaxFactory
+                   .GenericName(node.Name.Text)
+                   .AddTypeArgumentListArguments(typeArguments.ToCsNodes<TypeSyntax>());
+                }
             }
-            else
+            if (csName == null)
             {
                 csName = node.Name.ToCsNode<SimpleNameSyntax>();
             }

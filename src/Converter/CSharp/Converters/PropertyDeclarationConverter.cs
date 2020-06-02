@@ -40,48 +40,40 @@ namespace TypeScript.Converter.CSharp
         {
             List<Node> modifiers = node.Modifiers.FindAll(n => n.Kind != NodeKind.ReadonlyKeyword);
 
-            if (node.IsReadonly)
-            {
-                PropertyDeclarationSyntax csProperty = SyntaxFactory
+            PropertyDeclarationSyntax csProperty = SyntaxFactory
                 .PropertyDeclaration(node.Type.ToCsNode<TypeSyntax>(), node.Name.Text)
                 .AddModifiers(modifiers.ToCsNodes<SyntaxToken>());
 
-                if (node.JsDoc.Count > 0)
-                {
-                    csProperty = csProperty.WithLeadingTrivia(SyntaxFactory.Trivia(node.JsDoc[0].ToCsNode<DocumentationCommentTriviaSyntax>()));
-                }
-
-                AccessorDeclarationSyntax csGetAccess = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration);
-                if (node.Initializer != null)
-                {
-                    csGetAccess = csGetAccess.WithBody(SyntaxFactory.Block(SyntaxFactory.ReturnStatement(node.Initializer.ToCsNode<ExpressionSyntax>())));
-                }
-                else
-                {
-                    csGetAccess = csGetAccess.WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
-                }
-                return csProperty.AddAccessorListAccessors(csGetAccess);
-            }
-            else
+            if (node.JsDoc.Count > 0)
             {
-                PropertyDeclarationSyntax csProperty = SyntaxFactory
-                    .PropertyDeclaration(node.Type.ToCsNode<TypeSyntax>(), node.Name.Text)
-                    .AddModifiers(modifiers.ToCsNodes<SyntaxToken>());
-
-                AccessorDeclarationSyntax csGetAccess = SyntaxFactory
-                    .AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
-                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
-
-                AccessorDeclarationSyntax csSetAccess = SyntaxFactory
-                    .AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
-                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
-
-                if (node.JsDoc.Count > 0)
-                {
-                    csProperty = csProperty.WithLeadingTrivia(SyntaxFactory.Trivia(node.JsDoc[0].ToCsNode<DocumentationCommentTriviaSyntax>()));
-                }
-                return csProperty.AddAccessorListAccessors(csGetAccess, csSetAccess);
+                csProperty = csProperty.WithLeadingTrivia(SyntaxFactory.Trivia(node.JsDoc[0].ToCsNode<DocumentationCommentTriviaSyntax>()));
             }
+
+            //GetAccess
+            AccessorDeclarationSyntax csGetAccess = SyntaxFactory
+                .AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+            //    if (node.Initializer != null)
+            //    {
+            //        csGetAccess = csGetAccess.WithBody(SyntaxFactory.Block(SyntaxFactory.ReturnStatement(node.Initializer.ToCsNode<ExpressionSyntax>())));
+            //    }
+            csProperty = csProperty.AddAccessorListAccessors(csGetAccess);
+
+            //SetsAccess
+            if ((node.IsReadonly && !node.IsAbstract) || (!node.IsReadonly))
+            {
+                AccessorDeclarationSyntax csSetAccess = SyntaxFactory
+                  .AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                  .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+
+                if (node.IsReadonly)
+                {
+                    csSetAccess = csSetAccess.AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+                }
+                csProperty = csProperty.AddAccessorListAccessors(csSetAccess);
+            }
+
+            return csProperty;
         }
     }
 }

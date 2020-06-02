@@ -39,7 +39,8 @@ namespace TypeScript.Converter.CSharp
             {
                 if (this.IsDocCommentTag(tag))
                 {
-                    comment += (tag as JSDocTag).Comment;
+                    string cm = (tag as JSDocTag).Comment;
+                    comment += cm.TrimStart(new char[] { ' ', '*' });
                 }
             }
 

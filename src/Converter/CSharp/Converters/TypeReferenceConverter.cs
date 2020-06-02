@@ -43,6 +43,9 @@ namespace TypeScript.Converter.CSharp
                 case "DataValueObject":
                     return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
 
+                case "BooleanType":
+                    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.BoolKeyword));
+
                 case "Array":
                 case "ReadonlyArray":
                     if (node.IsParams)

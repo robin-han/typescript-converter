@@ -4,6 +4,7 @@ using System.Text;
 
 namespace TypeScript.Syntax
 {
+    // https://github.com/microsoft/TypeScript/blob/v3.8.3/src/compiler/types.ts
     public enum NodeKind
     {
         Unknown,
@@ -40,6 +41,7 @@ namespace TypeScript.Syntax
         DotDotDotToken,
         SemicolonToken,
         CommaToken,
+        QuestionDotToken,
         LessThanToken,
         LessThanSlashToken,
         GreaterThanToken,
@@ -71,6 +73,9 @@ namespace TypeScript.Syntax
         QuestionToken,
         ColonToken,
         AtToken,
+        QuestionQuestionToken,
+        /** Only the JSDoc scanner produces BacktickToken. The normal scanner produces NoSubstitutionTemplateLiteral and related kinds. */
+        BacktickToken,
         // Assignments
         EqualsToken,
         PlusEqualsToken,
@@ -85,8 +90,9 @@ namespace TypeScript.Syntax
         AmpersandEqualsToken,
         BarEqualsToken,
         CaretEqualsToken,
-        // Identifiers
+        // Identifiers and PrivateIdentifiers
         Identifier,
+        PrivateIdentifier,
         // Reserved words
         BreakKeyword,
         CaseKeyword,
@@ -137,6 +143,7 @@ namespace TypeScript.Syntax
         // Contextual keywords
         AbstractKeyword,
         AsKeyword,
+        AssertsKeyword,
         AnyKeyword,
         AsyncKeyword,
         AwaitKeyword,
@@ -248,8 +255,8 @@ namespace TypeScript.Syntax
         SemicolonClassElement,
         // Element
         Block,
-        VariableStatement,
         EmptyStatement,
+        VariableStatement,
         ExpressionStatement,
         IfStatement,
         DoStatement,
@@ -286,6 +293,7 @@ namespace TypeScript.Syntax
         ExportAssignment,
         ExportDeclaration,
         NamedExports,
+        NamespaceExport,
         ExportSpecifier,
         MissingDeclaration,
 
@@ -318,6 +326,13 @@ namespace TypeScript.Syntax
 
         // Enum
         EnumMember,
+        // Unparsed
+        UnparsedPrologue,
+        UnparsedPrepend,
+        UnparsedText,
+        UnparsedInternalText,
+        UnparsedSyntheticReference,
+
         // Top-level nodes
         SourceFile,
         Bundle,
@@ -335,12 +350,19 @@ namespace TypeScript.Syntax
         JSDocOptionalType,
         JSDocFunctionType,
         JSDocVariadicType,
+        // https://jsdoc.app/about-namepaths.html
+        JSDocNamepathType,
         JSDocComment,
         JSDocTypeLiteral,
         JSDocSignature,
         JSDocTag,
         JSDocAugmentsTag,
+        JSDocAuthorTag,
         JSDocClassTag,
+        JSDocPublicTag,
+        JSDocPrivateTag,
+        JSDocProtectedTag,
+        JSDocReadonlyTag,
         JSDocCallbackTag,
         JSDocEnumTag,
         JSDocParameterTag,
@@ -360,6 +382,7 @@ namespace TypeScript.Syntax
         CommaListExpression,
         MergeDeclarationMarker,
         EndOfDeclarationMarker,
+        SyntheticReferenceExpression,
 
         // Enum value count
         Count,
@@ -397,6 +420,8 @@ namespace TypeScript.Syntax
         LastTemplateToken = TemplateTail,
         FirstBinaryOperator = LessThanToken,
         LastBinaryOperator = CaretEqualsToken,
+        FirstStatement = VariableStatement,
+        LastStatement = DebuggerStatement,
         FirstNode = QualifiedName,
         FirstJSDocNode = JSDocTypeExpression,
         LastJSDocNode = JSDocPropertyTag,
