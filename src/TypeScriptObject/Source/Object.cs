@@ -329,6 +329,24 @@
             return NaN;
         }
 
+
+        public static String ToString(object obj)
+        {
+            if (obj == null)
+            {
+                return "null";
+            }
+            if (IsUndefined(obj))
+            {
+                return "undefined";
+            }
+            if (obj is Object)
+            {
+                return ((Object)obj).toString();
+            }
+            return System.Convert.ToString(obj);
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -395,14 +413,25 @@
             return "object";
         }
 
+        /// <summary>
+        /// Get typescript object's underlying value.
+        /// </summary>
+        public static object GetValue(object obj)
+        {
+            while ((obj is Object tsObj) && tsObj.__value__ != null)
+            {
+                obj = tsObj.__value__;
+            }
+            return obj;
+        }
+
         #region Internal and Private Methods
         /// <summary>
         /// 
         /// </summary>
         internal static bool IsUndefined(object obj)
         {
-            object value = GetValue(obj);
-            return value is Undefined;
+            return GetValue(obj) == (object)undefined;
         }
 
         /// <summary>
@@ -414,24 +443,12 @@
         }
         #endregion
 
-        /// <summary>
-        /// Get typescript object's underlying value.
-        /// </summary>
-        internal static object GetValue(object obj)
-        {
-            while ((obj is Object tsObj) && tsObj.__value__ != null)
-            {
-                obj = tsObj.__value__;
-            }
-            return obj;
-        }
-
         // [System.Diagnostics.Conditional("DEBUG")]
         protected void CheckUndefined()
         {
             if (IsUndefined(this))
             {
-                throw new System.NullReferenceException();
+                throw new System.NullReferenceException("undefined object");
             }
         }
         #endregion

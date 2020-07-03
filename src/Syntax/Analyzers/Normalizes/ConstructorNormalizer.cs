@@ -36,28 +36,37 @@ namespace TypeScript.Syntax.Analysis
         {
             Constructor constructor = classNode.GetConstructor();
             List<ClassDeclaration> baseClasses = classNode.Project.GetInheritClasses(classNode);
-            if (constructor == null && baseClasses.Count > 0)
+            if (constructor == null)
             {
-                var baseClass = baseClasses.Find(c =>
+                if (baseClasses.Count > 0)
                 {
-                    var ctor = c.GetConstructor();
-                    return (ctor != null && ctor.Parameters.Count > 0);
-                });
-
-                if (baseClass != null)
-                {
-                    Constructor baseCtor = baseClass.GetConstructor();
-                    Constructor newCtor = (Constructor)NodeHelper.CreateNode((JObject)baseCtor.TsNode.DeepClone());
-
-                    CallExpression baseNode = (CallExpression)NodeHelper.CreateNode(NodeKind.CallExpression);
-                    baseNode.SetExpression(NodeHelper.CreateNode(NodeKind.SuperKeyword));
-                    foreach (Parameter parameter in baseCtor.Parameters)
+                    var baseClass = baseClasses.Find(c =>
                     {
-                        baseNode.AddArgument(NodeHelper.CreateNode(NodeKind.Identifier, parameter.Name.Text));
-                    }
+                        var ctor = c.GetConstructor();
+                        return (ctor != null && ctor.Parameters.Count > 0);
+                    });
 
-                    newCtor.SetBase(baseNode);
-                    newCtor.Body.ClearStatements();
+                    if (baseClass != null)
+                    {
+                        Constructor baseCtor = baseClass.GetConstructor();
+                        Constructor newCtor = (Constructor)NodeHelper.CreateNode((JObject)baseCtor.TsNode.DeepClone());
+
+                        CallExpression baseNode = (CallExpression)NodeHelper.CreateNode(NodeKind.CallExpression);
+                        baseNode.SetExpression(NodeHelper.CreateNode(NodeKind.SuperKeyword));
+                        foreach (Parameter parameter in baseCtor.Parameters)
+                        {
+                            baseNode.AddArgument(NodeHelper.CreateNode(NodeKind.Identifier, parameter.Name.Text));
+                        }
+
+                        newCtor.SetBase(baseNode);
+                        newCtor.Body.ClearStatements();
+                        ModifierNormalizer.NormalizeModify(newCtor);
+                        classNode.InsertMember(0, newCtor);
+                    }
+                }
+                else if (this.GetInitProperties(classNode).Count > 0)
+                {
+                    Constructor newCtor = (Constructor)NodeHelper.CreateNode(BuildConstructorString());
                     ModifierNormalizer.NormalizeModify(newCtor);
                     classNode.InsertMember(0, newCtor);
                 }
@@ -83,13 +92,13 @@ namespace TypeScript.Syntax.Analysis
             props.Reverse();
             foreach (PropertyDeclaration prop in props)
             {
-                ExpressionStatement statement = (ExpressionStatement)NodeHelper.CreateNode(this.GetInitPropertyStatementString(prop.Name.Text));
+                ExpressionStatement statement = (ExpressionStatement)NodeHelper.CreateNode(this.BuildPropertyStatementString(prop.Name.Text));
                 (statement.Expression as BinaryExpression).SetRight(prop.Initializer, false);
                 ctorBlock.InsertStatement(0, statement);
             }
         }
 
-        private string GetInitPropertyStatementString(string propName)
+        private string BuildPropertyStatementString(string propName)
         {
             return
              "{" +
@@ -111,6 +120,17 @@ namespace TypeScript.Syntax.Analysis
                     "}" +
                  "}" +
              "}";
+        }
+
+        private string BuildConstructorString()
+        {
+            return
+            "{" +
+                "kind: \"Constructor\", " +
+                "body: {" +
+                    "kind: \"Block\"" +
+                "}" +
+            "}";
         }
 
         private List<PropertyDeclaration> GetInitProperties(ClassDeclaration classNode)

@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace TypeScript.CSharp
 {
-    public class String : Object
+    public class String : Object, IComparable, IComparable<String>
     {
         #region Constructors
         /// <summary>
@@ -87,7 +87,7 @@ namespace TypeScript.CSharp
         /// </summary>
         public static String operator +(String str1, String str2)
         {
-            return GetText(str1) + GetText(str2);
+            return (string)ToString(str1) + (string)ToString(str2);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace TypeScript.CSharp
         /// </summary>
         public static bool operator >(String str1, String str2)
         {
-            return string.Compare(GetText(str1), GetText(str2)) > 0;
+            return Compare(str1, str2) > 0;
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace TypeScript.CSharp
         /// </summary>
         public static bool operator <(String str1, String str2)
         {
-            return string.Compare(GetText(str1), GetText(str2)) < 0;
+            return Compare(str1, str2) < 0;
         }
         #endregion
 
@@ -535,7 +535,7 @@ namespace TypeScript.CSharp
             }
             else
             {
-                ss = text.Split(new string[] { separator }, count, StringSplitOptions.RemoveEmptyEntries);
+                ss = text.Split(new string[] { separator }, count, StringSplitOptions.None);
             }
 
             Array<String> ret = new Array<String>();
@@ -685,9 +685,7 @@ namespace TypeScript.CSharp
         {
             this.CheckUndefined();
 
-            string text1 = GetText(this);
-            string text2 = GetText(str);
-            return text1.CompareTo(text2);
+            return Compare(this, str);
         }
 
         /// <summary>
@@ -738,7 +736,9 @@ namespace TypeScript.CSharp
         {
             return this;
         }
+        #endregion
 
+        #region Static Methods
         /// <summary>
         /// 
         /// </summary>
@@ -763,6 +763,17 @@ namespace TypeScript.CSharp
                 return true;
             }
             return string.IsNullOrEmpty(str.__value__ as string);
+        }
+
+        /// <summary>
+        /// Compares two string object.
+        /// </summary>
+        /// <param name="str1"></param>
+        /// <param name="str2"></param>
+        /// <returns></returns>
+        public static int Compare(String str1, String str2)
+        {
+            return string.Compare(ToString(str1), ToString(str2), System.Globalization.CultureInfo.CurrentCulture, System.Globalization.CompareOptions.StringSort);
         }
         #endregion
 
@@ -791,21 +802,51 @@ namespace TypeScript.CSharp
         }
         #endregion
 
+        #region Interface Implements
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public int CompareTo(object obj)
+        {
+            if (obj == null)
+            {
+                obj = "null";
+            }
+            if (IsUndefined(obj))
+            {
+                obj = "undefined";
+            }
+
+            if (obj is string)
+            {
+                obj = (String)(string)obj;
+            }
+            if (!(obj is String))
+            {
+                throw new ArgumentException("obj must be string");
+            }
+            return Compare(this, (String)obj);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="another"></param>
+        /// <returns></returns>
+        public int CompareTo(String another)
+        {
+            return Compare(this, another);
+        }
+
+        #endregion
+
         #region Private Methods
         private static string GetText(String str)
         {
-            if (IsNull(str))
-            {
-                return "null";
-            }
-
-            if (IsUndefined(str))
-            {
-                return "undefined";
-            }
-            return str.__value__ as string;
+            return (string)str.__value__;
         }
-
         #endregion
     }
 }

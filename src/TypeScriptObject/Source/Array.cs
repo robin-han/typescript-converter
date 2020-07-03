@@ -83,10 +83,24 @@ namespace TypeScript.CSharp
         {
             get
             {
+                return this[(int)index];
+            }
+            set
+            {
+                this[(int)index] = value;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public T this[int index]
+        {
+            get
+            {
                 this.CheckUndefined();
 
-                int index2 = (int)index;
-                if (0 <= index2 && index2 < _list.Count)
+                if (0 <= index && index < _list.Count)
                 {
                     return _list[(int)index];
                 }
@@ -96,13 +110,12 @@ namespace TypeScript.CSharp
             {
                 this.CheckUndefined();
 
-                int index2 = (int)index;
                 int count = _list.Count;
-                if (index2 >= count)
+                if (index >= count)
                 {
-                    this.length = index2 + 1;
+                    this.length = index + 1;
                 }
-                _list[index2] = value;
+                _list[index] = value;
             }
         }
 
@@ -704,15 +717,18 @@ namespace TypeScript.CSharp
             {
                 throw new InvalidOperationException("Reduce of empty array with no initial value");
             }
+
+            int index = 0;
             if (initialValue == null && items.Count > 0)
             {
                 initialValue = (T1)Convert.ChangeType(items[0], typeof(T1));
+                index++;
             }
 
             T1 result = initialValue;
-            for (int i = 0; i < items.Count; i++)
+            for (; index < items.Count; index++)
             {
-                result = func(result, items[i]);
+                result = func(result, items[index]);
             }
             return result;
         }
@@ -729,15 +745,18 @@ namespace TypeScript.CSharp
             {
                 throw new InvalidOperationException("Reduce of empty array with no initial value");
             }
+
+            int index = 0;
             if (initialValue == null && items.Count > 0)
             {
                 initialValue = items[0];
+                index++;
             }
 
             T result = initialValue;
-            for (int i = 0; i < items.Count; i++)
+            for (; index < items.Count; index++)
             {
-                result = func(result, items[i], i);
+                result = func(result, items[index], index);
             }
             return result;
         }
@@ -775,15 +794,18 @@ namespace TypeScript.CSharp
             {
                 throw new InvalidOperationException("Reduce of empty array with no initial value");
             }
+
+            int index = items.Count - 1;
             if (initialValue == null && items.Count > 0)
             {
                 initialValue = items[items.Count - 1];
+                index--;
             }
 
             T result = initialValue;
-            for (int i = items.Count - 1; i >= 0; i--)
+            for (; index >= 0; index--)
             {
-                result = func(result, items[i]);
+                result = func(result, items[index]);
             }
             return result;
         }
@@ -800,15 +822,18 @@ namespace TypeScript.CSharp
             {
                 throw new InvalidOperationException("Reduce of empty array with no initial value");
             }
+
+            int index = items.Count - 1;
             if (initialValue == null && items.Count > 0)
             {
                 initialValue = items[items.Count - 1];
+                index--;
             }
 
             T result = initialValue;
-            for (int i = items.Count - 1; i >= 0; i--)
+            for (; index >= 0; index--)
             {
-                result = func(result, items[i], i);
+                result = func(result, items[index], index);
             }
             return result;
         }

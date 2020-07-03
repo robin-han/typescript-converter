@@ -4,12 +4,15 @@ using System.Text;
 
 namespace TypeScript.CSharp
 {
+    /// <summary>
+    /// Defines class.
+    /// </summary>
     public class ObjectUtil
     {
         /// <summary>
         /// Checks whether the object is dotnet primitive number.
         /// </summary>
-        public static bool IsPrimitiveNumber(object obj)
+        internal static bool IsPrimitiveNumber(object obj)
         {
             if (obj == null) { return false; }
 
@@ -30,7 +33,7 @@ namespace TypeScript.CSharp
         /// <summary>
         /// Checks whether the object is dotnet primitive string.
         /// </summary>
-        public static bool IsPrimitiveString(object obj)
+        internal static bool IsPrimitiveString(object obj)
         {
             if (obj == null) { return false; }
 
@@ -40,7 +43,7 @@ namespace TypeScript.CSharp
         /// <summary>
         /// Checks whether the object is dotnet primitive boolean.
         /// </summary>
-        public static bool IsPrimitiveBoolean(object obj)
+        internal static bool IsPrimitiveBoolean(object obj)
         {
             if (obj == null) { return false; }
 
@@ -50,7 +53,7 @@ namespace TypeScript.CSharp
         /// <summary>
         /// Checks whether the object is dotnet primitive datetime.
         /// </summary>
-        public static bool IsPrimitiveDate(object obj)
+        internal static bool IsPrimitiveDate(object obj)
         {
             if (obj == null) { return false; }
 
@@ -160,19 +163,7 @@ namespace TypeScript.CSharp
         /// </summary>
         public static string ToString(object obj)
         {
-            if (obj == null)
-            {
-                return "null";
-            }
-            if (obj is Object)
-            {
-                return ((Object)obj).toString();
-            }
-            if (Object.IsUndefined(obj))
-            {
-                return "undefined";
-            }
-            return Convert.ToString(obj);
+            return Object.ToString(obj);
         }
 
         /// <summary>
@@ -248,6 +239,14 @@ namespace TypeScript.CSharp
         {
             x = Object.GetValue(x);
             y = Object.GetValue(y);
+
+            bool xIsString = IsPrimitiveString(x);
+            bool yIsString = IsPrimitiveString(y);
+            if ((xIsString && (Object.IsNull(y) || Object.IsUndefined(y) || yIsString))
+             || (yIsString && (Object.IsNull(x) || Object.IsUndefined(x) || xIsString)))
+            {
+                return String.Compare(Object.ToString(x), Object.ToString(y));
+            }
 
             if (IsPrimitiveBoolean(x)) { x = Convert.ToBoolean(x) ? 1 : 0; }
             if (IsPrimitiveBoolean(y)) { y = Convert.ToBoolean(y) ? 1 : 0; }

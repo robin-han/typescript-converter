@@ -27,6 +27,12 @@ namespace TypeScript.Converter.CSharp
                     .InvocationExpression(SyntaxFactory.ParseExpression("ToNumber"))
                     .AddArgumentListArguments(this.ToArgumentList(node.Arguments));
             }
+            else if (node.Expression.Text == "String")
+            {
+                return SyntaxFactory
+                    .InvocationExpression(SyntaxFactory.ParseExpression("ToString"))
+                    .AddArgumentListArguments(this.ToArgumentList(node.Arguments));
+            }
             else
             {
                 return SyntaxFactory
