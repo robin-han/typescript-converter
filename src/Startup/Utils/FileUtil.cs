@@ -219,7 +219,7 @@ namespace TypeScript.Converter
             return path.IndexOfAny(new char[] { '*', '?' }) >= 0;
         }
 
-        private static string ToRegexPattern(string path)
+        public static string ToRegexPattern(string path)
         {
             if (!HasWildcard(path))
             {

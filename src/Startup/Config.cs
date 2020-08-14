@@ -23,13 +23,7 @@ namespace TypeScript.Converter
             this.Include = new List<string>();
             this.Exclude = new List<string>();
             this.Samples = new List<string>();
-
-            this.Output = string.Empty;
-            this.FlatOutput = false;
-            this.PreferTypeScriptType = true;
-
-            this.Namespace = string.Empty;
-            this.Usings = new List<string>();
+            this.Outputs = new List<Output>();
             this.NamespaceMappings = new List<string>();
             this.OmittedQualifiedNames = new List<string>();
         }
@@ -55,31 +49,7 @@ namespace TypeScript.Converter
             private set;
         }
 
-        public string Output
-        {
-            get;
-            private set;
-        }
-
-        public bool FlatOutput
-        {
-            get;
-            private set;
-        }
-
-        public bool PreferTypeScriptType
-        {
-            get;
-            private set;
-        }
-
-        public string Namespace
-        {
-            get;
-            private set;
-        }
-
-        public List<string> Usings
+        public List<Output> Outputs
         {
             get;
             private set;
@@ -119,42 +89,11 @@ namespace TypeScript.Converter
             JObject jsonConfig = JObject.Parse(File.ReadAllText(configFile));
             this.Init();
 
-            // output
-            JToken jsonOutput = jsonConfig["output"];
-            if (jsonOutput != null)
+            //outputs
+            JToken jsonOutputs = jsonConfig["outputs"];
+            if (jsonOutputs != null)
             {
-                this.Output = jsonOutput.ToObject<string>();
-            }
-
-            // flatOutput
-            JToken jsonFlatten = jsonConfig["flatOutput"];
-            if (jsonFlatten != null)
-            {
-                this.FlatOutput = jsonFlatten.ToObject<bool>();
-            }
-
-            // perfer typescript type
-            JToken jsonPerferType = jsonConfig["preferTypeScriptType"];
-            if (jsonPerferType != null)
-            {
-                this.PreferTypeScriptType = jsonPerferType.ToObject<bool>();
-            }
-
-            // namesapce
-            JToken jsonNamespace = jsonConfig["namespace"];
-            if (jsonNamespace != null)
-            {
-                this.Namespace = jsonNamespace.ToObject<string>();
-            }
-
-            // usings
-            JToken jsonUsings = jsonConfig["usings"];
-            if (jsonUsings != null)
-            {
-                foreach (JToken item in jsonUsings)
-                {
-                    this.Usings.Add(item.ToObject<string>());
-                }
+                this.ReadOutputs(jsonOutputs);
             }
 
             // namesapce mappings
@@ -208,6 +147,70 @@ namespace TypeScript.Converter
             }
 
             return string.Empty;
+        }
+
+        private void ReadOutputs(JToken jsonOutputs)
+        {
+            JArray jsonArray = jsonOutputs as JArray;
+            if (jsonArray == null)
+            {
+                return;
+            }
+
+            foreach (var jsonConfig in jsonArray)
+            {
+                Output output = new Output();
+
+                // path
+                JToken jsonPath = jsonConfig["path"];
+                if (jsonPath != null)
+                {
+                    output.Path = jsonPath.ToObject<string>();
+                }
+
+                //pattern
+                JToken jsonPatterns = jsonConfig["patterns"];
+                if (jsonPatterns != null)
+                {
+                    foreach (JToken item in jsonPatterns)
+                    {
+                        output.Patterns.Add(item.ToObject<string>());
+                    }
+                }
+
+                // flatOutput
+                JToken jsonFlatten = jsonConfig["flatOutput"];
+                if (jsonFlatten != null)
+                {
+                    output.FlatOutput = jsonFlatten.ToObject<bool>();
+                }
+
+                // perfer typescript type
+                JToken jsonPerferType = jsonConfig["preferTypeScriptType"];
+                if (jsonPerferType != null)
+                {
+                    output.PreferTypeScriptType = jsonPerferType.ToObject<bool>();
+                }
+
+                // namesapce
+                JToken jsonNamespace = jsonConfig["namespace"];
+                if (jsonNamespace != null)
+                {
+                    output.Namespace = jsonNamespace.ToObject<string>();
+                }
+
+                // usings
+                JToken jsonUsings = jsonConfig["usings"];
+                if (jsonUsings != null)
+                {
+                    foreach (JToken item in jsonUsings)
+                    {
+                        output.Usings.Add(item.ToObject<string>());
+                    }
+                }
+
+                this.Outputs.Add(output);
+            }
         }
         #endregion
     }

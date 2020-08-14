@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace TypeScript.Converter
 {
@@ -25,7 +26,7 @@ namespace TypeScript.Converter
             private set;
         }
 
-        public string Output
+        public List<Output> Outputs
         {
             get;
             private set;
@@ -42,30 +43,60 @@ namespace TypeScript.Converter
             get;
             private set;
         }
-        #endregion
 
-        public string GetSavePath(string sourcePath)
+        /// <summary>
+        /// Gets the default output.
+        /// </summary>
+        public Output Output
         {
-            string output = this.Output;
-            if (File.Exists(output))
+            get
             {
-                return output;
+                if (this.Outputs.Count > 0)
+                {
+                    return this.Outputs[this.Outputs.Count - 1];
+                }
+
+                return new Output();
+            }
+        }
+        #endregion
+        public Output GetOutput(string sourcePath)
+        {
+            string path = FileUtil.NormalizePath(sourcePath);
+            foreach (var output in this.Outputs)
+            {
+                if (output.Patterns.Exists((pattern) =>
+                {
+                    return Regex.IsMatch(path, FileUtil.ToRegexPattern(FileUtil.NormalizePath(pattern)));
+                }))
+                {
+                    return output;
+                }
+            }
+            return this.Output;
+        }
+
+        public string GetSavePath(string sourcePath, Output output)
+        {
+            string outputPath = output.Path;
+            if (File.Exists(outputPath))
+            {
+                return outputPath;
             }
 
-            string basePath = this.BasePath;
-            string savePath = string.Empty;
-            if (string.IsNullOrEmpty(basePath))
+            string savePath;
+            if (output.FlatOutput)
             {
-                savePath = Path.Combine(output, Path.GetFileName(sourcePath).Split('.')[0] + ".cs");
+                savePath = Path.Combine(outputPath, Path.GetFileName(sourcePath).Split('.')[0] + ".cs");
             }
             else
             {
-                string relativePath = Path.GetRelativePath(basePath, sourcePath);
+                string relativePath = Path.GetRelativePath(this.BasePath, sourcePath);
                 if (string.IsNullOrEmpty(relativePath) || relativePath == ".")
                 {
                     relativePath = Path.GetFileName(sourcePath);
                 }
-                savePath = Path.Combine(output, relativePath.Split('.')[0] + ".cs");
+                savePath = Path.Combine(outputPath, relativePath.Split('.')[0] + ".cs");
             }
 
             string dirName = Path.GetDirectoryName(savePath);
@@ -103,7 +134,7 @@ namespace TypeScript.Converter
 
             //
             string basePath = string.Empty;
-            string output = string.Empty;
+            List<Output> outputs = new List<Output>();
             List<string> allFiles = new List<string>();
             List<string> exclusion = new List<string>();
             List<string> topInputs = new List<string>();
@@ -136,14 +167,11 @@ namespace TypeScript.Converter
             }
 
             // base path
-            if (!config.FlatOutput)
+            basePath = FileUtil.GetBasePath(allFiles);
+            // adjust base path
+            if (topInputs.Count == 1 && Directory.Exists(topInputs[0]) && basePath.StartsWith(FileUtil.NormalizePath(topInputs[0])))
             {
-                basePath = FileUtil.GetBasePath(allFiles);
-                // adjust base path
-                if (topInputs.Count == 1 && Directory.Exists(topInputs[0]) && basePath.StartsWith(FileUtil.NormalizePath(topInputs[0])))
-                {
-                    basePath = topInputs[0];
-                }
+                basePath = topInputs[0];
             }
 
             // exclusion
@@ -156,8 +184,15 @@ namespace TypeScript.Converter
                 exclusion.AddRange(config.Exclude);
             }
 
-            // output
-            output = outOption.HasValue() ? outOption.Value() : config.Output;
+            // outputs
+            if (outOption.HasValue())
+            {
+                outputs.Add(new Output() { Path = outOption.Value() });
+            }
+            if (configOption.HasValue() || !outOption.HasValue())
+            {
+                outputs.InsertRange(0, config.Outputs);
+            }
 
             // files
             List<string> files = FileUtil.FilterFiles(allFiles, exclusion);
@@ -166,11 +201,13 @@ namespace TypeScript.Converter
             {
                 AllFiles = allFiles,
                 Files = files,
-                Output = output,
+                Outputs = outputs,
                 BasePath = basePath,
 
                 Config = config
             };
         }
     }
+
+
 }

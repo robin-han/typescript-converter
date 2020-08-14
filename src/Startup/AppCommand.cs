@@ -171,7 +171,7 @@ namespace TypeScript.Converter
         /// </summary>
         private void ClearOutput(ExecuteArgument arg)
         {
-            if (!Directory.Exists(arg.Output) || !Directory.Exists(arg.BasePath))
+            if (!Directory.Exists(arg.Output.Path) || !Directory.Exists(arg.BasePath))
             {
                 return;
             }
@@ -179,7 +179,7 @@ namespace TypeScript.Converter
             List<string> deleteFiles = new List<string>();
             List<string> allInputFiles = arg.AllFiles;
             var inputDirectories = Directory.GetDirectories(arg.BasePath);
-            var outputDirectories = Directory.GetDirectories(arg.Output).Where(dir1 =>
+            var outputDirectories = Directory.GetDirectories(arg.Output.Path).Where(dir1 =>
             {
                 return inputDirectories.Any(dir2 => Path.GetFileName(dir2) == Path.GetFileName(dir1));
             });
@@ -233,10 +233,19 @@ namespace TypeScript.Converter
                 DateTime beginTime = DateTime.Now;
                 this.Log(string.Format("Starting convert file '{0}'", Path.GetFileNameWithoutExtension(doc.Path)));
 
-                string savePath = arg.GetSavePath(doc.Path);
+                Output output = arg.GetOutput(doc.Path);
+                ConverterConfig config = context.Config;
+
+                //convert
+                config.Namespace = output.Namespace;
+                config.Usings = output.Usings;
+                config.PreferTypeScriptType = output.PreferTypeScriptType;
+
+                string savePath = arg.GetSavePath(doc.Path, output);
                 string code = CodeHeaderText + doc.Root.ToCSharp();
                 File.WriteAllText(savePath, code);
 
+                //
                 this.Log(string.Format("Finished after {0}s", (DateTime.Now - beginTime).TotalSeconds.ToString("0.00")));
             }
             this.Log(string.Format("Finished after {0}s", (DateTime.Now - startTime).TotalSeconds.ToString("0.00")));
@@ -252,9 +261,6 @@ namespace TypeScript.Converter
         {
             ConverterConfig converterConfig = new ConverterConfig
             {
-                Namespace = config.Namespace,
-                PreferTypeScriptType = config.PreferTypeScriptType,
-                Usings = config.Usings,
                 OmittedQualifiedNames = config.OmittedQualifiedNames,
                 NamespaceMappings = new Dictionary<string, string>()
             };

@@ -32,7 +32,7 @@ namespace TypeScript.Converter.CSharp
 
         private bool IsNullableType(Node type)
         {
-            if (type.Kind == NodeKind.NumberKeyword && !this.Context.Config.PreferTypeScriptType)
+            if ((type.Kind == NodeKind.NumberKeyword || type.Kind == NodeKind.BooleanKeyword) && !this.Context.Config.PreferTypeScriptType)
             {
                 return true;
             }

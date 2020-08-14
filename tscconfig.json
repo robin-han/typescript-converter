@@ -1,13 +1,16 @@
 {
   "include": [],
   "exclude": [],
-  "output": "",
   "samples": [],
-  "flatOutput": false,
-  "preferTypeScriptType": true,
-  "namespace": "MyNamespace",
-  "usings": [
-    "System"
+  "outputs": [
+    "path": "",
+	"patterns": [],
+	"flatOutput": false,
+	"preferTypeScriptType": true,
+    "namespace": "MyNamespace",
+	"usings": [
+	  "System"
+	]
   ],
   "namespaceMappings": [],
   "omittedQualifiedNames": []
