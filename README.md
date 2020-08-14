@@ -39,7 +39,7 @@ All config setting in file tscconfig.json
   "outputs": [
     {
       "path": "",                      // output directory
-	  "patterns": [],                  // file pattern to math output
+      "patterns": [],                  // file pattern to math output
       "flatOutput": false,             // true will not keep its directory hierarchy
       "preferTypeScriptType": true,    // keep typescript's primary type, when true please inlcude 'TypeScriptObject' project in your solution.
       "namespace": "MyNamespace",      // output's namespace
