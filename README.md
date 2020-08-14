@@ -35,13 +35,18 @@ All config setting in file tscconfig.json
 {
   "include": [],                 // source list directory or files
   "exclude": [],                 // exclude source directory or files
-  "output": "",                  // output directory
   "samples": [],                 // If translate part of the source, put class name here, it will convert all its referenced
-  "flatOutput": false,           // true will not keep its directory hierarchy
-  "preferTypeScriptType": true,  // keep typescript's primary type, when true please inlcude 'TypeScriptObject' project in your solution.
-  "namespace": "MyNamespace",    // output's namespace
-  "usings": [                    // will add them on the head of every file 
-    "System.Linq"
+  "outputs": [
+    {
+      "path": "",                      // output directory
+	  "patterns": [],                  // file pattern to math output
+      "flatOutput": false,             // true will not keep its directory hierarchy
+      "preferTypeScriptType": true,    // keep typescript's primary type, when true please inlcude 'TypeScriptObject' project in your solution.
+      "namespace": "MyNamespace",      // output's namespace
+      "usings": [                      // will add them on the head of every file 
+        "System.Linq"
+      ]
+    }
   ],
   "namespaceMappings": [],       // map typescript's namespace
   "omittedQualifiedNames": []    // omit qualified names, eg: dv.model
