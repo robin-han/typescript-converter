@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Linq;
+using TypeScript.Syntax;
 
 namespace TypeScript.Converter
 {
@@ -12,6 +13,42 @@ namespace TypeScript.Converter
         private static readonly string DirectorySeparator = "/";
         private static readonly string BackSlash = "\\";
         private static readonly string TsJsonFileExtension = "*.ts.json";
+
+        public static string GetFileExtension(Lang lang)
+        {
+            switch (lang)
+            {
+                case Lang.CSharp:
+                    return ".cs";
+                case Lang.Java:
+                    return ".java";
+                default:
+                    throw new NotSupportedException("lang");
+            }
+        }
+
+        public static string NormalizeName(Document doc, string name, Lang lang)
+        {
+            switch (lang)
+            {
+                case Lang.Java:
+                    name = name.TrimStart('_');
+
+                    Node publicType = doc.GetPublicTypeDeclaration();
+                    if (publicType != null)
+                    {
+                        string typeName = publicType.GetName().TrimStart('_');
+                        if (name != typeName)
+                        {
+                            name = typeName;
+                        }
+                    }
+                    return name;
+
+                default:
+                    return name;
+            }
+        }
 
         public static List<string> GetTsJsonFiles(string input)
         {
@@ -44,11 +81,9 @@ namespace TypeScript.Converter
             foreach (string file in files)
             {
                 bool excluded = false;
-                string path = NormalizePath(file);
                 foreach (string exclude in excludes)
                 {
-                    string excludePattern = ToRegexPattern(NormalizePath(exclude));
-                    if (Regex.IsMatch(path, excludePattern))
+                    if (IsMatch(file, exclude))
                     {
                         excluded = true;
                         break;
@@ -59,7 +94,6 @@ namespace TypeScript.Converter
                     ret.Add(file);
                 }
             }
-
             return ret;
         }
 
@@ -93,6 +127,14 @@ namespace TypeScript.Converter
         public static string NormalizePath(string path)
         {
             return path.Replace(BackSlash, DirectorySeparator);
+        }
+
+        public static bool IsMatch(string path, string pattern)
+        {
+            path = NormalizePath(path);
+            pattern = NormalizePath(pattern);
+
+            return Regex.IsMatch(path, ToRegexPattern(pattern));
         }
 
         private static string GetCommonPath(string path1, string path2)
@@ -219,32 +261,49 @@ namespace TypeScript.Converter
             return path.IndexOfAny(new char[] { '*', '?' }) >= 0;
         }
 
-        public static string ToRegexPattern(string path)
+        private static string ToRegexPattern(string path)
         {
-            if (!HasWildcard(path))
+            string pattern = string.Empty;
+            foreach (string pathSegment in path.Split(DirectorySeparator))
             {
-                return path;
-            }
-
-            string ret = string.Empty;
-            string path2 = path.Replace(".", "\\.");
-            foreach (string pathSegment in path2.Split(DirectorySeparator))
-            {
-                if (!string.IsNullOrEmpty(ret))
+                if (!string.IsNullOrEmpty(pattern))
                 {
-                    ret += DirectorySeparator;
+                    pattern += DirectorySeparator;
                 }
 
                 if (pathSegment == "**")
                 {
-                    ret += ".*";
+                    pattern += ".*";
                 }
-                else
+                else if (!string.IsNullOrEmpty(pathSegment))
                 {
-                    ret += pathSegment.Replace("*", ".*").Replace("?", ".{1}");
+                    string segment = pathSegment
+                        .Replace(".", "\\.")
+                        .Replace("?", ".{1}");
+
+                    // Process *
+                    if (segment[0] == '*')
+                    {
+                        segment = ".*" + segment.Substring(1);
+                    }
+                    for (int index = segment.IndexOf('*', 0); index >= 0; index = segment.IndexOf('*', ++index))
+                    {
+                        char prev = segment[index - 1];
+                        if (prev == '_'
+                            || prev == '$'
+                            || ('0' <= prev && prev <= '9')
+                            || ('a' <= prev && prev <= 'z')
+                            || ('A' <= prev && prev <= 'Z'))
+                        {
+                            segment = segment.Substring(0, index) + ".*" + segment.Substring(index + 1);
+                            index++;
+                        }
+                    }
+                    pattern += segment;
                 }
             }
-            return ret;
+
+            return pattern;
         }
     }
 }

@@ -3,17 +3,29 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using GrapeCity.Syntax.Converter.Source.TypeScript.Builders;
+
 namespace TypeScript.Syntax
 {
     public class NodeHelper
     {
-        public static Node CreateNode(NodeKind kind, string text = "")
+        public static Node CreateNode(NodeKind kind, string text = null)
         {
-            return CreateNode(
-                "{ " +
-                    "kind: \"" + kind.ToString() + "\", " +
-                    "text: \"" + text + "\" " +
-                "}");
+            if (text != null)
+            {
+                return CreateNode(
+                    "{ " +
+                        "kind: \"" + kind.ToString() + "\", " +
+                        "text: \"" + text + "\" " +
+                    "}");
+            }
+            else
+            {
+                return CreateNode(
+                    "{ " +
+                        "kind: \"" + kind.ToString() + "\" " +
+                    "}");
+            }
         }
 
         public static Node CreateNode(string json)
@@ -23,7 +35,14 @@ namespace TypeScript.Syntax
 
         public static Node CreateNode(JObject nodeJson)
         {
-            return new AstBuilder().Build(nodeJson);
+            var node = new AbstractSyntaxTreeBuilder().Build(nodeJson);
+            if (node != null)
+            {
+                node.Pos = 0;
+                node.End = 0;
+            }
+
+            return node;
         }
     }
 }

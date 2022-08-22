@@ -1,20 +1,33 @@
-﻿using TypeScript.Converter.CSharp;
-using TypeScript.Syntax;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.Extensions.CommandLineUtils;
+﻿using System;
 
-namespace TypeScript.Converter
+using Microsoft.Extensions.Logging;
+
+using TypeScript.Converter;
+
+namespace GrapeCity.Syntax.Converter.Console
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        internal static void Main(string[] args)
         {
-            var app = new AppCommand();
-            app.Execute(args);
+            System.Console.WriteLine("GrapeCity (R) Source Code Syntax Converter");
+            System.Console.WriteLine("Copyright (C) GrapeCity Corporation. All rights reserved.");
+            System.Console.WriteLine();
+
+            using (var loggerFactory = LoggerFactory.Create(builder => { builder.AddConsole(); }))
+            {
+                var logger = loggerFactory.CreateLogger<Program>();
+                var application = new ConverterApplication();
+                try
+                {
+                    application.Execute(args);
+                }
+                catch (Exception exception)
+                {
+                    logger.LogError(exception.Message);
+                    Environment.Exit(1);
+                }
+            }
         }
     }
-
 }

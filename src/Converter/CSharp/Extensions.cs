@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,7 +16,7 @@ namespace TypeScript.Converter.CSharp
     {
         internal static string GetPackageName(this Syntax.Document doc)
         {
-            string configNs = ConverterContext.Current.Config.Namespace;
+            string configNs = CSharpConverter.Current.Context.Namespace;
             if (!string.IsNullOrEmpty(configNs))
             {
                 return configNs;
@@ -26,8 +27,9 @@ namespace TypeScript.Converter.CSharp
     }
     #endregion
 
-    #region SyntaxNode
-    public static class SyntaxNodeExtension
+
+    #region Syntax Tree Node Extension
+    internal static class SyntaxTreeNodeExtension
     {
         /// <summary>
         /// Convert to csharp code.
@@ -36,50 +38,46 @@ namespace TypeScript.Converter.CSharp
         /// <returns>The csharp code.</returns>
         public static string ToCSharp(this Node node)
         {
-            CSharpSyntaxNode csNode = node?.ToCsNode<CSharpSyntaxNode>();
+            CSharpSyntaxNode csNode = node?.ToCsSyntaxTree<CSharpSyntaxNode>();
             if (csNode != null)
             {
-                return csNode.NormalizeWhitespace().ToFullString();
+                return csNode.NormalizeWhitespace("    ", Environment.NewLine,  false).ToFullString();
             }
 
             return string.Empty;
         }
 
-        internal static T ToCsNode<T>(this Node tsNode)
+        public static T ToCsSyntaxTree<T>(this Node tsNode)
         {
-            Converter converter = ConverterContext.Current.CreateConverter(tsNode);
-            if (converter == null)
+            object result = Convert(tsNode);
+            if (result != null)
             {
-                Log(string.Format("Cannot find {0} Converter", tsNode.Kind));
-                return default(T);
+                return (T)result;
             }
-
-            try
-            {
-                MethodInfo convertMethod = converter.GetType().GetMethod("Convert", new Type[] { tsNode.GetType() });
-                object node = convertMethod.Invoke(converter, new object[] { tsNode });
-
-                if (!CanConvert(tsNode))
-                {
-                    CannotConvert(tsNode);
-                }
-
-                if (node is T)
-                {
-                    return (T)node;
-                }
-                return default(T);
-            }
-            catch (TargetInvocationException ex)
-            {
-                PrintExecption(ex);
-                FailToConvert(tsNode);
-
-                return default(T);
-            }
+            return default(T);
         }
 
-        internal static T[] ToCsNodes<T>(this IEnumerable<Node> nodes)
+        public static List<T> ToCsSyntaxTrees<T>(this Node node)
+        {
+            List<T> trees = new List<T>();
+
+            object result = Convert(node);
+            if (result is IList list)
+            {
+                foreach (var item in list)
+                {
+                    trees.Add((T)item);
+                }
+            }
+            else if (result is T t)
+            {
+                trees.Add(t);
+            }
+
+            return trees;
+        }
+
+        public static T[] ToCsSyntaxTrees<T>(this IEnumerable<Node> nodes)
         {
             List<T> ret = new List<T>();
             foreach (Node node in nodes)
@@ -89,13 +87,41 @@ namespace TypeScript.Converter.CSharp
                     continue;
                 }
 
-                T csNode = node.ToCsNode<T>();
+                T csNode = node.ToCsSyntaxTree<T>();
                 if (csNode != null)
                 {
                     ret.Add(csNode);
                 }
             }
             return ret.ToArray();
+        }
+
+        private static object Convert(Node node)
+        {
+            try
+            {
+                NodeConverter converter = CSharpConverter.Current.CreateConverter(node);
+                if (converter == null)
+                {
+                    LogInfo($"Cannot find {node.Kind} Converter");
+                    return null;
+                }
+                MethodInfo convertMethod = converter.GetType().GetMethod("Convert", new Type[] { node.GetType() });
+                object result = convertMethod.Invoke(converter, new object[] { node });
+
+                if (!CanConvert(node))
+                {
+                    LogWarning($"Cannot convert {node.Kind}: {node.Text}");
+                }
+
+                return result;
+            }
+            catch (TargetInvocationException ex)
+            {
+                LogError($"Fail to convert {node.Kind}: { node.Text}");
+                PrintExecption(ex);
+                return null;
+            }
         }
 
         private static bool CanConvert(Node node)
@@ -135,22 +161,6 @@ namespace TypeScript.Converter.CSharp
             }
         }
 
-        private static void CannotConvert(Node node)
-        {
-            Log(string.Format("WARING: Cannot convert {0}: {1}", node.Kind, node.Text));
-        }
-
-        private static void FailToConvert(Node node)
-        {
-            Log(string.Format("ERROR: Fail to convert {0}: {1}", node.Kind, node.Text));
-        }
-
-        private static void Log(string msg)
-        {
-            Console.WriteLine(msg);
-        }
-
-        [Conditional("DEBUG")]
         private static void PrintExecption(Exception ex)
         {
             Exception e = ex;
@@ -158,9 +168,21 @@ namespace TypeScript.Converter.CSharp
             {
                 e = e.InnerException;
             }
-            Log(string.Format("ERROR: Exception {0}", e.ToString()));
+            LogInfo($"ERROR: Exception {e.ToString()}");
         }
 
+        private static void LogInfo(string msg)
+        {
+            Console.WriteLine(msg);
+        }
+        private static void LogWarning(string msg)
+        {
+            Console.WriteLine($"WARNING: {msg}");
+        }
+        private static void LogError(string msg)
+        {
+            Console.WriteLine($"ERROR: {msg}");
+        }
     }
     #endregion
 }

@@ -1,15 +1,19 @@
-﻿using TypeScript.Syntax;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
+
+using TypeScript.Syntax;
+using GrapeCity.Syntax.Converter.Source.TypeScript.Builders;
+
+using Newtonsoft.Json.Linq;
 
 namespace TypeScript.Converter
 {
     class DocumentUtil
     {
+        private static Dictionary<string, Type> nodeKinds = SyntaxNodeNameAndTypeDictionaryBuilder.DefaultSyntaxNodeTypeListBuilder.Build();
+
         /// <summary>
         /// Gets the lost nodes of the document.
         /// </summary>
@@ -19,7 +23,7 @@ namespace TypeScript.Converter
         {
             Dictionary<string, string> lost = new Dictionary<string, string>();
 
-            foreach (Node node in doc.Root.DescendantsAndSelf())
+            foreach (Node node in doc.Source.DescendantsAndSelf())
             {
                 string key = node.Kind.ToString();
                 if (lost.ContainsKey(key))
@@ -58,18 +62,26 @@ namespace TypeScript.Converter
         public static List<string> GetNotImplementNodeTypes(List<Document> tsDocs)
         {
             List<string> ret = new List<string>();
-            var implementedNodeTypes = AstBuilder.AllNodeTypes.Keys;
             foreach (var doc in tsDocs)
             {
-                List<string> docNodeKinds = GetNodeKinds(doc);
-                List<string> notImplementedNodes = docNodeKinds.FindAll((k) => !implementedNodeTypes.Contains(k));
-                notImplementedNodes.ForEach(item =>
+                string docText = doc.Source.Text;
+                var notImplementedNodeKinds = GetNotImplementNodeKind(doc);
+                foreach (var item in notImplementedNodeKinds)
                 {
-                    if (!ret.Contains(item))
+                    var texts = item.Value.Select(v =>
                     {
-                        ret.Add(item);
-                    }
-                });
+                        JToken jsonPos = v["pos"];
+                        int pos = jsonPos == null ? 0 : jsonPos.ToObject<int>();
+                        JToken jsonEnd = v["end"];
+                        int end = jsonEnd == null ? 0 : jsonEnd.ToObject<int>();
+                        if (pos + end <= docText.Length)
+                        {
+                            return docText.Substring(pos, end - pos);
+                        }
+                        return "";
+                    });
+                    ret.Add($"{doc.Path} : {item.Key} : {string.Join(',', texts)}");
+                }
             }
             return ret;
         }
@@ -78,49 +90,37 @@ namespace TypeScript.Converter
         /// Gets all NodeKinds of the document.
         /// </summary>
         /// <returns></returns>
-        public static List<string> GetNodeKinds(Document doc)
+        private static Dictionary<string, List<JToken>> GetNotImplementNodeKind(Document doc)
         {
-            List<string> kinds = new List<string>();
-            JObject jsonObject = JObject.Parse(File.ReadAllText(doc.Path));
-            Queue<JToken> queue = new Queue<JToken>(jsonObject);
+            var implementedNodeKinds = nodeKinds.Keys;
+            var notImplementNodeKinds = new Dictionary<string, List<JToken>>();
+            Queue<JToken> queue = new Queue<JToken>(doc.Source.TsNode);
+
             while (queue.Count > 0)
             {
                 JToken jsonToken = queue.Dequeue();
                 if (jsonToken.HasValues && jsonToken.Type == JTokenType.Object)
                 {
-                    string syntaxKind = AstBuilder.GetSyntaxNodeKey(jsonToken as JObject);
-                    if (!kinds.Contains(syntaxKind))
+                    string nodeKind = AbstractSyntaxTreeBuilder.GetSyntaxNodeKey((JObject)jsonToken);
+                    if (!implementedNodeKinds.Contains(nodeKind))
                     {
-                        kinds.Add(syntaxKind);
+                        if (notImplementNodeKinds.ContainsKey(nodeKind))
+                        {
+                            notImplementNodeKinds[nodeKind].Add(jsonToken);
+                        }
+                        else
+                        {
+                            notImplementNodeKinds.Add(nodeKind, new List<JToken>() { jsonToken });
+                        }
                     }
                 }
-
                 foreach (var token in jsonToken)
                 {
                     queue.Enqueue(token);
                 }
             }
 
-            return kinds;
-        }
-
-        /// <summary>
-        /// Gets all type names of the document.
-        /// </summary>
-        /// <returns></returns>
-        public static List<string> GetTypeNames(Syntax.Document doc)
-        {
-            List<string> ret = new List<string>();
-            List<Node> types = doc.TypeNodes;
-            foreach (Node type in types)
-            {
-                string name = TypeHelper.GetTypeName(type);
-                if (!string.IsNullOrEmpty(name))
-                {
-                    ret.Add(name);
-                }
-            }
-            return ret;
+            return notImplementNodeKinds;
         }
     }
 }

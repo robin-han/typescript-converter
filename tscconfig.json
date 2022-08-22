@@ -1,17 +1,31 @@
 {
-  "include": [],
-  "exclude": [],
-  "samples": [],
-  "outputs": [
-    "path": "",
-	"patterns": [],
-	"flatOutput": false,
-	"preferTypeScriptType": true,
-    "namespace": "MyNamespace",
-	"usings": [
-	  "System"
-	]
+  "source": [
+    "ast"
   ],
-  "namespaceMappings": [],
-  "omittedQualifiedNames": []
+  "exclude": [
+    "**/XXXX.ts.json",
+
+  ],
+  "samples": [
+    "MyClass"
+  ],
+  "target": {
+    "lang": "csharp",
+    "outputs": [
+      {
+        "path": "XXXXXX/enums",
+        "patterns": [
+          "**/enum/",
+          "**/enums/"
+        ],
+        "flat": true,
+        "typeScriptType": false,
+        "namespace": "MyNameSpace",
+        "usings": []
+      }
+    ]
+  },
+  "qualifiedNames": [
+
+  ]
 }

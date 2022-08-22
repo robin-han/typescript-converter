@@ -1,4 +1,5 @@
 ﻿using TypeScript.Syntax.Analysis;
+using TypeScript.Syntax.Converter;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,27 +7,22 @@ using System.Text.RegularExpressions;
 
 namespace TypeScript.Syntax
 {
-    public class Project
+    public class Project : IProject
     {
         #region Fields
-        private string _path;
-        private List<Document> _documents;
-        private List<Document> _includeDocuments;
-
-        private (List<Node> nodes, List<string> names)? _typeNodes;
-        private List<Type> _analyzerTypes;
+        private (List<Node> declarations, List<string> names)? _typeDeclarations;
         private List<Node> _globalFunctions;
+        private List<Document> _validDocuments;
         #endregion
 
         #region Constructor
-        public Project(string path, List<Document> documents, List<Document> includedDocuments)
+        public Project(string path, List<Document> documents)
         {
-            this._path = path;
-            this._documents = documents;
-            this._includeDocuments = includedDocuments;
-            this._typeNodes = null;
-            this._analyzerTypes = null;
+            this.Path = path;
+            this.Documents = documents;
+            this._typeDeclarations = null;
             this._globalFunctions = null;
+            this._validDocuments = null;
 
             foreach (Document doc in documents)
             {
@@ -37,14 +33,21 @@ namespace TypeScript.Syntax
 
         #region Properties
         /// <summary>
+        /// Gets or sets the group id.
+        /// </summary>
+        public string GroupId
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets the project's path.
         /// </summary>
         public string Path
         {
-            get
-            {
-                return this._path;
-            }
+            get;
+            private set;
         }
 
         /// <summary>
@@ -52,42 +55,48 @@ namespace TypeScript.Syntax
         /// </summary>
         public List<Document> Documents
         {
-            get
-            {
-                return this._documents;
-            }
+            get;
+            private set;
         }
 
         /// <summary>
-        /// Gets transform documents.
+        /// Gets or sets the sample documents
         /// </summary>
-        public List<Document> IncludeDocuments
+        public List<Document> SampleDocuments
         {
             get
             {
-                return this._includeDocuments;
+                if (this._validDocuments != null)
+                {
+                    return this._validDocuments;
+                }
+                return this.Documents;
+            }
+            set
+            {
+                this._validDocuments = value.FindAll(doc => this.Documents.Contains(doc));
             }
         }
 
         /// <summary>
         ///  Gets all the type names in the project.
         /// </summary>
-        public List<string> TypeNames
+        public List<string> TypeDeclarationNames
         {
             get
             {
-                return this.GetAllTypes().names;
+                return this.GetTypeDeclarations().names;
             }
         }
 
         /// <summary>
         /// Gets all type nodes in the project.
         /// </summary>
-        public List<Node> TypeNodes
+        public List<Node> TypeDeclarations
         {
             get
             {
-                return this.GetAllTypes().nodes;
+                return this.GetTypeDeclarations().declarations;
             }
         }
 
@@ -95,7 +104,7 @@ namespace TypeScript.Syntax
         /// Get all global functions in the project.
         /// </summary>
         /// <returns></returns>
-        public List<Node> GlobalFunctions
+        public List<Node> Functions
         {
             get
             {
@@ -106,18 +115,45 @@ namespace TypeScript.Syntax
                 return this._globalFunctions;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the project's converter.
+        /// </summary>
+        public IConverter Converter
+        {
+            get;
+            set;
+        }
         #endregion
 
         #region Methods
         /// <summary>
-        /// Add document to transform collection.
+        /// Normalize docs
         /// </summary>
-        /// <param name="doc">The document.</param>
-        public void AddIncludeDocument(Document doc)
+        /// <param name="docs"></param>
+        public void Normalize(List<Document> docs)
         {
-            if (!this.IncludeDocuments.Contains(doc))
+            List<Normalizer> analyzers = new List<Normalizer>();
+            Type baseType = typeof(Normalizer);
+            Type[] types = typeof(Normalizer).Assembly.GetExportedTypes();
+            foreach (Type type in types)
             {
-                this.IncludeDocuments.Add(doc);
+                if (type.IsSubclassOf(baseType))
+                {
+                    analyzers.Add((Normalizer)type.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes));
+                }
+            }
+            analyzers.Sort((a, b) =>
+            {
+                return a.Priority - b.Priority;
+            });
+
+            foreach (var analyzer in analyzers)
+            {
+                foreach (Document doc in docs)
+                {
+                    analyzer.Analyze(doc.Source);
+                }
             }
         }
 
@@ -126,10 +162,10 @@ namespace TypeScript.Syntax
         /// </summary>
         /// <param name="path">The import/export path.</param>
         /// <returns>The document.</returns>
-        public Document GetDocumentByPath(string path)
+        public Document GetDocument(string path)
         {
-            string docPath = (path.EndsWith(".ts.json") ? path : path + ".ts.json");
-            return this.Documents.Find(doc => doc.Path == docPath);
+            string docPath = path.EndsWith(".ts.json") ? path : path + ".ts.json";
+            return this.Documents.Find(doc => IsSamePath(doc.Path, docPath));
         }
 
         /// <summary>
@@ -137,12 +173,66 @@ namespace TypeScript.Syntax
         /// </summary>
         /// <param name="typeName">The type name.</param>
         /// <returns>The document where the type in</returns>
-        public Document GetDocumentByType(string typeName)
+        public Document GetTypeDeclarationDocument(string typeName)
         {
-            int index = this.TypeNames.IndexOf(typeName);
+            Node typeDeclaration = GetTypeDeclaration(typeName);
+            return typeDeclaration?.Document;
+        }
+
+        /// <summary>
+        /// Gets the node by type name.
+        /// </summary>
+        /// <param name="typeName">The type name</param>
+        /// <returns>The type node</returns>
+        public Node GetTypeDeclaration(string typeName)
+        {
+            int index = this.TypeDeclarationNames.IndexOf(typeName);
             if (index >= 0)
             {
-                return this.TypeNodes[index].Document;
+                return this.TypeDeclarations[index];
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the function declaration by name
+        /// </summary>
+        /// <param name="fnName">The function declaration name.</param>
+        /// <returns>The function declaration</returns>
+        public Node GetFunctionDeclaration(string fnName)
+        {
+            foreach (FunctionDeclaration fn in this.Functions)
+            {
+                if (fn.Name.Text == fnName)
+                {
+                    return fn;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the enum declaration node with the name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public EnumDeclaration GetEnum(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return null;
+            }
+
+            foreach (Node node in this.TypeDeclarations)
+            {
+                if (node.Kind == NodeKind.EnumDeclaration)
+                {
+                    EnumDeclaration @enum = (EnumDeclaration)node;
+                    if (@enum.NameText == name)
+                    {
+                        return @enum;
+                    }
+                }
             }
             return null;
         }
@@ -159,7 +249,7 @@ namespace TypeScript.Syntax
                 return null;
             }
 
-            foreach (Node node in this.TypeNodes)
+            foreach (Node node in this.TypeDeclarations)
             {
                 if (node.Kind == NodeKind.ClassDeclaration)
                 {
@@ -185,7 +275,7 @@ namespace TypeScript.Syntax
                 return null;
             }
 
-            foreach (Node node in this.TypeNodes)
+            foreach (Node node in this.TypeDeclarations)
             {
                 if (node.Kind == NodeKind.InterfaceDeclaration)
                 {
@@ -211,13 +301,12 @@ namespace TypeScript.Syntax
                 return null;
             }
 
-            Document document = classNode.Document;
             foreach (HeritageClause inherit in classNode.HeritageClauses)
             {
                 if (inherit.Token == NodeKind.ExtendsKeyword && inherit.Types.Count > 0)
                 {
-                    string typeName = TypeHelper.ToShortName(inherit.Types[0].Text);
-                    return this.GetClass(document.GetTypeDefinitionName(typeName));
+                    string typeName = TypeHelper.GetTypeDeclarationName(inherit.Types[0]);
+                    return this.GetClass(typeName);
                 }
             }
             return null;
@@ -292,12 +381,17 @@ namespace TypeScript.Syntax
                 {
                     if (inherit.Token == NodeKind.ExtendsKeyword)
                     {
-                        string className = TypeHelper.ToShortName(type.Text);
-                        ClassDeclaration baseClass = this.GetClass(type.Document.GetTypeDefinitionName(className));
-                        if (baseClass != null)
+                        string className = TypeHelper.GetTypeDeclarationName(type);
+                        Node @base = this.GetTypeDeclaration(className);
+                        if (@base != null)
                         {
-                            ret.Add(baseClass);
-                            foreach (HeritageClause nextInherit in baseClass.HeritageClauses)
+                            ret.Add(@base);
+                            List<Node> heritageClauses =
+                                  @base.Kind == NodeKind.ClassDeclaration
+                                ? ((ClassDeclaration)@base).HeritageClauses
+                                : ((InterfaceDeclaration)@base).HeritageClauses;
+
+                            foreach (HeritageClause nextInherit in heritageClauses)
                             {
                                 heritages.Enqueue(nextInherit);
                             }
@@ -305,8 +399,8 @@ namespace TypeScript.Syntax
                     }
                     else
                     {
-                        string interfaceName = TypeHelper.ToShortName(type.Text);
-                        InterfaceDeclaration baseInterface = this.GetInterface(type.Document.GetTypeDefinitionName(interfaceName));
+                        string interfaceName = TypeHelper.GetTypeDeclarationName(type);
+                        InterfaceDeclaration baseInterface = this.GetInterface(interfaceName);
                         if (baseInterface != null)
                         {
                             ret.Add(baseInterface);
@@ -327,13 +421,13 @@ namespace TypeScript.Syntax
         /// </summary>
         /// <param name="typeName"></param>
         /// <returns></returns>
-        public List<string> GetReferences(params string[] typeNames)
+        public List<string> GetReferences(List<string> typeNames)
         {
             List<string> ret = new List<string>();
             foreach (string name in typeNames)
             {
                 ret.Add(name);
-                this.GetReferences(name, ret);
+                this.FillReferences(name, ret);
             }
             return ret;
         }
@@ -343,77 +437,28 @@ namespace TypeScript.Syntax
         /// </summary>
         /// <param name="name">The type name.</param>
         /// <param name="results">The referenced types.</param>
-        private void GetReferences(string typeName, List<string> result)
+        private void FillReferences(string typeName, List<string> result)
         {
-            var (nodes, names) = this.GetAllTypes();
+            var (declarations, names) = this.GetTypeDeclarations();
             int index = names.IndexOf(typeName);
             if (index == -1)
             {
                 return;
             }
 
-            Node rootNode = nodes[index];
+            Node rootNode = declarations[index];
             Document document = rootNode.Document;
-            if (document == null || !this.IncludeDocuments.Contains(document))
+            if (document == null || !this.SampleDocuments.Contains(document))
             {
                 return;
             }
 
-            List<Node> types = new List<Node>();
-            rootNode.Descendants(n =>
+            foreach (string name in document.GetReferenceTypes())
             {
-                if (n.GetValue("Type") is Node t)
-                {
-                    types.Add(t);
-                }
-                if (n.GetValue("Types") is List<Node> ts)
-                {
-                    types.AddRange(ts);
-                }
-
-                switch (n.Kind)
-                {
-                    case NodeKind.PropertyAccessExpression:
-                        PropertyAccessExpression access = n as PropertyAccessExpression;
-
-                        if (access.Expression.Kind == NodeKind.Identifier && Regex.IsMatch(access.Expression.Text, "^[_A-Z]+[_A-Za-z0-9]*$") && names.Contains(access.Expression.Text))
-                        {
-                            types.Add(access.Expression);
-                        }
-                        else if (access.Name.Kind == NodeKind.Identifier && Regex.IsMatch(access.Name.Text, "^[_A-Z]+[_A-Za-z0-9]*$") && names.Contains(access.Name.Text))
-                        {
-                            types.Add(access.Name);
-                        }
-                        break;
-
-                    case NodeKind.BinaryExpression:
-                        BinaryExpression binary = n as BinaryExpression;
-                        if (binary.OperatorToken.Kind == NodeKind.InstanceOfKeyword)
-                        {
-                            types.Add(binary.Right);
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-                return false;
-            });
-
-            for (int i = 0; i < types.Count; i++)
-            {
-                Node type = types[i];
-                if (type.Kind == NodeKind.ArrayType)
-                {
-                    type = (type as ArrayType).ElementType;
-                }
-                
-                string name = TypeHelper.ToShortName(type.Text);
-                name = document.GetTypeDefinitionName(name);
-                if (Regex.IsMatch(name, "^[_A-Za-z]+[_A-Za-z0-9]*$") && !result.Contains(name) && names.Contains(name))
+                if (!result.Contains(name) && names.Contains(name))
                 {
                     result.Add(name);
-                    this.GetReferences(name, result);
+                    this.FillReferences(name, result);
                 }
             }
         }
@@ -422,32 +467,28 @@ namespace TypeScript.Syntax
         /// Get all type nodes(class, interfact, enum etc.) in the project.
         /// </summary>
         /// <returns></returns>
-        private (List<Node> nodes, List<string> names) GetAllTypes()
+        private (List<Node> declarations, List<string> names) GetTypeDeclarations()
         {
-            if (this._typeNodes.HasValue)
+            if (this._typeDeclarations.HasValue)
             {
-                return (this._typeNodes.Value.nodes, this._typeNodes.Value.names);
+                return (this._typeDeclarations.Value.declarations, this._typeDeclarations.Value.names);
             }
 
             //
-            List<Node> nodes = new List<Node>();
+            List<Node> declarations = new List<Node>();
             List<string> names = new List<string>();
             foreach (Document doc in this.Documents)
             {
-                List<Node> docTypes = doc.TypeNodes;
-                foreach (Node node in docTypes)
+                foreach (Node typeDeclaration in doc.TypeDeclarations)
                 {
-                    string name = TypeHelper.GetTypeName(node);
-                    if (!string.IsNullOrEmpty(name) && !names.Contains(name))
-                    {
-                        nodes.Add(node);
-                        names.Add(name);
-                    }
+                    string name = typeDeclaration.GetName();
+                    declarations.Add(typeDeclaration);
+                    names.Add(name);
                 }
             }
 
-            this._typeNodes = (nodes, names);
-            return (nodes, names);
+            this._typeDeclarations = (declarations, names);
+            return (declarations, names);
         }
 
         /// <summary>
@@ -459,42 +500,19 @@ namespace TypeScript.Syntax
             List<Node> nodes = new List<Node>();
             foreach (Document doc in this.Documents)
             {
-                nodes.AddRange(doc.GlobalFunctions);
+                nodes.AddRange(doc.Functions);
             }
             return nodes;
         }
 
         /// <summary>
-        /// Gets all analyzer types of the project
+        /// Indicates is the same path.
         /// </summary>
-        /// <returns></returns>
-        public List<Type> GetAnalyzerTypes()
+        private bool IsSamePath(string path1, string path2)
         {
-            if (this._analyzerTypes != null)
-            {
-                return this._analyzerTypes;
-            }
-
-            List<Type> ret = this._analyzerTypes = new List<Type>();
-            Type baseType = typeof(Analyzer);
-            Type[] types = typeof(Analyzer).Assembly.GetExportedTypes();
-            foreach (Type type in types)
-            {
-                if (type.IsSubclassOf(baseType))
-                {
-                    ret.Add(type);
-                }
-            }
-
-            ret.Sort((a, b) =>
-            {
-                Analyzer analyzerA = a.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes) as Analyzer;
-                Analyzer analyzerB = b.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes) as Analyzer;
-                return analyzerA.Priority - analyzerB.Priority;
-            });
-            return ret;
+            return System.IO.Path.GetFullPath(path1) == System.IO.Path.GetFullPath(path2);
         }
-        #endregion
 
+        #endregion
     }
 }

@@ -2,11 +2,26 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace TypeScript.Syntax
 {
     public static class TypeHelper
     {
+        // ITypeDeclaration: native type should contains: Name, MemberDeclarations, TypeParameters, GetMember(name), BaseTypeDeclarations
+        // IMemberDeclaration: Name, TypeParameters, ParameterTypes, ReturnType.
+        private static readonly List<string> MATH_MEMBER = new List<string>()
+        {
+            "E", "LN10", "LN2", "LOG2E", "LOG10E", "PI", "SQRT1_2", "SQRT2",
+            "abs", "acos", "asin", "atan", "atan2", "ceil", "cos", "exp", "floor",
+            "log", "max", "min", "pow", "random", "round", "sin", "sqrt", "tan"
+        };
+
+        public static bool IsMatchTypeName(string name)
+        {
+            return Regex.IsMatch(name, "^_*[A-Z]+[_A-Za-z0-9]*$");
+        }
+
         public static bool IsSameType(Node type1, Node type2)
         {
             if (type1 == null && type2 == null)
@@ -18,8 +33,8 @@ namespace TypeScript.Syntax
                 return false;
             }
 
-            type1 = TrimNullUnionType(type1);
-            type2 = TrimNullUnionType(type2);
+            type1 = TrimType(type1);
+            type2 = TrimType(type2);
             string name1 = GetNormalizedTypeName(type1);
             string name2 = GetNormalizedTypeName(type2);
             if (name1 == name2)
@@ -34,45 +49,187 @@ namespace TypeScript.Syntax
             return false;
         }
 
-        public static Node TrimNullUnionType(Node type)
+        /// <summary>
+        /// Trim null type of UnionType and ParenthesizedType.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static Node TrimType(Node type)
         {
-            if (type.Kind == NodeKind.UnionType)
+            if (type != null)
             {
-                List<Node> types = (type as UnionType).Types;
-                if (types.Count == 2)
+                if (type.Kind == NodeKind.ParenthesizedType)
                 {
-                    if (types[0].Kind == NodeKind.NullKeyword)
+                    type = ((ParenthesizedType)type).Type;
+                }
+
+                if (type.Kind == NodeKind.UnionType)
+                {
+                    List<Node> types = (type as UnionType).Types;
+                    if (types.Count == 2)
                     {
-                        return types[1];
-                    }
-                    else if (types[1].Kind == NodeKind.NullKeyword)
-                    {
-                        return types[0];
+                        if (types[0].Kind == NodeKind.NullKeyword)
+                        {
+                            type = types[1];
+                        }
+                        else if (types[1].Kind == NodeKind.NullKeyword)
+                        {
+                            type = types[0];
+                        }
                     }
                 }
             }
             return type;
         }
 
-        public static string GetTypeName(Node typeNode)
+        public static bool IsNullableType(Node type)
         {
-            if (typeNode.GetValue("Name") is Node name)
+            if (type != null && type.Kind == NodeKind.UnionType)
             {
-                return name.Text;
+                List<Node> types = ((UnionType)type).Types;
+                return (types.Count == 2 && (types[0].Kind == NodeKind.NullKeyword || types[1].Kind == NodeKind.NullKeyword));
             }
-            return null;
+            return false;
+        }
+
+        public static string GetTypeName(Node type)
+        {
+            if (type == null)
+            {
+                return null;
+            }
+
+            type = TrimType(type);
+            if (type.IsTypeDeclaration())
+            {
+                return type.GetName();
+            }
+            if (IsStringType(type))
+            {
+                return "string";
+            }
+            if (IsNumberType(type))
+            {
+                return "number";
+            }
+            if (IsBoolType(type))
+            {
+                return "boolean";
+            }
+
+            string typeName = type.Text;
+            return ToShortName(typeName);
+        }
+
+        public static string GetTypeDeclarationName(Node type)
+        {
+            if (type == null)
+            {
+                return null;
+            }
+
+            type = TrimType(type);
+            string name = ToShortName(type.Text); // name or alias name
+            Node declaration = type.Document?.GetTypeDeclaration(name);
+            if (declaration != null)
+            {
+                name = declaration.GetName();
+            }
+            return name;
         }
 
         public static string ToShortName(string typeName)
         {
-            string ret = typeName;
-            int genericIndex = typeName.IndexOf("<");
-            if (genericIndex >= 0)
+            string name = typeName;
+            if (!string.IsNullOrEmpty(name))
             {
-                ret = typeName.Substring(0, genericIndex);
+                int index = typeName.IndexOf("<");
+                if (index >= 0)
+                {
+                    name = typeName.Substring(0, index);
+                }
+                index = name.LastIndexOf('.');
+                if (index >= 0)
+                {
+                    return name.Substring(index + 1);
+                }
             }
-            string[] parts = ret.Split('.');
-            return parts[parts.Length - 1].Trim();
+            return name;
+        }
+
+        public static bool IsNativeNumber(Node type)
+        {
+            if (type == null)
+            {
+                return false;
+            }
+
+            type = TrimType(type);
+            if (type.Kind == NodeKind.IntKeyword)
+            {
+                return true;
+            }
+            if (type.Kind == NodeKind.LongKeyword)
+            {
+                return true;
+            }
+            return IsNativeNumber(type.Text);
+        }
+
+        public static bool IsNativeNumber(string type)
+        {
+            if (type == NativeTypes.Double || type == NativeTypes.Int || type == NativeTypes.Long)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool IsNativeBool(Node type)
+        {
+            if (type == null)
+            {
+                return false;
+            }
+
+            type = TrimType(type);
+            return IsNativeBool(type.Text);
+        }
+
+        public static bool IsNativeBool(string type)
+        {
+            return type == NativeTypes.Bool;
+        }
+
+        public static bool IsBoolType(Node type)
+        {
+            if (type == null)
+            {
+                return false;
+            }
+
+            type = TrimType(type);
+            if (type.Kind == NodeKind.BooleanKeyword)
+            {
+                return true;
+            }
+
+            return IsNativeBool(type);
+        }
+
+        public static bool IsIntType(Node type)
+        {
+            if (type == null)
+            {
+                return false;
+            }
+
+            type = TrimType(type);
+            if (type.Kind == NodeKind.IntKeyword)
+            {
+                return true;
+            }
+            return type.Text == NativeTypes.Int;
         }
 
         public static bool IsNumberType(Node type)
@@ -81,7 +238,14 @@ namespace TypeScript.Syntax
             {
                 return false;
             }
-            return type.Kind == NodeKind.NumberKeyword;
+
+            type = TrimType(type);
+            if (type.Kind == NodeKind.NumberKeyword)
+            {
+                return true;
+            }
+
+            return IsNativeNumber(type);
         }
 
         public static bool IsStringType(Node type)
@@ -91,13 +255,37 @@ namespace TypeScript.Syntax
                 return false;
             }
 
+            type = TrimType(type);
             if (type.Kind == NodeKind.StringKeyword)
             {
                 return true;
             }
 
-            string text = type.Text.Trim();
-            if (text == "string")
+            return IsStringType(type.Text);
+        }
+
+        public static bool IsStringType(string typeName)
+        {
+            if (typeName == "string" || typeName == NativeTypes.String)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool IsDictionaryType(Node type)
+        {
+            if (type == null)
+            {
+                return false;
+            }
+
+            type = TrimType(type);
+            if (type.Kind == NodeKind.IndexSignature)
+            {
+                return true;
+            }
+            if (type.Kind == NodeKind.TypeLiteral && ((TypeLiteral)type).IsIndexSignature)
             {
                 return true;
             }
@@ -111,21 +299,100 @@ namespace TypeScript.Syntax
                 return false;
             }
 
+            type = TrimType(type);
             if (type.Kind == NodeKind.ArrayType)
             {
                 return true;
             }
+
+            string typeText = "";
             if (type.Kind == NodeKind.TypeReference)
             {
-                return (type as TypeReference).TypeName.Text == "Array";
+                typeText = (type as TypeReference).TypeName.Text;
+            }
+            return IsArrayType(typeText);
+        }
+
+        public static bool IsArrayType(string typeText)
+        {
+            return (typeText == "Array" || typeText == "RegExpExecArray" || typeText == "RegExpMatchArray");
+        }
+
+        public static bool IsGenericType(Node type)
+        {
+            if (type == null)
+            {
+                return false;
             }
 
-            string text = type.Text.Trim();
-            if (!string.IsNullOrEmpty(text) && text.StartsWith("Array<"))
+            type = TrimType(type);
+            List<Node> tArgs = type.GetValue("TypeArguments") as List<Node>;
+            return (tArgs != null && tArgs.Count > 0);
+        }
+
+        public static bool IsObjectType(Node type)
+        {
+            if (type == null)
+            {
+                return false;
+            }
+
+            type = TrimType(type);
+            if (type.Kind == NodeKind.ObjectKeyword)
             {
                 return true;
             }
+            return type.Text == NativeTypes.AnyObject;
+        }
+
+        public static bool IsEnumType(Node type)
+        {
+            if (type == null)
+            {
+                return false;
+            }
+
+            type = TrimType(type);
+            if (type.Kind == NodeKind.EnumDeclaration)
+            {
+                return true;
+            }
+
+            string typeName = GetTypeName(type);
+            if (!string.IsNullOrEmpty(typeName))
+            {
+                var project = type.Document?.Project;
+                return project?.GetEnum(typeName) != null;
+            }
             return false;
+        }
+
+        public static Node GetArrayElementType(Node arrayType)
+        {
+            if (arrayType == null)
+            {
+                return null;
+            }
+
+            arrayType = TrimType(arrayType);
+            if (arrayType.Kind == NodeKind.ArrayType)
+            {
+                return ((ArrayType)arrayType).ElementType;
+            }
+            if (arrayType.Kind == NodeKind.TypeReference)
+            {
+                string typeText = ((TypeReference)arrayType).TypeName.Text;
+                if (typeText == "RegExpExecArray" || typeText == "RegExpMatchArray")
+                {
+                    return NodeHelper.CreateNode(NodeKind.StringKeyword);
+                }
+                else
+                {
+                    return ((TypeReference)arrayType).TypeArguments[0];
+                }
+            }
+
+            return null;
         }
 
         public static bool IsNodeType(System.Type type)
@@ -178,7 +445,14 @@ namespace TypeScript.Syntax
                     return NodeHelper.CreateNode(NodeKind.StringKeyword);
 
                 case NodeKind.NumericLiteral:
-                    return NodeHelper.CreateNode(NodeKind.NumberKeyword);
+                    if (node.Text.Contains('.') || node.Text.Contains('e'))
+                    {
+                        return NodeHelper.CreateNode(NodeKind.NumberKeyword);
+                    }
+                    else
+                    {
+                        return NodeHelper.CreateNode(NodeKind.IntKeyword);
+                    }
 
                 case NodeKind.PrefixUnaryExpression:
                     return NodeHelper.CreateNode(NodeKind.NumberKeyword);
@@ -191,29 +465,40 @@ namespace TypeScript.Syntax
                     return NodeHelper.CreateNode(NodeKind.BooleanKeyword);
 
                 case NodeKind.NewExpression:
-                    return (node as NewExpression).Type;
+                    return ((NewExpression)node).Type;
 
                 case NodeKind.Identifier:
-                    return GetIdentifierType(node as Identifier);
+                    return GetIdentifierType((Identifier)node);
 
                 case NodeKind.PropertyAccessExpression:
+                    return GetPropertyAccessType((PropertyAccessExpression)node);
+
                 case NodeKind.CallExpression:
-                    return GetPropertyAccessType(node);
+                    return GetCallExpressionType((CallExpression)node);
 
                 case NodeKind.ArrayLiteralExpression:
-                    return GetArrayLiteralType(node as ArrayLiteralExpression);
+                    return GetArrayLiteralType((ArrayLiteralExpression)node);
 
                 case NodeKind.ObjectLiteralExpression:
-                    return GetObjectLiteralType(node as ObjectLiteralExpression);
+                    return GetObjectLiteralType((ObjectLiteralExpression)node);
 
                 case NodeKind.ElementAccessExpression:
-                    return GetElementAccessType(node as ElementAccessExpression);
+                    return GetElementAccessType((ElementAccessExpression)node);
 
                 case NodeKind.ParenthesizedExpression:
-                    return GetNodeType((node as ParenthesizedExpression).Expression);
+                    return GetNodeType(((ParenthesizedExpression)node).Expression);
 
                 case NodeKind.AsExpression:
-                    return (node as AsExpression).Type;
+                    return ((AsExpression)node).Type;
+
+                case NodeKind.VariableDeclaration:
+                    return GetVariableDeclarationType((VariableDeclaration)node);
+
+                case NodeKind.TypeOfExpression:
+                    return NodeHelper.CreateNode(NodeKind.StringKeyword);
+
+                case NodeKind.ConditionalExpression:
+                    return GetConditionalExpressionType((ConditionalExpression)node);
 
                 default:
                     return node.GetValue("Type") as Node;
@@ -230,16 +515,16 @@ namespace TypeScript.Syntax
                 return null;
             }
 
-            string name = elementAccess.ArgumentExpression.Text;
             switch (type.Kind)
             {
                 case NodeKind.ArrayType:
-                    return (type as ArrayType).ElementType;
+                    return GetArrayElementType(type);
 
                 case NodeKind.TypeLiteral:
-                    if (elementAccess.ArgumentExpression.Kind == NodeKind.Identifier)
+                    TypeLiteral typeLiteral = (TypeLiteral)type;
+                    if (typeLiteral.IsIndexSignature)
                     {
-                        return GetTypeLiteralMemberType(type as TypeLiteral, elementAccess.ArgumentExpression.Text);
+                        return ((IndexSignature)typeLiteral.Members[0]).Type;
                     }
                     return null;
 
@@ -250,13 +535,33 @@ namespace TypeScript.Syntax
 
         private static Node GetIdentifierType(Identifier identifier)
         {
-            return GetIdentifierType(identifier, identifier.Text);
+            return GetIdentifierTypeByName(identifier.Text, identifier);
         }
 
-        private static Node GetIdentifierType(Node startNode, string name)
+        private static Node GetIdentifierTypeByName(string name, Node startNode)
         {
-            Node parent = startNode.Parent;
+            var project = startNode.Document.Project;
+            if (name == "this")
+            {
+                return startNode.Ancestor<ClassDeclaration>();
+            }
+            if (name == "super")
+            {
+                ClassDeclaration thisClassNode = startNode.Ancestor<ClassDeclaration>();
+                return (thisClassNode == null ? null : project.GetBaseClass(thisClassNode));
+            }
+            if (name == "NaN" || name == "Infinity")
+            {
+                return NodeHelper.CreateNode(NodeKind.NumberKeyword);
+            }
+            // xxx as View
+            if (name.Contains(" as "))
+            {
+                string[] parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                return project.GetTypeDeclaration(parts[parts.Length - 1]);
+            }
 
+            Node parent = startNode.Parent;
             while (parent != null)
             {
                 switch (parent.Kind)
@@ -304,11 +609,15 @@ namespace TypeScript.Syntax
                         ForOfStatement forOfStatement = parent as ForOfStatement;
                         if (forOfStatement.Identifier.Text == name)
                         {
-                            Node forOfType = GetNodeType(forOfStatement.Expression);
-                            if (forOfType != null && forOfType.Kind == NodeKind.ArrayType)
-                            {
-                                return (forOfType as ArrayType).ElementType;
-                            }
+                            return GetForOfStatementType(forOfStatement);
+                        }
+                        break;
+
+                    case NodeKind.ForStatement:
+                        ForStatement forStatement = parent as ForStatement;
+                        if (CanGetForStatementType(forStatement, name, out Node forType))
+                        {
+                            return forType;
                         }
                         break;
 
@@ -317,6 +626,7 @@ namespace TypeScript.Syntax
                     case NodeKind.ArrowFunction:
                     case NodeKind.FunctionDeclaration:
                     case NodeKind.FunctionExpression:
+                    case NodeKind.SetAccessor:
                         List<Node> parameters = parent.GetValue("Parameters") as List<Node>;
                         if (parameters != null)
                         {
@@ -329,7 +639,12 @@ namespace TypeScript.Syntax
 
                     case NodeKind.ClassDeclaration:
                     case NodeKind.InterfaceDeclaration:
-                        return null;
+                        Node typeDeclaration = project.GetTypeDeclaration(name);
+                        if (typeDeclaration != null)
+                        {
+                            return typeDeclaration;
+                        }
+                        return project.GetFunctionDeclaration(name);
 
                     default:
                         break;
@@ -350,86 +665,401 @@ namespace TypeScript.Syntax
                 }
 
                 VariableDeclarationList declarationList = (statement as VariableStatement).DeclarationList as VariableDeclarationList;
-                VariableDeclarationNode declarationNode = declarationList.Declarations[0] as VariableDeclarationNode;
+                VariableDeclaration declarationNode = declarationList.Declarations[0] as VariableDeclaration;
                 if (declarationNode.Name.Text == name)
                 {
-                    return declarationNode.Type;
+                    return GetVariableDeclarationType(declarationNode);
                 }
             }
             return null;
         }
 
-        private static Node GetPropertyAccessType(Node accessNode)
+        public static Node GetVariableDeclarationType(VariableDeclaration node)
         {
-            Node tailNode = GetPropertyAccessMember(accessNode);
-            if (tailNode != null)
+            if (node.Type != null)
             {
-                return tailNode.GetValue("Type") as Node;
+                return node.Type;
+            }
+
+            Node type = null;
+            if (node.Initializer != null)
+            {
+                type = GetNodeType(node.Initializer);
+                if (type == null && node.Initializer.Kind == NodeKind.ConditionalExpression)
+                {
+                    ConditionalExpression cond = (ConditionalExpression)node.Initializer;
+                    type = GetConditionalExpressionType(cond);
+                }
+            }
+            else if (node.Parent.Kind == NodeKind.CatchClause)
+            {
+                type = NodeHelper.CreateNode(NodeKind.Identifier, "Exception");
+            }
+            else if (node.Parent.Parent.Kind == NodeKind.ForOfStatement)
+            {
+                type = GetForOfStatementType((ForOfStatement)node.Parent.Parent);
+            }
+            return type ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
+        }
+
+        public static Node GetConditionalExpressionType(ConditionalExpression cond)
+        {
+            Node trueType = GetNodeType(cond.WhenTrue);
+            Node falseType = GetNodeType(cond.WhenFalse);
+            return GetTypeOfBinaryType(trueType, falseType);
+        }
+
+        private static bool CanGetForStatementType(ForStatement forStatement, string varName, out Node type)
+        {
+            type = null;
+            foreach (var init in forStatement.Initializers)
+            {
+                VariableDeclaration varDeclaraion = null;
+                if (init is VariableDeclarationList varList)
+                {
+                    varDeclaraion = (VariableDeclaration)varList.Declarations[0];
+                }
+                else if (init is VariableDeclaration var)
+                {
+                    varDeclaraion = var;
+                }
+
+                if (varDeclaraion != null && varDeclaraion.Name.Text == varName)
+                {
+                    type = GetNodeType(varDeclaraion);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static Node GetForOfStatementType(ForOfStatement forOfStatement)
+        {
+            Node forOfType = GetNodeType(forOfStatement.Expression);
+            forOfType = TrimType(forOfType);
+            if (IsArrayType(forOfType))
+            {
+                return GetArrayElementType(forOfType);
             }
             return null;
         }
 
-        private static Node GetPropertyAccessMember(Node accessNode)
+        private static ClassDeclaration GetThisType(ThisKeyword @this)
         {
-            string[] accessNames = GetNameParts(accessNode.Text);
+            return @this.Ancestor<ClassDeclaration>();
+        }
 
-            Document document = accessNode.Document;
-            Project project = document?.Project;
+        private static ClassDeclaration GetSuperType(SuperKeyword superNode)
+        {
+            ClassDeclaration thisClassNode = superNode.Ancestor<ClassDeclaration>();
+            return thisClassNode == null ? null : thisClassNode.Document.Project.GetBaseClass(thisClassNode);
+        }
 
-            Node classNode = null;
-            for (int i = 0; i < accessNames.Length; i++)
+        public static List<Node> GetParameters(NewExpression newExpr)
+        {
+            List<Node> parameters = new List<Node>();
+            string name = ToShortName(newExpr.Expression.Text);
+            ClassDeclaration classDeclaration = newExpr.Document.Project.GetClass(name);
+            if (classDeclaration != null)
             {
-                string memberName = accessNames[i];
+                parameters = classDeclaration.GetConstructor().Parameters;
+            }
+            return parameters;
+        }
 
-                if (i == 0 && memberName == "this")
+        public static List<Node> GetParameters(CallExpression callExpr) // TODO: generic
+        {
+            List<Node> parameters = new List<Node>();
+
+            Node member = GetCallExpressionMember(callExpr);
+            if (member != null && member.IsTypeDeclaration())
+            {
+                if (member.Kind == NodeKind.ClassDeclaration)
                 {
-                    classNode = accessNode.Ancestor(NodeKind.ClassDeclaration);
+                    member = ((ClassDeclaration)member).GetConstructor();
                 }
-                else if (i == 0 && memberName == "super")
+                else if (member.Kind == NodeKind.TypeAliasDeclaration)
                 {
-                    ClassDeclaration thisClassNode = accessNode.Ancestor(NodeKind.ClassDeclaration) as ClassDeclaration;
-                    classNode = thisClassNode == null ? null : project.GetBaseClass(thisClassNode);
-                    if (classNode != null)
+                    member = ((TypeAliasDeclaration)member).Type;
+                }
+            }
+            if (member != null)
+            {
+                if (member.Kind == NodeKind.MethodDeclaration)
+                {
+                    parameters = ((MethodDeclaration)member).Parameters;
+                }
+                else if (member.Kind == NodeKind.MethodSignature)
+                {
+                    parameters = ((MethodSignature)member).Parameters;
+                }
+                else if (member.Kind == NodeKind.Constructor)
+                {
+                    parameters = ((Constructor)member).Parameters;
+                }
+                else if (member.Kind == NodeKind.FunctionType)
+                {
+                    parameters = ((FunctionType)member).Parameters;
+                }
+                else if (member.Kind == NodeKind.FunctionDeclaration)
+                {
+                    parameters = ((FunctionDeclaration)member).Parameters;
+                }
+            }
+            return parameters;
+        }
+
+        private static Node GetCallExpressionType(CallExpression callExpr)
+        {
+            Node tailMember = GetCallExpressionMember(callExpr);
+            if (tailMember != null)
+            {
+                if (tailMember.Kind == NodeKind.Identifier)
+                {
+                    string text = tailMember.Text;
+                    switch (text)
                     {
-                        return (classNode as ClassDeclaration).GetConstructor();
+                        case "isNaN":
+                        case "isFinite":
+                            return NodeHelper.CreateNode(NodeKind.BooleanKeyword);
+
+                        case "parseInt":
+                        case "parseFloat":
+                            return NodeHelper.CreateNode(NodeKind.NumberKeyword);
+
+                        default:
+                            return null;
                     }
+                }
+                else if (tailMember.IsTypeDeclaration())
+                {
+                    return tailMember.GetValue("Name") as Node;
+                }
+                else if (IsArrayType(tailMember) || IsStringType(tailMember))
+                {
+                    return tailMember;
                 }
                 else
                 {
-                    Node type = null;
-                    Node member = null;
-                    if (i == 0)
-                    {
-                        type = GetIdentifierType(accessNode, memberName);
-                    }
-                    else
-                    {
-                        member = GetClassInterfaceMember(classNode, memberName);
-                        type = member?.GetValue("Type") as Node;
-                    }
+                    return tailMember.GetValue("Type") as Node;
+                }
+            }
 
-                    if (type == null)
-                    {
-                        return null;
-                    }
-
-                    if (i == accessNames.Length - 1)
-                    {
-                        return member;
-                    }
-
-                    string[] typeParts = GetNameParts(type.Text);
-                    memberName = typeParts[typeParts.Length - 1];
-                    classNode = project?.GetClass(memberName);
-                    if (classNode == null)
-                    {
-                        classNode = project?.GetInterface(memberName);
-                    }
+            // Hard code here:
+            if (callExpr.Expression.Kind == NodeKind.PropertyAccessExpression)
+            {
+                List<string> parts = callExpr.Parts;
+                if (parts.Count == 2 && parts[0] == "Math" && MATH_MEMBER.Contains(parts[1]))
+                {
+                    return NodeHelper.CreateNode(NodeKind.NumberKeyword);
                 }
 
-                if (classNode == null)
+                switch (parts[parts.Count - 1])
+                {
+                    case "indexOf":
+                    case "lastIndexOf":
+                        return NodeHelper.CreateNode(NodeKind.IntKeyword);
+
+                    case "substr":
+                    case "substring":
+                        return NodeHelper.CreateNode(NodeKind.StringKeyword);
+
+                    default:
+                        return null;
+                }
+
+            }
+
+            return null;
+        }
+
+        private static Node GetPropertyAccessType(PropertyAccessExpression accessNode)
+        {
+            Node propAccessType = null;
+
+            Node tailMember = GetPropertyAccessMember(accessNode);
+            if (tailMember != null)
+            {
+                if (IsArrayType(tailMember) || IsStringType(tailMember)) //todo native type
+                {
+                    propAccessType = tailMember;
+                }
+                else if (tailMember.GetValue("Type") is Node accessType)
+                {
+                    propAccessType = accessType;
+                }
+                else if (tailMember.IsTypeDeclaration())
+                {
+                    return tailMember.GetValue("Name") as Node;
+                }
+            }
+
+            // native object's property.
+            if (propAccessType == null)
+            {
+                List<string> parts = accessNode.Parts;
+                if (parts[parts.Count - 1] == "length")
+                {
+                    Node exprType = GetNodeType(accessNode.Expression);
+                    if (IsArrayType(exprType) || IsStringType(exprType))
+                    {
+                        propAccessType = NodeHelper.CreateNode(NodeKind.IntKeyword);
+                    }
+                }
+                else if (parts.Count == 2 && parts[0] == "Math" && MATH_MEMBER.Contains(parts[1]))
+                {
+                    propAccessType = NodeHelper.CreateNode(NodeKind.NumberKeyword);
+                }
+            }
+
+            return propAccessType;
+        }
+
+        private static Node GetCallExpressionMember(CallExpression callExpr)
+        {
+            Node expression = callExpr.Expression;
+            switch (expression.Kind)
+            {
+                case NodeKind.SuperKeyword:
+                    return GetSuperType((SuperKeyword)expression);
+
+                case NodeKind.ThisKeyword:
+                    return GetThisType((ThisKeyword)expression);
+
+                case NodeKind.Identifier:
+                    Node type = GetIdentifierType((Identifier)expression);
+                    if (type != null)
+                    {
+                        if (type.IsTypeDeclaration() || type.Kind == NodeKind.FunctionDeclaration)
+                        {
+                            return type;
+                        }
+                        else
+                        {
+                            return type.Document.Project.GetTypeDeclaration(type.Text);
+                        }
+                    }
+                    return expression;
+
+                case NodeKind.PropertyAccessExpression:
+                    return GetPropertyAccessMember((PropertyAccessExpression)expression);
+
+                default:
+                    return null;
+            }
+        }
+
+        public static Node GetPropertyAccessMember(PropertyAccessExpression accessNode)
+        {
+            Document document = accessNode.Document;
+            Project project = document?.Project;
+
+            List<string> accessNames = accessNode.Parts;
+            if (project.Converter != null)
+            {
+                string fullName = string.Join('.', accessNames);
+                fullName = project.Converter.Context.TrimTypeName(fullName);
+                accessNames = fullName.Split('.').ToList();
+            }
+
+            Node classNode = null;
+            for (int i = 0; i < accessNames.Count; i++)
+            {
+                string memberName = accessNames[i];
+
+                int elementAccessIndex = memberName.IndexOf('[');
+                if (elementAccessIndex >= 0)
+                {
+                    memberName = memberName.Substring(0, elementAccessIndex);
+                }
+                if (memberName.Length > 0 && memberName[0] == '(' && memberName[memberName.Length - 1] == ')')
+                {
+                    memberName = memberName.Substring(1, memberName.Length - 2);
+                }
+
+                Node type;
+                Node member;
+                if (i == 0)
+                {
+                    type = GetIdentifierTypeByName(memberName, accessNode);
+                    member = type;
+                }
+                else
+                {
+                    member = GetClassInterfaceMember(classNode, memberName);
+                    type = GetClassInterfaceMemberType(member);
+                }
+
+                //  Get array type...
+                if (IsArrayType(type))
+                {
+                    for (int j = i + 1; j < accessNames.Count; j++)
+                    {
+                        if (accessNames[j] == "concat"
+                         || accessNames[j] == "reverse"
+                         || accessNames[j] == "slice"
+                         || accessNames[j] == "filter"
+                         || accessNames[j] == "sort"
+                         || accessNames[j] == "splice")
+                        {
+                            i = j;
+                            continue;
+                        }
+                        break;
+                    }
+                }
+                //~
+
+                if (i == accessNames.Count - 1)
+                {
+                    return member;
+                }
+
+                // normalize type
+                if (type == null)
                 {
                     return null;
+                }
+                if (IsArrayType(type) && elementAccessIndex >= 0)
+                {
+                    type = GetArrayElementType(type);
+                }
+                type = TrimType(type);
+
+                // class node
+                if (type.IsTypeDeclaration())
+                {
+                    classNode = type;
+                }
+                else
+                {
+                    string[] typeParts = GetNameParts(type.Text);
+                    classNode = project.GetTypeDeclaration(typeParts[typeParts.Length - 1]);
+                }
+                if (classNode == null || classNode.Kind == NodeKind.EnumDeclaration)
+                {
+                    return classNode;
+                }
+            }
+
+            return null;
+        }
+        private static Node GetClassInterfaceMemberType(Node member)
+        {
+            if (member != null)
+            {
+                if (member.GetValue("Type") is Node type)
+                {
+                    return type;
+                }
+
+                if (member.Kind == NodeKind.PropertyDeclaration)
+                {
+                    PropertyDeclaration propDeclaration = ((PropertyDeclaration)member);
+                    if (propDeclaration.Initializer != null)
+                    {
+                        return GetNodeType(propDeclaration.Initializer);
+                    }
                 }
             }
             return null;
@@ -454,7 +1084,15 @@ namespace TypeScript.Syntax
 
             ArrayType arrayType = (ArrayType)NodeHelper.CreateNode(NodeKind.ArrayType);
             Node elementType = GetItemType(arrayLiteral);
-            if (elementType == null)
+            if (elementType != null)
+            {
+                bool shouldClone = elementType.Parent != null;
+                if (shouldClone)
+                {
+                    elementType = elementType.TsNode != null ? NodeHelper.CreateNode(elementType.TsNode) : NodeHelper.CreateNode(elementType.Kind);
+                }
+            }
+            else
             {
                 elementType = NodeHelper.CreateNode(NodeKind.AnyKeyword);
             }
@@ -505,21 +1143,67 @@ namespace TypeScript.Syntax
         {
             switch (binary.OperatorToken.Kind)
             {
+                case NodeKind.LessThanToken:
+                case NodeKind.LessThanEqualsToken:
+                case NodeKind.GreaterThanToken:
+                case NodeKind.GreaterThanEqualsToken:
+                case NodeKind.EqualsEqualsToken:
+                case NodeKind.EqualsEqualsEqualsToken:
+                case NodeKind.ExclamationEqualsToken:
+                case NodeKind.ExclamationEqualsEqualsToken:
+                    return NodeHelper.CreateNode(NodeKind.BooleanKeyword);
+
                 case NodeKind.MinusToken:
                 case NodeKind.AsteriskToken:
                 case NodeKind.SlashToken:
-                    return NodeHelper.CreateNode(NodeKind.NumberKeyword);
-
+                case NodeKind.PercentToken:
                 case NodeKind.PlusToken:
+                case NodeKind.PlusEqualsToken: // +=
+                case NodeKind.MinusEqualsToken: // -=
+                case NodeKind.AsteriskEqualsToken: // *=
+                case NodeKind.SlashEqualsToken: // /=
+                case NodeKind.PercentEqualsToken: // %=
                     Node leftType = GetNodeType(binary.Left);
                     Node rightType = GetNodeType(binary.Right);
-                    if (IsNumberType(leftType) && IsNumberType(rightType))
-                    {
-                        return NodeHelper.CreateNode(NodeKind.NumberKeyword);
-                    }
-                    return NodeHelper.CreateNode(NodeKind.StringKeyword);
+                    return GetTypeOfBinaryType(leftType, rightType);
+
                 default:
                     return null;
+            }
+        }
+        private static Node GetTypeOfBinaryType(Node leftType, Node rightType)
+        {
+            // string
+            if (IsStringType(leftType) || IsStringType(rightType))
+            {
+                return NodeHelper.CreateNode(NodeKind.StringKeyword);
+            }
+
+            // integer
+            if (IsIntType(leftType) && IsIntType(rightType))
+            {
+                return leftType;
+            }
+            // number
+            else if (IsIntType(leftType) && IsNumberType(rightType))
+            {
+                return rightType;
+            }
+            else if (IsNumberType(leftType) && IsIntType(rightType))
+            {
+                return leftType;
+            }
+            else if (IsNumberType(leftType))
+            {
+                return leftType;
+            }
+            else if (IsNumberType(rightType))
+            {
+                return rightType;
+            }
+            else
+            {
+                return leftType != null ? leftType : rightType;
             }
         }
 
@@ -528,7 +1212,15 @@ namespace TypeScript.Syntax
             Node elementType = null;
 
             List<Node> elements = value.Elements;
-            if (elements.Find(n => n.Kind == NodeKind.StringLiteral) != null)
+            if (value.Parent.Kind == NodeKind.ArrayLiteralExpression)
+            {
+                Node arrarrType = GetDeclarationType((ArrayLiteralExpression)value.Parent);
+                if (arrarrType != null)
+                {
+                    elementType = ((arrarrType as ArrayType).ElementType as ArrayType).ElementType;
+                }
+            }
+            else if (elements.Find(n => n.Kind == NodeKind.StringLiteral) != null)
             {
                 elementType = NodeHelper.CreateNode(NodeKind.StringKeyword);
             }
@@ -552,14 +1244,6 @@ namespace TypeScript.Syntax
                     }
                 }
             }
-            else if (elements.Count == 0 && value.Parent.Kind == NodeKind.ArrayLiteralExpression)
-            {
-                Node arrarrType = GetArrayLiteralType((ArrayLiteralExpression)value.Parent);
-                if (arrarrType != null)
-                {
-                    elementType = ((arrarrType as ArrayType).ElementType as ArrayType).ElementType;
-                }
-            }
 
             elementType = elementType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
             elementType.NodeName = "elementType";
@@ -567,110 +1251,102 @@ namespace TypeScript.Syntax
             return elementType;
         }
 
-        private static Node GetDeclarationType(Node node)
+        public static Node GetReturnType(ReturnStatement returnStatement)
         {
-            VariableDeclarationNode variableParent = node.Parent as VariableDeclarationNode;
-            if (variableParent != null)
+            ArrowFunction arrowFn = returnStatement.Ancestor<ArrowFunction>();
+            if (arrowFn != null && arrowFn.Type != null)
             {
-                return variableParent.Type;
+                return arrowFn.Type;
             }
-            //
-            Parameter paramterParent = node.Parent as Parameter;
-            if (paramterParent != null)
-            {
-                return paramterParent.Type;
-            }
-            //
-            PropertyDeclaration propertyDeclarationParent = node.Parent as PropertyDeclaration;
-            if (propertyDeclarationParent != null)
-            {
-                return propertyDeclarationParent.Type;
-            }
-            //
-            CallExpression callExpressionParent = node.Parent as CallExpression;
-            if (callExpressionParent != null)
-            {
-                int index = callExpressionParent.Arguments.IndexOf(node);
-                Node member = GetPropertyAccessMember(callExpressionParent);
-                if (index >= 0 && member != null)
-                {
-                    List<Node> parameters = new List<Node>();
-                    if (member.Kind == NodeKind.MethodDeclaration)
-                    {
-                        parameters = (member as MethodDeclaration).Parameters;
-                    }
-                    else if (member.Kind == NodeKind.MethodSignature)
-                    {
-                        parameters = (member as MethodSignature).Parameters;
-                    }
-                    else if (member.Kind == NodeKind.Constructor)
-                    {
-                        parameters = (member as Constructor).Parameters;
-                    }
 
+            MethodDeclaration method = returnStatement.Ancestor<MethodDeclaration>();
+            if (method != null && method.Type != null)
+            {
+                return method.Type;
+            }
+            return null;
+        }
+
+        public static Node GetDeclarationType(Node node)
+        {
+            Node parent = node?.Parent;
+            if (parent == null)
+            {
+                return null;
+            }
+
+            switch (parent.Kind)
+            {
+                case NodeKind.VariableDeclaration:
+                    return ((VariableDeclaration)parent).Type;
+
+                case NodeKind.Parameter:
+                    return ((Parameter)parent).Type;
+
+                case NodeKind.PropertyDeclaration:
+                    return ((PropertyDeclaration)parent).Type;
+
+                case NodeKind.CallExpression:
+                    CallExpression callExpressionParent = (CallExpression)parent;
+                    List<Node> parameters = GetParameters(callExpressionParent);
+                    int index = callExpressionParent.Arguments.IndexOf(node);
                     if (0 <= index && index < parameters.Count)
                     {
                         return (parameters[index] as Parameter).Type;
                     }
-                }
-            }
-            //
-            ReturnStatement returnParent = node.Parent as ReturnStatement;
-            if (returnParent != null)
-            {
-                MethodDeclaration method = returnParent.Ancestor(NodeKind.MethodDeclaration) as MethodDeclaration;
-                return method?.Type;
-            }
-            //
-            BinaryExpression binaryParent = node.Parent as BinaryExpression;
-            if (binaryParent != null && binaryParent.OperatorToken.Kind == NodeKind.EqualsToken && binaryParent.Right == node) //assign
-            {
-                return GetNodeType(binaryParent.Left);
-            }
-            //
-            ConditionalExpression conditionalParent = node.Parent as ConditionalExpression;
-            if (conditionalParent != null)
-            {
-                return GetDeclarationType(conditionalParent);
-            }
-            //
-            NewExpression newParent = node.Parent as NewExpression;
-            if (newParent != null)
-            {
-                int index = newParent.Arguments.IndexOf(node);
-                string clsName = TypeHelper.ToShortName(newParent.Type.Text);
-                Project project = newParent.Project;
-                ClassDeclaration classDeclaration = project?.GetClass(clsName);
-                Constructor ctor = classDeclaration?.GetConstructor();
-                if (index >= 0 && ctor != null)
-                {
-                    return (ctor.Parameters[index] as Parameter).Type;
-                }
-            }
-            //
-            PropertyAssignment propertyAssignParent = node.Parent as PropertyAssignment; //{a: [], b: ''}
-            ObjectLiteralExpression objLiteralParent = propertyAssignParent?.Parent as ObjectLiteralExpression;
-            if (objLiteralParent != null)
-            {
-                string memberName = propertyAssignParent.Name.Text;
-                Node objLiteralType = GetNodeType(objLiteralParent);
-                if (objLiteralType != null && objLiteralType.Kind == NodeKind.TypeLiteral)
-                {
-                    PropertySignature member = (objLiteralType as TypeLiteral).Members.Find(n => (n as PropertySignature).Name.Text == memberName) as PropertySignature;
-                    if (member != null)
-                    {
-                        return member.Type;
-                    }
-                }
-            }
-            //
-            ParenthesizedExpression parentthesizedParent = node.Parent as ParenthesizedExpression;
-            if (parentthesizedParent != null)
-            {
-                return GetDeclarationType(parentthesizedParent);
-            }
+                    return null;
 
-            return null;
+                case NodeKind.ReturnStatement:
+                    return GetReturnType((ReturnStatement)parent);
+
+                case NodeKind.BinaryExpression:
+                    BinaryExpression binaryParent = (BinaryExpression)parent;
+                    if (binaryParent.OperatorToken.Kind == NodeKind.EqualsToken && binaryParent.Right == node) //assign
+                    {
+                        return GetNodeType(binaryParent.Left);
+                    }
+                    return null;
+
+                case NodeKind.ConditionalExpression:
+                    return GetDeclarationType(parent);
+
+                case NodeKind.NewExpression:
+                    NewExpression newParent = (NewExpression)parent;
+                    int idx = newParent.Arguments.IndexOf(node);
+                    string clsName = TypeHelper.ToShortName(newParent.Type.Text);
+                    Project project = newParent.Document.Project;
+                    ClassDeclaration classDeclaration = project?.GetClass(clsName);
+                    Constructor ctor = classDeclaration?.GetConstructor();
+                    if (idx >= 0 && ctor != null)
+                    {
+                        return (ctor.Parameters[idx] as Parameter).Type;
+                    }
+                    return null;
+
+                case NodeKind.PropertyAssignment:
+                    PropertyAssignment propertyAssignParent = (PropertyAssignment)parent; //{a: [], b: ''}
+                    ObjectLiteralExpression objLiteralParent = propertyAssignParent?.Parent as ObjectLiteralExpression;
+                    if (objLiteralParent != null)
+                    {
+                        string memberName = propertyAssignParent.Name.Text;
+                        Node objLiteralType = GetNodeType(objLiteralParent);
+                        if (objLiteralType != null && objLiteralType.Kind == NodeKind.TypeLiteral)
+                        {
+                            PropertySignature propSignatureMember = (objLiteralType as TypeLiteral).Members.Find(n => (n as PropertySignature).Name.Text == memberName) as PropertySignature;
+                            if (propSignatureMember != null)
+                            {
+                                return propSignatureMember.Type;
+                            }
+                        }
+                    }
+                    return null;
+
+                case NodeKind.ParenthesizedExpression:
+                    return GetDeclarationType(parent);
+
+                default:
+                    return null;
+            }
         }
 
         private static Node GetClassInterfaceMember(Node accessNode, string memberName)
@@ -690,6 +1366,10 @@ namespace TypeScript.Syntax
                     Node member = (node as ClassDeclaration).GetMember(memberName);
                     if (member != null)
                     {
+                        if (member.Kind == NodeKind.GetSetAccessor)
+                        {
+                            member = ((GetSetAccessor)member).GetAccessor;
+                        }
                         return member;
                     }
                 }
@@ -702,7 +1382,6 @@ namespace TypeScript.Syntax
                     }
                 }
             }
-
             return null;
         }
 
@@ -717,7 +1396,7 @@ namespace TypeScript.Syntax
                 {
                     name = name.Substring(0, index);
                 }
-                accessNames[i] = name.Trim();
+                accessNames[i] = name;
             }
             return accessNames;
         }
