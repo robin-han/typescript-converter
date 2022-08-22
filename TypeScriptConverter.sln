@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28306.52
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Syntax", "Syntax", "{CBFD46D8-4448-4CD6-B9EF-D9D7D6AD507E}"
 EndProject
@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Startup", "Startup", "{C1BF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeScriptConverter", "src\Startup\TypeScriptConverter.csproj", "{F66EA55D-C726-4649-9BA2-934F739411B1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeScript.Syntax", "src\Syntax\TypeScript.Syntax.csproj", "{E416CE28-6163-46BA-8078-01C0C93BF690}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeScript.Syntax", "src\Syntax\TypeScript\TypeScript.Syntax.csproj", "{63727903-786A-4655-AB20-EDE5CBA4951C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,10 +31,10 @@ Global
 		{F66EA55D-C726-4649-9BA2-934F739411B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F66EA55D-C726-4649-9BA2-934F739411B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F66EA55D-C726-4649-9BA2-934F739411B1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E416CE28-6163-46BA-8078-01C0C93BF690}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E416CE28-6163-46BA-8078-01C0C93BF690}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E416CE28-6163-46BA-8078-01C0C93BF690}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E416CE28-6163-46BA-8078-01C0C93BF690}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63727903-786A-4655-AB20-EDE5CBA4951C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63727903-786A-4655-AB20-EDE5CBA4951C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63727903-786A-4655-AB20-EDE5CBA4951C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63727903-786A-4655-AB20-EDE5CBA4951C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,7 +43,7 @@ Global
 		{FA2C645A-8035-4B1A-B95A-1B01F06E90CC} = {A9210F5A-9E37-4F93-B89D-DA347AE98029}
 		{F2537EF3-0813-4F92-9C08-ECB7EA1B2E93} = {FA2C645A-8035-4B1A-B95A-1B01F06E90CC}
 		{F66EA55D-C726-4649-9BA2-934F739411B1} = {C1BF44FB-F123-4459-9EFA-A0ABAE70D4C0}
-		{E416CE28-6163-46BA-8078-01C0C93BF690} = {CBFD46D8-4448-4CD6-B9EF-D9D7D6AD507E}
+		{63727903-786A-4655-AB20-EDE5CBA4951C} = {CBFD46D8-4448-4CD6-B9EF-D9D7D6AD507E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {35DD1E7B-8F32-42A4-A4FB-B5730DF57701}
