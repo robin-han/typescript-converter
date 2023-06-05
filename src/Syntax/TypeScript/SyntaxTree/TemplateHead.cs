@@ -8,6 +8,12 @@
         {
             get { return NodeKind.TemplateHead; }
         }
+
+        public string RawText
+        {
+            get;
+            private set;
+        }
         #endregion
 
         public override void AddChild(Node childNode)

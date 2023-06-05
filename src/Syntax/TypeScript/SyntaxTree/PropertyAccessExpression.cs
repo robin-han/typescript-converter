@@ -29,6 +29,12 @@ namespace TypeScript.Syntax
             internal set;
         }
 
+        public Node QuestionDotToken
+        {
+            get;
+            private set;
+        }
+
         public Node Type
         {
             // TODO:

@@ -1,21 +1,15 @@
-namespace TypeScript.Syntax
+﻿namespace TypeScript.Syntax
 {
-    [NodeKindAttribute(NodeKind.BindingElement)]
-    public class BindingElement : Node
+    [NodeKindAttribute(NodeKind.FirstTemplateToken)]
+    public class FirstTemplateToken : Node
     {
         #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.BindingElement; }
+            get { return NodeKind.FirstTemplateToken; }
         }
-
-        public Node Name
-        {
-            get;
-            private set;
-        }
-
-        public Node PropertyName
+        
+        public string RawText
         {
             get;
             private set;
@@ -29,14 +23,6 @@ namespace TypeScript.Syntax
             string nodeName = childNode.NodeName;
             switch (nodeName)
             {
-                case "name":
-                    this.Name = childNode;
-                    break;
-
-                case "propertyName":
-                    this.PropertyName = childNode;
-                    break;
-
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;

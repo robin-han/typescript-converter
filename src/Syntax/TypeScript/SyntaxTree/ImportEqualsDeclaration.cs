@@ -1,21 +1,34 @@
+﻿using System.Collections.Generic;
+
 namespace TypeScript.Syntax
 {
-    [NodeKindAttribute(NodeKind.BindingElement)]
-    public class BindingElement : Node
+    [NodeKindAttribute(NodeKind.ImportEqualsDeclaration)]
+    public class ImportEqualsDeclaration : Node
     {
+        public ImportEqualsDeclaration()
+        {
+            this.Modifiers = new List<Node>();
+        }
+
         #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.BindingElement; }
+            get { return NodeKind.ImportEqualsDeclaration; }
         }
 
-        public Node Name
+        public List<Node> Modifiers
         {
             get;
             private set;
         }
 
-        public Node PropertyName
+        public virtual Node Name
+        {
+            get;
+            private set;
+        }
+
+        public Node ModuleReference
         {
             get;
             private set;
@@ -29,18 +42,23 @@ namespace TypeScript.Syntax
             string nodeName = childNode.NodeName;
             switch (nodeName)
             {
+                case "modifiers":
+                    this.Modifiers.Add(childNode);
+                    break;
+
                 case "name":
                     this.Name = childNode;
                     break;
 
-                case "propertyName":
-                    this.PropertyName = childNode;
+                case "moduleReference":
+                    this.ModuleReference = childNode;
                     break;
-
+                    
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;
             }
         }
+
     }
 }

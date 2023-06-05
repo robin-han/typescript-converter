@@ -1,12 +1,14 @@
+using Newtonsoft.Json.Linq;
+
 namespace TypeScript.Syntax
 {
-    [NodeKindAttribute(NodeKind.BindingElement)]
-    public class BindingElement : Node
+    [NodeKindAttribute(NodeKind.ShorthandPropertyAssignment)]
+    public class ShorthandPropertyAssignment : Node
     {
         #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.BindingElement; }
+            get { return NodeKind.ShorthandPropertyAssignment; }
         }
 
         public Node Name
@@ -14,11 +16,11 @@ namespace TypeScript.Syntax
             get;
             private set;
         }
-
-        public Node PropertyName
+        
+        public Node Initializer
         {
             get;
-            private set;
+            protected set;
         }
         #endregion
 
@@ -33,8 +35,8 @@ namespace TypeScript.Syntax
                     this.Name = childNode;
                     break;
 
-                case "propertyName":
-                    this.PropertyName = childNode;
+                case "initializer":
+                    this.Initializer = childNode;
                     break;
 
                 default:

@@ -1,26 +1,33 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Newtonsoft.Json.Linq;
+
 namespace TypeScript.Syntax
 {
-    [NodeKindAttribute(NodeKind.BindingElement)]
-    public class BindingElement : Node
+    [NodeKindAttribute(NodeKind.ObjectBindingPattern)]
+    public class ObjectBindingPattern : Node
     {
+
         #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.BindingElement; }
+            get { return NodeKind.ObjectBindingPattern; }
         }
 
-        public Node Name
-        {
-            get;
-            private set;
-        }
-
-        public Node PropertyName
+        public List<Node> Elements
         {
             get;
             private set;
         }
         #endregion
+
+        public override void Init(JObject jsonObj)
+        {
+            base.Init(jsonObj);
+
+            this.Elements = new List<Node>();
+        }
 
         public override void AddChild(Node childNode)
         {
@@ -29,12 +36,8 @@ namespace TypeScript.Syntax
             string nodeName = childNode.NodeName;
             switch (nodeName)
             {
-                case "name":
-                    this.Name = childNode;
-                    break;
-
-                case "propertyName":
-                    this.PropertyName = childNode;
+                case "elements":
+                    this.Elements.Add(childNode);
                     break;
 
                 default:
@@ -42,5 +45,7 @@ namespace TypeScript.Syntax
                     break;
             }
         }
+
     }
 }
+

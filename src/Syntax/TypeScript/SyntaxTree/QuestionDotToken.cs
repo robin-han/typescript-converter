@@ -1,20 +1,21 @@
-﻿namespace TypeScript.Syntax
+using Newtonsoft.Json.Linq;
+
+namespace TypeScript.Syntax
 {
-    [NodeKindAttribute(NodeKind.TemplateTail)]
-    public class TemplateTail : Node
+    [NodeKindAttribute(NodeKind.QuestionDotToken)]
+    public class QuestionDotToken : Node
     {
         #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.TemplateTail; }
-        }
-
-        public string RawText
-        {
-            get;
-            private set;
+            get { return NodeKind.QuestionDotToken; }
         }
         #endregion
+
+        public override void Init(JObject jsonObj)
+        {
+            base.Init(jsonObj);
+        }
 
         public override void AddChild(Node childNode)
         {
@@ -29,4 +30,5 @@
             }
         }
     }
+
 }

@@ -1,20 +1,21 @@
-﻿namespace TypeScript.Syntax
+﻿using Newtonsoft.Json.Linq;
+
+namespace TypeScript.Syntax
 {
-    [NodeKindAttribute(NodeKind.TemplateTail)]
-    public class TemplateTail : Node
+    [NodeKindAttribute(NodeKind.AsyncKeyword)]
+    public class AsyncKeyword : Node
     {
         #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.TemplateTail; }
-        }
-
-        public string RawText
-        {
-            get;
-            private set;
+            get { return NodeKind.AsyncKeyword; }
         }
         #endregion
+
+        public override void Init(JObject jsonObj)
+        {
+            base.Init(jsonObj);
+        }
 
         public override void AddChild(Node childNode)
         {
@@ -28,5 +29,11 @@
                     break;
             }
         }
+
+        protected override string GetText()
+        {
+            return "async";
+        }
     }
 }
+

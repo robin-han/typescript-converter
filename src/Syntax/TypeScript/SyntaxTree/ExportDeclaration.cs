@@ -35,6 +35,12 @@
                 return System.IO.Path.Combine(path);
             }
         }
+
+        public bool IsTypeOnly
+        {
+            get;
+            private set;
+        }
         #endregion
 
         public override void AddChild(Node childNode)

@@ -1,18 +1,12 @@
-﻿namespace TypeScript.Syntax
+namespace TypeScript.Syntax
 {
-    [NodeKindAttribute(NodeKind.TemplateTail)]
-    public class TemplateTail : Node
+    [NodeKindAttribute(NodeKind.ImportKeyword)]
+    public class ImportKeyword : Node
     {
         #region Properties
         public override NodeKind Kind
         {
-            get { return NodeKind.TemplateTail; }
-        }
-
-        public string RawText
-        {
-            get;
-            private set;
+            get { return NodeKind.ImportKeyword; }
         }
         #endregion
 
