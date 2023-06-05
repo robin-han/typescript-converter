@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.EmptyStatement)]
     public class EmptyStatement : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.EmptyStatement; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

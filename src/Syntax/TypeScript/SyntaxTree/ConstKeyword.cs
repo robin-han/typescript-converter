@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace TypeScript.Syntax
 {
+    [NodeKindAttribute(NodeKind.ConstKeyword)]
     public class ConstKeyword : Node
     {
         #region Properties

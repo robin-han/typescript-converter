@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.AmpersandAmpersandToken)]
     public class AmpersandAmpersandToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.AmpersandAmpersandToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

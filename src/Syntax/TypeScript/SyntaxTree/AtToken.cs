@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.AtToken)]
     public class AtToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.AtToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

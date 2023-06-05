@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace TypeScript.Syntax
+﻿namespace TypeScript.Syntax
 {
     [NodeKindAttribute(NodeKind.Decorator)]
     public class Decorator : Node

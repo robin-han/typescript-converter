@@ -3,10 +3,12 @@
     [NodeKindAttribute(NodeKind.BarToken)]
     public class BarToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.BarToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

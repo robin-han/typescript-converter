@@ -2,11 +2,13 @@ namespace TypeScript.Syntax
 {
     [NodeKindAttribute(NodeKind.SlashToken)]
     public class SlashToken : Node
-    {
+    {        
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.SlashToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

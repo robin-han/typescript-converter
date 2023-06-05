@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.BreakStatement)]
     public class BreakStatement : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.BreakStatement; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {
