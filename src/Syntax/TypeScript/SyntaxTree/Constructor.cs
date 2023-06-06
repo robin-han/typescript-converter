@@ -46,7 +46,7 @@ namespace TypeScript.Syntax
         {
             get
             {
-                if (this.Body.Statements.Count > 0 && this.IsBaseStatement(this.Body.Statements[0]))
+                if (this.Body != null && this.Body.Statements.Count > 0 && this.IsBaseStatement(this.Body.Statements[0]))
                 {
                     return this.Body.Statements[0];
                 }

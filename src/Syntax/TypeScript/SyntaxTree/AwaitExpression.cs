@@ -18,7 +18,6 @@ namespace TypeScript.Syntax
         }
         #endregion
 
-
         public override void Init(JObject jsonObj)
         {
             base.Init(jsonObj);
