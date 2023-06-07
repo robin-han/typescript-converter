@@ -65,6 +65,10 @@ namespace TypeScript.Syntax.Analysis
                     this.InferType(node as VariableDeclaration);
                     break;
 
+                case NodeKind.Parameter:
+                    this.InferType(node as Parameter);
+                    break;
+
                 default:
                     break;
             }
@@ -181,6 +185,22 @@ namespace TypeScript.Syntax.Analysis
             {
                 Node type = TypeHelper.GetNodeType(node);
                 node.SetType(type, type.Parent == null);
+            }
+        }
+
+        private void InferType(Parameter node)
+        {
+            if (node.Type == null)
+            {
+                Node type = node.Children.Count > 1 ? TypeHelper.GetNodeType(node.Children[1]) : null;
+                if (type != null)
+                {
+                    node.SetType(type, false);
+                }
+                else
+                {
+                    node.SetType(NodeHelper.CreateNode(NodeKind.AnyKeyword));
+                }
             }
         }
     }
