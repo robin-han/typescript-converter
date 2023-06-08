@@ -50,17 +50,24 @@ namespace TypeScript.Converter.CSharp
 
                 case "Array":
                 case "ReadonlyArray":
-                    if (this.Context.TypeScriptType)
+                    if (node.TypeArguments.Count > 0)
                     {
-                        return SyntaxFactory
-                            .GenericName("Array")
-                            .AddTypeArgumentListArguments(node.TypeArguments[0].ToCsSyntaxTree<TypeSyntax>());
+                        if (this.Context.TypeScriptType)
+                        {
+                            return SyntaxFactory
+                                .GenericName("Array")
+                                .AddTypeArgumentListArguments(node.TypeArguments[0].ToCsSyntaxTree<TypeSyntax>());
+                        }
+                        else
+                        {
+                            return SyntaxFactory
+                                .GenericName("List")
+                                .AddTypeArgumentListArguments(node.TypeArguments[0].ToCsSyntaxTree<TypeSyntax>());
+                        }
                     }
                     else
                     {
-                        return SyntaxFactory
-                            .GenericName("List")
-                            .AddTypeArgumentListArguments(node.TypeArguments[0].ToCsSyntaxTree<TypeSyntax>());
+                        return node.TypeName.ToCsSyntaxTree<TypeSyntax>();
                     }
 
                 case "RegExpMatchArray":
