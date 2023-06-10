@@ -24,11 +24,35 @@ namespace TypeScript.Converter.CSharp
             else if (type.Kind == NodeKind.AnyKeyword)
             {
                 AnonymousObjectCreationExpressionSyntax csAnonyNewExpr = SyntaxFactory.AnonymousObjectCreationExpression();
-                foreach (PropertyAssignment prop in node.Properties)
+                foreach (Node property in node.Properties)
                 {
-                    string propName = prop.Name.Text;
-                    Node initValue = prop.Initializer;
-                    ExpressionSyntax valueExpr = initValue.ToCsSyntaxTree<ExpressionSyntax>();
+                    string propName = null;
+                    Node initValue = null;
+                    ExpressionSyntax valueExpr = null;
+
+                    switch (property.Kind)
+                    {
+                        case NodeKind.PropertyAssignment:
+                            var prop = (PropertyAssignment)property;
+                            propName = prop.Name.Text;
+                            initValue = prop.Initializer;
+                            valueExpr = initValue.ToCsSyntaxTree<ExpressionSyntax>();
+                            break;
+
+                        case NodeKind.ShorthandPropertyAssignment:
+                            var shortProp = (ShorthandPropertyAssignment)property;
+                            propName = shortProp.Name.Text;
+                            initValue = type; 
+                            valueExpr = SyntaxFactory.ParseName(propName);
+                            break;
+
+                        case NodeKind.SpreadAssignment:
+                            //TODO: spread
+                            continue;
+
+                        default:
+                            continue;
+                    }
 
                     if (type.Kind == NodeKind.TypeLiteral && initValue.Kind == NodeKind.NullKeyword)
                     {
@@ -49,14 +73,39 @@ namespace TypeScript.Converter.CSharp
             {
                 ObjectCreationExpressionSyntax csObjLiteral = SyntaxFactory.ObjectCreationExpression(type.ToCsSyntaxTree<TypeSyntax>()).AddArgumentListArguments();
                 List<ExpressionSyntax> initItemExprs = new List<ExpressionSyntax>();
-                foreach (PropertyAssignment prop in properties)
+                foreach (Node property in node.Properties)
                 {
+                    string propName = null;
+                    ExpressionSyntax valueExpr = null;
+
+                    switch (property.Kind)
+                    {
+                        case NodeKind.PropertyAssignment:
+                            var prop = (PropertyAssignment)property;
+                            propName = prop.Name.Text;
+                            valueExpr = prop.Initializer.ToCsSyntaxTree<ExpressionSyntax>();
+                            break;
+                            
+                        case NodeKind.ShorthandPropertyAssignment:
+                            var shortProp = (ShorthandPropertyAssignment)property;
+                            propName = shortProp.Name.Text;
+                            valueExpr = SyntaxFactory.ParseName(propName);
+                            break;
+
+                        case NodeKind.SpreadAssignment:
+                            //TODO: spread
+                            continue;
+
+                        default:
+                            continue;                            
+                    }
+
                     ExpressionSyntax csNameExpression = SyntaxFactory.LiteralExpression(
                         SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(prop.Name.Text));
+                        SyntaxFactory.Literal(propName));
                     InitializerExpressionSyntax itemInitExpr = SyntaxFactory
                         .InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
-                        .AddExpressions(csNameExpression, prop.Initializer.ToCsSyntaxTree<ExpressionSyntax>());
+                        .AddExpressions(csNameExpression, valueExpr);
 
                     initItemExprs.Add(itemInitExpr);
                 }
@@ -72,4 +121,3 @@ namespace TypeScript.Converter.CSharp
 
     }
 }
-

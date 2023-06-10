@@ -40,6 +40,11 @@ namespace TypeScript.Converter.CSharp
                 csCtor = csCtor.WithLeadingTrivia(SyntaxFactory.Trivia(node.JsDoc[0].ToCsSyntaxTree<DocumentationCommentTriviaSyntax>()));
             }
 
+            if (node.Body == null)
+            { // .d.ts file
+                return csCtor.WithBody(SyntaxFactory.Block());
+            }
+
             return csCtor.WithBody(node.Body.ToCsSyntaxTree<BlockSyntax>());
         }
     }

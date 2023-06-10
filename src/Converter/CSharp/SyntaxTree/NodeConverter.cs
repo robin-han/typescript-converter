@@ -68,13 +68,13 @@ namespace TypeScript.Converter.CSharp
         /// <returns></returns>
         protected ArgumentSyntax[] ToArgumentList(List<Node> argNodes)
         {
-            List<ArgumentSyntax> csArgumetns = new List<ArgumentSyntax>();
+            List<ArgumentSyntax> csArguments = new List<ArgumentSyntax>();
             foreach (Node node in argNodes)
             {
-                csArgumetns.Add(SyntaxFactory.Argument(node.ToCsSyntaxTree<ExpressionSyntax>()));
+                csArguments.Add(SyntaxFactory.Argument(node.ToCsSyntaxTree<ExpressionSyntax>()));
             }
 
-            return csArgumetns.ToArray();
+            return csArguments.ToArray();
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace TypeScript.Converter.CSharp
         /// <returns></returns>
         protected string CommentText(string text)
         {
-            return "AAA___" + text + "___AAA";
+            return "AAA___ " + text.Trim() + " ___AAA";
         }
         #endregion
 

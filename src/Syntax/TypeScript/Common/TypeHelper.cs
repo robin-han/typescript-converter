@@ -444,7 +444,7 @@ namespace TypeScript.Syntax
                     visited = new HashSet<Node>();
                 }
                 if (visited.Contains(node)) {
-                    return null;
+                    return NodeHelper.CreateNode(NodeKind.AnyKeyword);
                 }
                 visited.Add(node);
                 switch (node.Kind)
@@ -1124,6 +1124,7 @@ namespace TypeScript.Syntax
             {
                 TypeLiteral typeLiteral = NodeHelper.CreateNode(NodeKind.TypeLiteral) as TypeLiteral;
                 typeLiteral.Members.Add(NodeHelper.CreateNode(NodeKind.IndexSignature));
+                ((IndexSignature)typeLiteral.Members[0]).SetType(NodeHelper.CreateNode(NodeKind.AnyKeyword));
                 return typeLiteral;
             }
             else
@@ -1133,35 +1134,49 @@ namespace TypeScript.Syntax
                 {
                     Node elementType = null;
                     Node name = null;
-                    if (property.Kind == NodeKind.PropertyAssignment)
+                    switch (property.Kind)
                     {
-                        PropertyAssignment prop = property as PropertyAssignment;
-                        elementType = prop.Initializer;
-                        name = prop.Name;
-                    }
-                    else if (property.Kind == NodeKind.ShorthandPropertyAssignment)
-                    {
-                        ShorthandPropertyAssignment prop = property as ShorthandPropertyAssignment;
-                        elementType = prop.Initializer;
-                        name = prop.Name;
-                    }
-                    else if (property.Kind == NodeKind.MethodDeclaration)
-                    {
-                        MethodDeclaration method = property as MethodDeclaration;
-                        elementType = GetNodeType(method, visited);
-                        name = method.Name;
-                    }
-                    else
-                    {
-                        continue;
+                        case NodeKind.PropertyAssignment:
+                            {
+                                PropertyAssignment prop = property as PropertyAssignment;
+                                elementType = prop.Initializer;
+                                name = prop.Name;
+                                break;
+                            }
+
+                        case NodeKind.ShorthandPropertyAssignment:
+                            {
+                                ShorthandPropertyAssignment prop = property as ShorthandPropertyAssignment;
+                                elementType = prop.Initializer;
+                                name = prop.Name;
+                                break;
+                            }
+
+                        case NodeKind.MethodDeclaration:
+                            {
+                                MethodDeclaration method = property as MethodDeclaration;
+                                elementType = GetNodeType(method, visited);
+                                name = method.Name;
+                                break;
+                            }
+
+                        case NodeKind.SpreadAssignment:
+                            //TODO: spread
+                            continue;
+
+                        default:
+                            continue;
                     }
 
-                    if (elementType != null && elementType.Kind != NodeKind.ObjectLiteralExpression && elementType.Kind != NodeKind.ArrayLiteralExpression)
+                    if (elementType != null)
                     {
                         elementType = GetNodeType(elementType, visited);
                     }
                     
                     elementType = elementType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
+                    if (elementType.Parent != null) {
+                        elementType = NodeHelper.CreateNode(elementType.TsNode);
+                    }
                     elementType.NodeName = "type";
 
                     Node propSignature = NodeHelper.CreateNode(NodeKind.PropertySignature);

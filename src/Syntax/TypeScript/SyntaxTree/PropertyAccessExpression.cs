@@ -109,6 +109,10 @@ namespace TypeScript.Syntax
                     this.Name = childNode;
                     break;
 
+                case "questionDotToken":
+                    this.QuestionDotToken = childNode;
+                    break;
+
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;

@@ -14,8 +14,19 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ForInStatement node)
         {
-            //TODO: not support now
-            return SyntaxFactory.ParseStatement(this.CommentText(node.Text));
+            var init = node.Initializer as VariableDeclarationList;
+            if (init == null || init.Declarations.Count != 1)
+            {
+                //TODO: not support now multiple vars
+                return SyntaxFactory.ParseStatement(this.CommentText(node.Text));
+            }
+
+            var varName = init.Declarations[0] as VariableDeclaration;
+            return SyntaxFactory.ForEachStatement(
+                SyntaxFactory.IdentifierName("var"),
+                varName.Name.Text,
+                node.Expression.ToCsSyntaxTree<ExpressionSyntax>(),
+                node.Statement.ToCsSyntaxTree<StatementSyntax>());
         }
     }
 }
