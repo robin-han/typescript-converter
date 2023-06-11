@@ -159,7 +159,8 @@ namespace TypeScript.Syntax
         {
             if (node.Kind == NodeKind.TypeAliasDeclaration)
             {
-                return ((TypeAliasDeclaration)node).Type.Kind != NodeKind.FunctionType;
+                var ty = ((TypeAliasDeclaration)node).Type;
+                return ty.Kind != NodeKind.FunctionType && ty.Kind != NodeKind.TypeLiteral;
             }
             return false;
         }

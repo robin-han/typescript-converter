@@ -18,6 +18,14 @@ namespace TypeScript.Converter.CSharp
             {
                 return CreateDelegateDeclaration(node);
             }
+            if (node.TypeParameters.Count > 0)
+            {
+                return SyntaxFactory.UsingDirective(SyntaxFactory.NameEquals(node.Name.Text), SyntaxFactory.IdentifierName("dynamic"));
+            }
+            if (node.Type.Kind == NodeKind.TypeLiteral)
+            {
+                return SyntaxFactory.PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), node.Name.Text);
+            }
             return SyntaxFactory.UsingDirective(SyntaxFactory.NameEquals(node.Name.Text), node.Type.ToCsSyntaxTree<NameSyntax>());
         }
 
@@ -38,4 +46,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-
