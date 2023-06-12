@@ -1,9 +1,9 @@
+#!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const TsAstBuilder_1 = require("./TsAstBuilder");
 const FileSystem = require("fs");
 const Path = require("path");
-'use strict';
 var tools;
 (function (tools) {
     class Program {

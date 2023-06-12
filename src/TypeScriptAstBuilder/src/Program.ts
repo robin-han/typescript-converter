@@ -2,8 +2,6 @@ import { TsAstBuilder } from './TsAstBuilder';
 import * as FileSystem from 'fs';
 import * as Path from 'path';
 
-'use strict';
-
 namespace tools {
     export class Program {
         public static main(args: string[]): void {
