@@ -374,25 +374,30 @@ namespace TypeScript.Syntax
                 return null;
             }
 
+            Node type = null;
             arrayType = TrimType(arrayType);
             if (arrayType.Kind == NodeKind.ArrayType)
             {
-                return ((ArrayType)arrayType).ElementType;
+                type = ((ArrayType)arrayType).ElementType;
             }
             if (arrayType.Kind == NodeKind.TypeReference)
             {
-                string typeText = ((TypeReference)arrayType).TypeName.Text;
+                var typeRef = (TypeReference)arrayType;
+                string typeText = typeRef.TypeName.Text;
                 if (typeText == "RegExpExecArray" || typeText == "RegExpMatchArray")
                 {
-                    return NodeHelper.CreateNode(NodeKind.StringKeyword);
+                    type = NodeHelper.CreateNode(NodeKind.StringKeyword);
+                }
+                else if (typeRef.TypeArguments.Count == 0) {
+                    type = GetPropertyAccessMemberFromParts(typeRef, typeText.Split('.').ToList());
                 }
                 else
                 {
-                    return ((TypeReference)arrayType).TypeArguments[0];
+                    type = typeRef.TypeArguments[0];
                 }
             }
 
-            return null;
+            return type ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
         }
 
         public static bool IsNodeType(System.Type type)
@@ -961,17 +966,26 @@ namespace TypeScript.Syntax
 
         public static Node GetPropertyAccessMember(PropertyAccessExpression accessNode, HashSet<Node> visited = null)
         {
-            Document document = accessNode.Document;
-            Project project = document?.Project;
+            Project project = accessNode.Document?.Project;
+            var parts = accessNode.Parts;
 
-            List<string> accessNames = accessNode.Parts;
-            if (project.Converter != null)
+            if (accessNode.Expression.Kind == NodeKind.ArrayLiteralExpression) {
+                parts = parts.Select(p => string.Join(',', p.Split(',').Select(t => t.Trim()))).ToList();
+            }
+            else if (project.Converter != null)
             {
-                string fullName = string.Join('.', accessNames);
+                string fullName = string.Join('.', parts);
                 fullName = project.Converter.Context.TrimTypeName(fullName);
-                accessNames = fullName.Split('.').ToList();
+                parts = fullName.Split('.').ToList();
             }
 
+            return GetPropertyAccessMemberFromParts(accessNode, parts, visited) ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
+        }
+
+        public static Node GetPropertyAccessMemberFromParts(Node accessNode, List<string> accessNames, HashSet<Node> visited = null)
+        {
+            Project project = accessNode.Document?.Project;
+            
             Node classNode = null;
             for (int i = 0; i < accessNames.Count; i++)
             {
@@ -1028,7 +1042,7 @@ namespace TypeScript.Syntax
                 // normalize type
                 if (type == null)
                 {
-                    return null;
+                    break;
                 }
                 if (IsArrayType(type) && elementAccessIndex >= 0)
                 {

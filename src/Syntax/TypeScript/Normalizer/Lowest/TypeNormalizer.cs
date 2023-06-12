@@ -21,6 +21,10 @@ namespace TypeScript.Syntax.Analysis
                     this.InferType(node as ArrayLiteralExpression);
                     break;
 
+                case NodeKind.ArrowFunction:
+                    this.InferType(node as ArrowFunction);
+                    break;
+
                 case NodeKind.FunctionDeclaration:
                     this.InferType(node as FunctionDeclaration);
                     break;
@@ -80,6 +84,14 @@ namespace TypeScript.Syntax.Analysis
             {
                 Node type = TypeHelper.GetNodeType(node);
                 node.SetType(type, type.Parent == null);
+            }
+        }
+
+        private void InferType(ArrowFunction node)
+        {
+            if (node.Type == null)
+            {
+                node.SetType(NodeHelper.CreateNode(NodeKind.AnyKeyword));
             }
         }
 

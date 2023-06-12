@@ -92,5 +92,14 @@ namespace TypeScript.Syntax
                     break;
             }
         }
+        
+        public void SetType(Node type, bool changeParent = true)
+        {
+            this.Type = type;
+            if (changeParent && this.Type != null)
+            {
+                this.Type.Parent = this;
+            }
+        }
     }
 }

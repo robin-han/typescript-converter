@@ -26,7 +26,7 @@ namespace TypeScript.Converter.Java
                 if (IsEnumToNumberOperator(node))
                 {
                     init = CreateEnumToNumberOperator(node);
-                } 
+                }
                 else
                 {
                     string fromType = TypeHelper.GetTypeName(TypeHelper.GetNodeType(node.Initializer));
@@ -58,7 +58,11 @@ namespace TypeScript.Converter.Java
 
         private bool IsConst(VariableDeclaration node)
         {
-            VariableDeclarationList parent = (VariableDeclarationList)node.Parent;
+            VariableDeclarationList parent = node.Parent as VariableDeclarationList;
+            if (parent == null)
+            {
+                return false;
+            }
             string[] texts = parent.Text.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var text in texts)
             {

@@ -16,7 +16,7 @@ namespace TypeScript.Converter.Java
         {
             return TreeMaker.Try(
                 node.TryBlock.ToJavaSyntaxTree<JCBlock>(),
-                node.CatchClause.ToJavaSyntaxTrees<JCCatch>(),
+                node.CatchClause?.ToJavaSyntaxTrees<JCCatch>(),
                 node.FinallyBlock?.ToJavaSyntaxTree<JCBlock>()
             );
         }

@@ -54,7 +54,9 @@ namespace TypeScript.Converter.Java
                 return ConvertTypeTestOperator(node);
             }
 
-            throw new NotSupportedException(node.OperatorToken.Text);
+            // throw new NotSupportedException(node.OperatorToken.Text);            
+            //TODO: 
+            return TreeMaker.Literal(TypeTag.UNINITIALIZED_OBJECT, "XXX" + node.Text + "XXX");
         }
 
         private bool IsCustomTypeOperator(BinaryExpression node, out TypeOperator customeType)
@@ -175,7 +177,7 @@ namespace TypeScript.Converter.Java
                 case NodeKind.ExclamationEqualsEqualsToken:
                     JCExpression leftExpression = left.ToJavaSyntaxTree<JCExpression>();
                     JCExpression rightExpression = right.ToJavaSyntaxTree<JCExpression>();
-                    if (node.Document.Project.GetEnum(enumName).IsBitFieldSet)
+                    if (node.Document.Project.GetEnum(enumName)?.IsBitFieldSet ?? false)
                     {
                         leftExpression = TreeMaker.Apply(
                             Nil<JCExpression>(),

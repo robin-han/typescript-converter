@@ -111,52 +111,54 @@ namespace TypeScript.Converter.Java
             string fnName = GetAnonymousInnerClassName(arrowFn);
             JCExpression clazz = TreeMaker.Ident(Names.fromString(NormalizeTypeName(fnName)));
             JCExpression fnType = (arrowFn.Type == null ? TreeMaker.TypeIdent(TypeTag.VOID) : CreateGenericTypeParameter(arrowFn.Type));
-
-            if (fnName == EVERY_CALLBACK
-             || fnName == FILTER_CALLBACK
-             || fnName == FOREACH_CALLBACK
-             || fnName == SOME_CALLBACK
-             || fnName == SORT_CALLBACK)
+            if (parameters.Count > 0)
             {
-                clazz = TreeMaker.TypeApply(
-                    clazz,
-                    new List<JCExpression>()
-                    {
-                        CreateGenericTypeParameter(parameters[0].Type)
-                    }
-                 );
-            }
-            else if (fnName == MAP_CALLBACK)
-            {
-                clazz = TreeMaker.TypeApply(
-                    clazz,
-                    new List<JCExpression>()
-                    {
-                        CreateGenericTypeParameter(parameters[0].Type),
-                        fnType
-                    }
-                 );
-            }
-            else if (fnName == REDUCE_CALLBACK)
-            {
-                clazz = TreeMaker.TypeApply(
-                    clazz,
-                    new List<JCExpression>()
-                    {
-                        CreateGenericTypeParameter(parameters[1].Type),
-                        CreateGenericTypeParameter(parameters[0].Type)
-                    }
-                 );
-            }
-            else if (parameters.Count > 0)
-            {
-                Node typeDeclaration = arrowFn.Document.Project.GetTypeDeclaration(fnName);
-                if (IsGenericTypeDeclaraion(typeDeclaration))
+                if (fnName == EVERY_CALLBACK
+                || fnName == FILTER_CALLBACK
+                || fnName == FOREACH_CALLBACK
+                || fnName == SOME_CALLBACK
+                || fnName == SORT_CALLBACK)
                 {
                     clazz = TreeMaker.TypeApply(
-                       clazz,
-                       parameters.Select(p => CreateGenericTypeParameter(p.Type)).ToList()
+                        clazz,
+                        new List<JCExpression>()
+                        {
+                            CreateGenericTypeParameter(parameters[0].Type)
+                        }
                     );
+                }
+                else if (fnName == MAP_CALLBACK)
+                {
+                    clazz = TreeMaker.TypeApply(
+                        clazz,
+                        new List<JCExpression>()
+                        {
+                            CreateGenericTypeParameter(parameters[0].Type),
+                            fnType
+                        }
+                    );
+                }
+                else if (fnName == REDUCE_CALLBACK)
+                {
+                    clazz = TreeMaker.TypeApply(
+                        clazz,
+                        new List<JCExpression>()
+                        {
+                            CreateGenericTypeParameter(parameters[1].Type),
+                            CreateGenericTypeParameter(parameters[0].Type)
+                        }
+                    );
+                }
+                else
+                {
+                    Node typeDeclaration = arrowFn.Document.Project.GetTypeDeclaration(fnName);
+                    if (IsGenericTypeDeclaraion(typeDeclaration))
+                    {
+                        clazz = TreeMaker.TypeApply(
+                        clazz,
+                        parameters.Select(p => CreateGenericTypeParameter(p.Type)).ToList()
+                        );
+                    }
                 }
             }
             return clazz;
@@ -218,14 +220,13 @@ namespace TypeScript.Converter.Java
                 || fnName == MAP_CALLBACK
                 || fnName == SOME_CALLBACK)
             {
-                if (IsPrimitiveType(parameters[0].Type))
-                {
-                    @params[0].vartype = CreateGenericTypeParameter(parameters[0].Type);
-                }
-
-                //autocomplete seconds parameter or change its type to int
                 if (parameters.Count == 1)
                 {
+                    if (IsPrimitiveType(parameters[0].Type))
+                    {
+                        @params[0].vartype = CreateGenericTypeParameter(parameters[0].Type);
+                    }
+                    //autocomplete seconds parameter or change its type to int
                     @params.Add(TreeMaker.VarDef(
                         TreeMaker.Modifiers(0),
                         Names.fromString("index"),
