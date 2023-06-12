@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.QuestionToken)]
     public class QuestionToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.QuestionToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

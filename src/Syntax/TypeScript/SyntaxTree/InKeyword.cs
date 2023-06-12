@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.InKeyword)]
     public class InKeyword : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.InKeyword; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
@@ -12,15 +12,16 @@ namespace TypeScript.Converter.CSharp
 {
     public class IntersectionTypeConverter : NodeConverter
     {
-        public List<CSharpSyntaxNode> Convert(IntersectionType node)
+        public CSharpSyntaxNode Convert(IntersectionType node)
         {
-            var ret = new List<CSharpSyntaxNode>();
+            var ret = new List<TypeSyntax>();
             foreach (var type in node.Types)
             {
-                ret.Add(type.ToCsSyntaxTree<CSharpSyntaxNode>());
+                ret.Add(type.ToCsSyntaxTree<TypeSyntax>());
             }
-            return ret;
+            return SyntaxFactory
+                    .GenericName("Combine")
+                    .AddTypeArgumentListArguments(ret.ToArray());
         }
     }
 }
-

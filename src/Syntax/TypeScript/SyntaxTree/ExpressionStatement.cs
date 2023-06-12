@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace TypeScript.Syntax
 {
@@ -28,6 +29,13 @@ namespace TypeScript.Syntax
             private set;
         }
         #endregion
+
+        public override void Init(JObject jsonObj)
+        {
+            base.Init(jsonObj);
+
+            this.Expression = null;
+        }
 
         public override void AddChild(Node childNode)
         {

@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.ColonToken)]
     public class ColonToken : Node
     {
+        #region Properties        
         public override NodeKind Kind
         {
             get { return NodeKind.ColonToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

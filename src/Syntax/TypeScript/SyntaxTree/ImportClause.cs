@@ -20,6 +20,12 @@
             get;
             set;
         }
+        
+        public bool IsTypeOnly
+        {
+            get;
+            private set;
+        }
         #endregion
 
         public override void AddChild(Node childNode)

@@ -54,7 +54,9 @@ namespace TypeScript.Converter.CSharp
                 List<TupleElementSyntax> csTupleElements = new List<TupleElementSyntax>();
                 foreach (PropertySignature member in members)
                 {
-                    csTupleElements.Add(SyntaxFactory.TupleElement(member.Type.ToCsSyntaxTree<TypeSyntax>(), SyntaxFactory.Identifier(member.Name.Text)));
+                    csTupleElements.Add(SyntaxFactory.TupleElement(
+                        member.Type.ToCsSyntaxTree<TypeSyntax>(),
+                        SyntaxFactory.Identifier(IdentifierConverter.Map(member.Name.Text))));
                 }
 
                 return SyntaxFactory.TupleType().WithElements(SyntaxFactory.SeparatedList(csTupleElements));
@@ -64,4 +66,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

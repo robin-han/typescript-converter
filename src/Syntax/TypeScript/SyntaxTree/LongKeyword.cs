@@ -3,10 +3,12 @@
     [NodeKindAttribute(NodeKind.LongKeyword)]
     public class LongKeyword : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.LongKeyword; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

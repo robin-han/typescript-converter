@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace TypeScript.Syntax
 {
     // https://github.com/microsoft/TypeScript/blob/v3.8.3/src/compiler/types.ts

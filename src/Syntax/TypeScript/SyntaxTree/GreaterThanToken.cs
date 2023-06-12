@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.GreaterThanToken)]
     public class GreaterThanToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.GreaterThanToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

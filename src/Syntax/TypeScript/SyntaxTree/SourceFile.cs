@@ -128,7 +128,7 @@ namespace TypeScript.Syntax
         private int IdentifierCount { get; set; }
         private object Identifiers { get; set; }
         private List<string> ParseDiagnostics { get; set; }
-        private Node ExternalModuleIndicator { get; set; }
+        public Node ExternalModuleIndicator { get; set; }
         #endregion
 
         #endregion

@@ -24,6 +24,7 @@ namespace TypeScript.Syntax
             get;
             private set;
         }
+
         public List<Node> Statements
         {
             get;

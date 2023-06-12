@@ -56,21 +56,16 @@ namespace TypeScript.Converter.Java
 
                 case "Array":
                 case "ReadonlyArray":
-                    //if (Context.TypeScriptType)
-                    //{
-                    //    return TreeMaker.TypeApply(
-                    //        TreeMaker.Ident(Names.fromString("Array")),
-                    //        node.TypeArguments[0].ToJavaSyntaxTrees<JCExpression>());
-                    //}
-                    //else
-                    //{
-                    //    return TreeMaker.TypeApply(
-                    //        TreeMaker.Ident(Names.fromString("ArrayList")),
-                    //        node.TypeArguments[0].ToJavaSyntaxTrees<JCExpression>());
-                    //}
-                    return TreeMaker.TypeApply(
-                        TreeMaker.Ident(Names.fromString("ArrayList")),
-                        node.TypeArguments[0].ToJavaSyntaxTrees<JCExpression>());
+                    if (node.TypeArguments.Count > 0)
+                    {
+                        return TreeMaker.TypeApply(
+                            TreeMaker.Ident(Names.fromString("ArrayList")),
+                            node.TypeArguments[0].ToJavaSyntaxTrees<JCExpression>());
+                    }
+                    else
+                    {
+                        return TreeMaker.Ident(Names.fromString("ArrayList"));
+                    }
 
                 case "RegExpMatchArray":
                 case "RegExpExecArray":

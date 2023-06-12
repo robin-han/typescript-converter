@@ -24,7 +24,7 @@ namespace TypeScript.Converter.CSharp
             {
                 CatchDeclarationSyntax csCatchDeclaration = SyntaxFactory.CatchDeclaration(
                    SyntaxFactory.IdentifierName(node.VariableDeclaration.Type.Text),
-                   SyntaxFactory.Identifier(node.VariableDeclaration.Name.Text));
+                   SyntaxFactory.Identifier(IdentifierConverter.Map(node.VariableDeclaration.Name.Text)));
 
                 return SyntaxFactory.CatchClause().WithDeclaration(csCatchDeclaration).WithBlock(csCatchBlock);
             }

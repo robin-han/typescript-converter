@@ -118,16 +118,16 @@ namespace TypeScript.Converter.Java
         private bool IsDelegateInovke(CallExpression node)
         {
             Node type = TypeHelper.GetNodeType(node.Expression);
-            Node delcaration = type == null ? null : node.Document.Project.GetTypeDeclaration(TypeHelper.TrimType(type).Text);
-            if (delcaration != null)
+            Node declaration = type == null ? null : node.Document.Project.GetTypeDeclaration(TypeHelper.TrimType(type).Text);
+            if (declaration != null)
             {
-                switch (delcaration.Kind)
+                switch (declaration.Kind)
                 {
                     case NodeKind.InterfaceDeclaration:
-                        return ((InterfaceDeclaration)delcaration).IsDelegate;
+                        return ((InterfaceDeclaration)declaration).IsDelegate;
 
                     case NodeKind.TypeAliasDeclaration:
-                        return ((TypeAliasDeclaration)delcaration).IsDelegate;
+                        return ((TypeAliasDeclaration)declaration).IsDelegate;
 
                     default:
                         return false;

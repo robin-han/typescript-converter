@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace TypeScript.Syntax
 {
@@ -8,6 +9,7 @@ namespace TypeScript.Syntax
         public FunctionExpression()
         {
             this.Parameters = new List<Node>();
+            this.Modifiers = new List<Node>();
         }
 
         #region Properties
@@ -17,6 +19,12 @@ namespace TypeScript.Syntax
         }
 
         public List<Node> Parameters
+        {
+            get;
+            private set;
+        }
+
+        public List<Node> Modifiers
         {
             get;
             private set;
@@ -37,6 +45,15 @@ namespace TypeScript.Syntax
         private int ModifierFlagsCache { get; set; }
         #endregion
 
+        public override void Init(JObject jsonObj)
+        {
+            base.Init(jsonObj);
+
+            this.Parameters = new List<Node>();
+            this.Modifiers = new List<Node>();
+            this.Body = null;
+        }
+
         public override void AddChild(Node childNode)
         {
             base.AddChild(childNode);
@@ -46,6 +63,10 @@ namespace TypeScript.Syntax
             {
                 case "parameters":
                     this.Parameters.Add(childNode);
+                    break;
+
+                case "modifiers":
+                    this.Modifiers.Add(childNode);
                     break;
 
                 case "body":

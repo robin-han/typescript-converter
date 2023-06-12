@@ -1371,9 +1371,12 @@ namespace com.sun.tools.javac.tree
                 //{
                 //    printStat(l.head);
                 //}
-                foreach (var l in tree.catchers)
+                if (tree.catchers != null)
                 {
-                    printStat(l);
+                    foreach (var l in tree.catchers)
+                    {
+                        printStat(l);
+                    }
                 }
                 if (tree.finalizer != null)
                 {

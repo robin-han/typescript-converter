@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.SemicolonClassElement)]
     public class SemicolonClassElement : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.SemicolonClassElement; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

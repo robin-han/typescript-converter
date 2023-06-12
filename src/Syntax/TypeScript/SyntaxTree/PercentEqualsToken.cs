@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.PercentEqualsToken)]
     public class PercentEqualsToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.PercentEqualsToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

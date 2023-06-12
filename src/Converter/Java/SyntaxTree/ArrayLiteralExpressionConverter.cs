@@ -18,7 +18,8 @@ namespace TypeScript.Converter.Java
             if (IsSpreadItem(node))
             {
                 // TODO: [...arg]
-                throw new NotSupportedException("Does not support spread item");
+                // throw new NotSupportedException("Does not support spread item");
+                return TreeMaker.Literal(TypeTag.UNINITIALIZED_OBJECT, "XXX" + node.Text + "XXX");
             }
 
             if (IsEmptyArray(node))

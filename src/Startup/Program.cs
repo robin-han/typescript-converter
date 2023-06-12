@@ -24,6 +24,7 @@ namespace GrapeCity.Syntax.Converter.Console
                 }
                 catch (Exception exception)
                 {
+                    System.Console.Error.WriteLine(exception.ToString());
                     logger.LogError(exception.Message);
                     Environment.Exit(1);
                 }

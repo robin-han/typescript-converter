@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.LessThanLessThanToken)]
     public class LessThanLessThanToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.LessThanLessThanToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

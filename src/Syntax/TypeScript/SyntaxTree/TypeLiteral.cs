@@ -26,7 +26,7 @@ namespace TypeScript.Syntax
         {
             get
             {
-                return this.Members[0].Kind == NodeKind.IndexSignature;
+                return this.Members.Count > 0 && this.Members[0].Kind == NodeKind.IndexSignature;
             }
         }
         #endregion

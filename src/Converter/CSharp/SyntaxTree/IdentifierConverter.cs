@@ -15,16 +15,23 @@ namespace TypeScript.Converter.CSharp
         private static readonly Dictionary<string, string> IdentifierMappings = new Dictionary<string, string>()
         {
             { "as", "@as" },
-            //{ "length", "Length" },
+            { "ref", "@ref" },
+            { "private", "@private"},
+            { "public", "@public" },
+            { "string", "@string" }
         };
+
+        public static string Map(string id) {
+            if (IdentifierMappings.ContainsKey(id))
+            {
+                return IdentifierMappings[id];
+            }
+            return id;
+        }
 
         public CSharpSyntaxNode Convert(Identifier node)
         {
-            string text = node.Text;
-            if (IdentifierMappings.ContainsKey(text))
-            {
-                text = IdentifierMappings[text];
-            }
+            string text = Map(node.Text);
 
             if (text == "length" && node.Parent.Kind == NodeKind.PropertyAccessExpression)
             {

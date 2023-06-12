@@ -374,25 +374,30 @@ namespace TypeScript.Syntax
                 return null;
             }
 
+            Node type = null;
             arrayType = TrimType(arrayType);
             if (arrayType.Kind == NodeKind.ArrayType)
             {
-                return ((ArrayType)arrayType).ElementType;
+                type = ((ArrayType)arrayType).ElementType;
             }
             if (arrayType.Kind == NodeKind.TypeReference)
             {
-                string typeText = ((TypeReference)arrayType).TypeName.Text;
+                var typeRef = (TypeReference)arrayType;
+                string typeText = typeRef.TypeName.Text;
                 if (typeText == "RegExpExecArray" || typeText == "RegExpMatchArray")
                 {
-                    return NodeHelper.CreateNode(NodeKind.StringKeyword);
+                    type = NodeHelper.CreateNode(NodeKind.StringKeyword);
+                }
+                else if (typeRef.TypeArguments.Count == 0) {
+                    type = GetPropertyAccessMemberFromParts(typeRef, typeText.Split('.').ToList());
                 }
                 else
                 {
-                    return ((TypeReference)arrayType).TypeArguments[0];
+                    type = typeRef.TypeArguments[0];
                 }
             }
 
-            return null;
+            return type ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
         }
 
         public static bool IsNodeType(System.Type type)
@@ -437,79 +442,89 @@ namespace TypeScript.Syntax
             return null;
         }
 
-        public static Node GetNodeType(Node node)
+        public static Node GetNodeType(Node node, HashSet<Node> visited = null)
         {
-            switch (node.Kind)
-            {
-                case NodeKind.StringLiteral:
-                    return NodeHelper.CreateNode(NodeKind.StringKeyword);
+            try {
+                if (visited == null) {
+                    visited = new HashSet<Node>();
+                }
+                if (visited.Contains(node)) {
+                    return NodeHelper.CreateNode(NodeKind.AnyKeyword);
+                }
+                visited.Add(node);
+                switch (node.Kind)
+                {
+                    case NodeKind.StringLiteral:
+                        return NodeHelper.CreateNode(NodeKind.StringKeyword);
 
-                case NodeKind.NumericLiteral:
-                    if (node.Text.Contains('.') || node.Text.Contains('e'))
-                    {
+                    case NodeKind.NumericLiteral:
+                        if (node.Text.Contains('.') || node.Text.Contains('e'))
+                        {
+                            return NodeHelper.CreateNode(NodeKind.NumberKeyword);
+                        }
+                        else
+                        {
+                            return NodeHelper.CreateNode(NodeKind.IntKeyword);
+                        }
+
+                    case NodeKind.PrefixUnaryExpression:
                         return NodeHelper.CreateNode(NodeKind.NumberKeyword);
-                    }
-                    else
-                    {
-                        return NodeHelper.CreateNode(NodeKind.IntKeyword);
-                    }
 
-                case NodeKind.PrefixUnaryExpression:
-                    return NodeHelper.CreateNode(NodeKind.NumberKeyword);
+                    case NodeKind.BinaryExpression:
+                        return GetBinaryExpressionType(node as BinaryExpression, visited);
 
-                case NodeKind.BinaryExpression:
-                    return GetBinaryExpressionType(node as BinaryExpression);
+                    case NodeKind.TrueKeyword:
+                    case NodeKind.FalseKeyword:
+                        return NodeHelper.CreateNode(NodeKind.BooleanKeyword);
 
-                case NodeKind.TrueKeyword:
-                case NodeKind.FalseKeyword:
-                    return NodeHelper.CreateNode(NodeKind.BooleanKeyword);
+                    case NodeKind.NewExpression:
+                        return ((NewExpression)node).Type;
 
-                case NodeKind.NewExpression:
-                    return ((NewExpression)node).Type;
+                    case NodeKind.Identifier:
+                        return GetIdentifierType((Identifier)node, visited);
 
-                case NodeKind.Identifier:
-                    return GetIdentifierType((Identifier)node);
+                    case NodeKind.PropertyAccessExpression:
+                        return GetPropertyAccessType((PropertyAccessExpression)node, visited);
 
-                case NodeKind.PropertyAccessExpression:
-                    return GetPropertyAccessType((PropertyAccessExpression)node);
+                    case NodeKind.CallExpression:
+                        return GetCallExpressionType((CallExpression)node, visited);
 
-                case NodeKind.CallExpression:
-                    return GetCallExpressionType((CallExpression)node);
+                    case NodeKind.ArrayLiteralExpression:
+                        return GetArrayLiteralType((ArrayLiteralExpression)node, visited);
 
-                case NodeKind.ArrayLiteralExpression:
-                    return GetArrayLiteralType((ArrayLiteralExpression)node);
+                    case NodeKind.ObjectLiteralExpression:
+                        return GetObjectLiteralType((ObjectLiteralExpression)node, visited);
 
-                case NodeKind.ObjectLiteralExpression:
-                    return GetObjectLiteralType((ObjectLiteralExpression)node);
+                    case NodeKind.ElementAccessExpression:
+                        return GetElementAccessType((ElementAccessExpression)node, visited);
 
-                case NodeKind.ElementAccessExpression:
-                    return GetElementAccessType((ElementAccessExpression)node);
+                    case NodeKind.ParenthesizedExpression:
+                        return GetNodeType(((ParenthesizedExpression)node).Expression, visited);
 
-                case NodeKind.ParenthesizedExpression:
-                    return GetNodeType(((ParenthesizedExpression)node).Expression);
+                    case NodeKind.AsExpression:
+                        return ((AsExpression)node).Type;
 
-                case NodeKind.AsExpression:
-                    return ((AsExpression)node).Type;
+                    case NodeKind.VariableDeclaration:
+                        return GetVariableDeclarationType((VariableDeclaration)node, visited);
 
-                case NodeKind.VariableDeclaration:
-                    return GetVariableDeclarationType((VariableDeclaration)node);
+                    case NodeKind.TypeOfExpression:
+                        return NodeHelper.CreateNode(NodeKind.StringKeyword);
 
-                case NodeKind.TypeOfExpression:
-                    return NodeHelper.CreateNode(NodeKind.StringKeyword);
+                    case NodeKind.ConditionalExpression:
+                        return GetConditionalExpressionType((ConditionalExpression)node, visited);
 
-                case NodeKind.ConditionalExpression:
-                    return GetConditionalExpressionType((ConditionalExpression)node);
-
-                default:
-                    return node.GetValue("Type") as Node;
+                    default:
+                        return node.GetValue("Type") as Node;
+                }
+            } finally {
+                visited.Remove(node);
             }
         }
 
-
-        private static Node GetElementAccessType(ElementAccessExpression elementAccess)
+        private static Node GetElementAccessType(ElementAccessExpression elementAccess, HashSet<Node> visited = null)
         {
             //TODO:
-            Node type = GetNodeType(elementAccess.Expression);
+            Node type = GetNodeType(elementAccess.Expression, visited);
             if (type == null)
             {
                 return null;
@@ -533,12 +548,12 @@ namespace TypeScript.Syntax
             }
         }
 
-        private static Node GetIdentifierType(Identifier identifier)
+        private static Node GetIdentifierType(Identifier identifier, HashSet<Node> visited = null)
         {
-            return GetIdentifierTypeByName(identifier.Text, identifier);
+            return GetIdentifierTypeByName(identifier.Text, identifier, visited);
         }
 
-        private static Node GetIdentifierTypeByName(string name, Node startNode)
+        private static Node GetIdentifierTypeByName(string name, Node startNode, HashSet<Node> visited = null)
         {
             var project = startNode.Document.Project;
             if (name == "this")
@@ -568,7 +583,7 @@ namespace TypeScript.Syntax
                 {
                     case NodeKind.Block:
                         Block block = parent as Block;
-                        Node bvType = GetVariableStatementType(block.Statements, name);
+                        Node bvType = GetVariableStatementType(block.Statements, name, visited);
                         if (bvType != null)
                         {
                             return bvType;
@@ -578,7 +593,7 @@ namespace TypeScript.Syntax
 
                     case NodeKind.CaseClause:
                         CaseClause caseClause = parent as CaseClause;
-                        Node ccType = GetVariableStatementType(caseClause.Statements, name);
+                        Node ccType = GetVariableStatementType(caseClause.Statements, name, visited);
                         if (ccType != null)
                         {
                             return ccType;
@@ -609,13 +624,13 @@ namespace TypeScript.Syntax
                         ForOfStatement forOfStatement = parent as ForOfStatement;
                         if (forOfStatement.Identifier.Text == name)
                         {
-                            return GetForOfStatementType(forOfStatement);
+                            return GetForOfStatementType(forOfStatement, visited);
                         }
                         break;
 
                     case NodeKind.ForStatement:
                         ForStatement forStatement = parent as ForStatement;
-                        if (CanGetForStatementType(forStatement, name, out Node forType))
+                        if (CanGetForStatementType(forStatement, name, visited, out Node forType))
                         {
                             return forType;
                         }
@@ -655,7 +670,7 @@ namespace TypeScript.Syntax
             return null;
         }
 
-        private static Node GetVariableStatementType(List<Node> statements, string name)
+        private static Node GetVariableStatementType(List<Node> statements, string name, HashSet<Node> visited = null)
         {
             foreach (var statement in statements)
             {
@@ -668,13 +683,13 @@ namespace TypeScript.Syntax
                 VariableDeclaration declarationNode = declarationList.Declarations[0] as VariableDeclaration;
                 if (declarationNode.Name.Text == name)
                 {
-                    return GetVariableDeclarationType(declarationNode);
+                    return GetVariableDeclarationType(declarationNode, visited);
                 }
             }
             return null;
         }
 
-        public static Node GetVariableDeclarationType(VariableDeclaration node)
+        public static Node GetVariableDeclarationType(VariableDeclaration node, HashSet<Node> visited = null)
         {
             if (node.Type != null)
             {
@@ -684,11 +699,11 @@ namespace TypeScript.Syntax
             Node type = null;
             if (node.Initializer != null)
             {
-                type = GetNodeType(node.Initializer);
+                type = GetNodeType(node.Initializer, visited);
                 if (type == null && node.Initializer.Kind == NodeKind.ConditionalExpression)
                 {
                     ConditionalExpression cond = (ConditionalExpression)node.Initializer;
-                    type = GetConditionalExpressionType(cond);
+                    type = GetConditionalExpressionType(cond, visited);
                 }
             }
             else if (node.Parent.Kind == NodeKind.CatchClause)
@@ -697,19 +712,19 @@ namespace TypeScript.Syntax
             }
             else if (node.Parent.Parent.Kind == NodeKind.ForOfStatement)
             {
-                type = GetForOfStatementType((ForOfStatement)node.Parent.Parent);
+                type = GetForOfStatementType((ForOfStatement)node.Parent.Parent, visited);
             }
             return type ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
         }
 
-        public static Node GetConditionalExpressionType(ConditionalExpression cond)
+        public static Node GetConditionalExpressionType(ConditionalExpression cond, HashSet<Node> visited = null)
         {
-            Node trueType = GetNodeType(cond.WhenTrue);
-            Node falseType = GetNodeType(cond.WhenFalse);
+            Node trueType = GetNodeType(cond.WhenTrue, visited);
+            Node falseType = GetNodeType(cond.WhenFalse, visited);
             return GetTypeOfBinaryType(trueType, falseType);
         }
 
-        private static bool CanGetForStatementType(ForStatement forStatement, string varName, out Node type)
+        private static bool CanGetForStatementType(ForStatement forStatement, string varName, HashSet<Node> visited, out Node type)
         {
             type = null;
             foreach (var init in forStatement.Initializers)
@@ -726,16 +741,16 @@ namespace TypeScript.Syntax
 
                 if (varDeclaraion != null && varDeclaraion.Name.Text == varName)
                 {
-                    type = GetNodeType(varDeclaraion);
+                    type = GetNodeType(varDeclaraion, visited);
                     return true;
                 }
             }
             return false;
         }
 
-        private static Node GetForOfStatementType(ForOfStatement forOfStatement)
+        private static Node GetForOfStatementType(ForOfStatement forOfStatement, HashSet<Node> visited = null)
         {
-            Node forOfType = GetNodeType(forOfStatement.Expression);
+            Node forOfType = GetNodeType(forOfStatement.Expression, visited);
             forOfType = TrimType(forOfType);
             if (IsArrayType(forOfType))
             {
@@ -767,11 +782,11 @@ namespace TypeScript.Syntax
             return parameters;
         }
 
-        public static List<Node> GetParameters(CallExpression callExpr) // TODO: generic
+        public static List<Node> GetParameters(CallExpression callExpr, HashSet<Node> visited = null) // TODO: generic
         {
             List<Node> parameters = new List<Node>();
 
-            Node member = GetCallExpressionMember(callExpr);
+            Node member = GetCallExpressionMember(callExpr, visited);
             if (member != null && member.IsTypeDeclaration())
             {
                 if (member.Kind == NodeKind.ClassDeclaration)
@@ -809,9 +824,9 @@ namespace TypeScript.Syntax
             return parameters;
         }
 
-        private static Node GetCallExpressionType(CallExpression callExpr)
+        private static Node GetCallExpressionType(CallExpression callExpr, HashSet<Node> visited = null)
         {
-            Node tailMember = GetCallExpressionMember(callExpr);
+            Node tailMember = GetCallExpressionMember(callExpr, visited);
             if (tailMember != null)
             {
                 if (tailMember.Kind == NodeKind.Identifier)
@@ -873,11 +888,11 @@ namespace TypeScript.Syntax
             return null;
         }
 
-        private static Node GetPropertyAccessType(PropertyAccessExpression accessNode)
+        private static Node GetPropertyAccessType(PropertyAccessExpression accessNode, HashSet<Node> visited = null)
         {
             Node propAccessType = null;
 
-            Node tailMember = GetPropertyAccessMember(accessNode);
+            Node tailMember = GetPropertyAccessMember(accessNode, visited);
             if (tailMember != null)
             {
                 if (IsArrayType(tailMember) || IsStringType(tailMember)) //todo native type
@@ -900,7 +915,7 @@ namespace TypeScript.Syntax
                 List<string> parts = accessNode.Parts;
                 if (parts[parts.Count - 1] == "length")
                 {
-                    Node exprType = GetNodeType(accessNode.Expression);
+                    Node exprType = GetNodeType(accessNode.Expression, visited);
                     if (IsArrayType(exprType) || IsStringType(exprType))
                     {
                         propAccessType = NodeHelper.CreateNode(NodeKind.IntKeyword);
@@ -915,7 +930,7 @@ namespace TypeScript.Syntax
             return propAccessType;
         }
 
-        private static Node GetCallExpressionMember(CallExpression callExpr)
+        private static Node GetCallExpressionMember(CallExpression callExpr, HashSet<Node> visited = null)
         {
             Node expression = callExpr.Expression;
             switch (expression.Kind)
@@ -927,7 +942,7 @@ namespace TypeScript.Syntax
                     return GetThisType((ThisKeyword)expression);
 
                 case NodeKind.Identifier:
-                    Node type = GetIdentifierType((Identifier)expression);
+                    Node type = GetIdentifierType((Identifier)expression, visited);
                     if (type != null)
                     {
                         if (type.IsTypeDeclaration() || type.Kind == NodeKind.FunctionDeclaration)
@@ -942,26 +957,35 @@ namespace TypeScript.Syntax
                     return expression;
 
                 case NodeKind.PropertyAccessExpression:
-                    return GetPropertyAccessMember((PropertyAccessExpression)expression);
+                    return GetPropertyAccessMember((PropertyAccessExpression)expression, visited);
 
                 default:
                     return null;
             }
         }
 
-        public static Node GetPropertyAccessMember(PropertyAccessExpression accessNode)
+        public static Node GetPropertyAccessMember(PropertyAccessExpression accessNode, HashSet<Node> visited = null)
         {
-            Document document = accessNode.Document;
-            Project project = document?.Project;
+            Project project = accessNode.Document?.Project;
+            var parts = accessNode.Parts;
 
-            List<string> accessNames = accessNode.Parts;
-            if (project.Converter != null)
+            if (accessNode.Expression.Kind == NodeKind.ArrayLiteralExpression) {
+                parts = parts.Select(p => string.Join(',', p.Split(',').Select(t => t.Trim()))).ToList();
+            }
+            else if (project.Converter != null)
             {
-                string fullName = string.Join('.', accessNames);
+                string fullName = string.Join('.', parts);
                 fullName = project.Converter.Context.TrimTypeName(fullName);
-                accessNames = fullName.Split('.').ToList();
+                parts = fullName.Split('.').ToList();
             }
 
+            return GetPropertyAccessMemberFromParts(accessNode, parts, visited) ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
+        }
+
+        public static Node GetPropertyAccessMemberFromParts(Node accessNode, List<string> accessNames, HashSet<Node> visited = null)
+        {
+            Project project = accessNode.Document?.Project;
+            
             Node classNode = null;
             for (int i = 0; i < accessNames.Count; i++)
             {
@@ -981,13 +1005,13 @@ namespace TypeScript.Syntax
                 Node member;
                 if (i == 0)
                 {
-                    type = GetIdentifierTypeByName(memberName, accessNode);
+                    type = GetIdentifierTypeByName(memberName, accessNode, visited);
                     member = type;
                 }
                 else
                 {
                     member = GetClassInterfaceMember(classNode, memberName);
-                    type = GetClassInterfaceMemberType(member);
+                    type = GetClassInterfaceMemberType(member, visited);
                 }
 
                 //  Get array type...
@@ -1018,7 +1042,7 @@ namespace TypeScript.Syntax
                 // normalize type
                 if (type == null)
                 {
-                    return null;
+                    break;
                 }
                 if (IsArrayType(type) && elementAccessIndex >= 0)
                 {
@@ -1044,7 +1068,8 @@ namespace TypeScript.Syntax
 
             return null;
         }
-        private static Node GetClassInterfaceMemberType(Node member)
+
+        private static Node GetClassInterfaceMemberType(Node member, HashSet<Node> visited = null)
         {
             if (member != null)
             {
@@ -1058,16 +1083,16 @@ namespace TypeScript.Syntax
                     PropertyDeclaration propDeclaration = ((PropertyDeclaration)member);
                     if (propDeclaration.Initializer != null)
                     {
-                        return GetNodeType(propDeclaration.Initializer);
+                        return GetNodeType(propDeclaration.Initializer, visited);
                     }
                 }
             }
             return null;
         }
 
-        private static Node GetArrayLiteralType(ArrayLiteralExpression arrayLiteral)
+        private static Node GetArrayLiteralType(ArrayLiteralExpression arrayLiteral, HashSet<Node> visited = null)
         {
-            Node type = GetDeclarationType(arrayLiteral);
+            Node type = GetDeclarationType(arrayLiteral, visited);
             if (type != null)
             {
                 return type;
@@ -1075,7 +1100,7 @@ namespace TypeScript.Syntax
 
             if (arrayLiteral.Elements.Find(n => n.Kind == NodeKind.SpreadElement) is SpreadElement spreadElement)
             {
-                type = GetNodeType(spreadElement.Expression);
+                type = GetNodeType(spreadElement.Expression, visited);
                 if (type != null)
                 {
                     return type;
@@ -1083,7 +1108,7 @@ namespace TypeScript.Syntax
             }
 
             ArrayType arrayType = (ArrayType)NodeHelper.CreateNode(NodeKind.ArrayType);
-            Node elementType = GetItemType(arrayLiteral);
+            Node elementType = GetItemType(arrayLiteral, visited);
             if (elementType != null)
             {
                 bool shouldClone = elementType.Parent != null;
@@ -1100,9 +1125,9 @@ namespace TypeScript.Syntax
             return arrayType;
         }
 
-        private static Node GetObjectLiteralType(ObjectLiteralExpression objectLiteral)
+        private static Node GetObjectLiteralType(ObjectLiteralExpression objectLiteral, HashSet<Node> visited = null)
         {
-            Node type = GetDeclarationType(objectLiteral);
+            Node type = GetDeclarationType(objectLiteral, visited);
             if (type != null)
             {
                 return type;
@@ -1113,24 +1138,63 @@ namespace TypeScript.Syntax
             {
                 TypeLiteral typeLiteral = NodeHelper.CreateNode(NodeKind.TypeLiteral) as TypeLiteral;
                 typeLiteral.Members.Add(NodeHelper.CreateNode(NodeKind.IndexSignature));
+                ((IndexSignature)typeLiteral.Members[0]).SetType(NodeHelper.CreateNode(NodeKind.AnyKeyword));
                 return typeLiteral;
             }
             else
             {
                 TypeLiteral typeLiteral = NodeHelper.CreateNode(NodeKind.TypeLiteral) as TypeLiteral;
-                foreach (PropertyAssignment prop in properties)
+                foreach (Node property in properties)
                 {
-                    Node initValue = prop.Initializer;
                     Node elementType = null;
-                    if (initValue.Kind != NodeKind.ObjectLiteralExpression && initValue.Kind != NodeKind.ArrayLiteralExpression)
+                    Node name = null;
+                    switch (property.Kind)
                     {
-                        elementType = GetNodeType(initValue);
+                        case NodeKind.PropertyAssignment:
+                            {
+                                PropertyAssignment prop = property as PropertyAssignment;
+                                elementType = prop.Initializer;
+                                name = prop.Name;
+                                break;
+                            }
+
+                        case NodeKind.ShorthandPropertyAssignment:
+                            {
+                                ShorthandPropertyAssignment prop = property as ShorthandPropertyAssignment;
+                                elementType = prop.Initializer;
+                                name = prop.Name;
+                                break;
+                            }
+
+                        case NodeKind.MethodDeclaration:
+                            {
+                                MethodDeclaration method = property as MethodDeclaration;
+                                elementType = GetNodeType(method, visited);
+                                name = method.Name;
+                                break;
+                            }
+
+                        case NodeKind.SpreadAssignment:
+                            //TODO: spread
+                            continue;
+
+                        default:
+                            continue;
                     }
+
+                    if (elementType != null)
+                    {
+                        elementType = GetNodeType(elementType, visited);
+                    }
+                    
                     elementType = elementType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
+                    if (elementType.Parent != null) {
+                        elementType = NodeHelper.CreateNode(elementType.TsNode);
+                    }
                     elementType.NodeName = "type";
 
                     Node propSignature = NodeHelper.CreateNode(NodeKind.PropertySignature);
-                    propSignature.AddChild(prop.Name.TsNode);
+                    propSignature.AddChild(name.TsNode);
                     propSignature.AddChild(elementType);
 
                     typeLiteral.Members.Add(propSignature);
@@ -1139,7 +1203,7 @@ namespace TypeScript.Syntax
             }
         }
 
-        private static Node GetBinaryExpressionType(BinaryExpression binary)
+        private static Node GetBinaryExpressionType(BinaryExpression binary, HashSet<Node> visited = null)
         {
             switch (binary.OperatorToken.Kind)
             {
@@ -1163,14 +1227,15 @@ namespace TypeScript.Syntax
                 case NodeKind.AsteriskEqualsToken: // *=
                 case NodeKind.SlashEqualsToken: // /=
                 case NodeKind.PercentEqualsToken: // %=
-                    Node leftType = GetNodeType(binary.Left);
-                    Node rightType = GetNodeType(binary.Right);
+                    Node leftType = GetNodeType(binary.Left, visited);
+                    Node rightType = GetNodeType(binary.Right, visited);
                     return GetTypeOfBinaryType(leftType, rightType);
 
                 default:
                     return null;
             }
         }
+    
         private static Node GetTypeOfBinaryType(Node leftType, Node rightType)
         {
             // string
@@ -1207,17 +1272,23 @@ namespace TypeScript.Syntax
             }
         }
 
-        private static Node GetItemType(ArrayLiteralExpression value)
+        private static Node GetItemType(ArrayLiteralExpression value, HashSet<Node> visited = null)
         {
             Node elementType = null;
 
             List<Node> elements = value.Elements;
             if (value.Parent.Kind == NodeKind.ArrayLiteralExpression)
             {
-                Node arrarrType = GetDeclarationType((ArrayLiteralExpression)value.Parent);
+                Node arrarrType = GetDeclarationType((ArrayLiteralExpression)value.Parent, visited);
                 if (arrarrType != null)
                 {
-                    elementType = ((arrarrType as ArrayType).ElementType as ArrayType).ElementType;
+                    elementType = arrarrType;
+                    if (elementType is ArrayType arrType) {
+                        elementType = arrType.ElementType;
+                    }
+                    if (elementType is ArrayType arrType2) {
+                        elementType = arrType2.ElementType;
+                    }
                 }
             }
             else if (elements.Find(n => n.Kind == NodeKind.StringLiteral) != null)
@@ -1236,7 +1307,7 @@ namespace TypeScript.Syntax
             {
                 foreach (Node element in elements)
                 {
-                    Node type = GetNodeType(element);
+                    Node type = GetNodeType(element, visited);
                     if (type != null)
                     {
                         elementType = type;
@@ -1267,7 +1338,7 @@ namespace TypeScript.Syntax
             return null;
         }
 
-        public static Node GetDeclarationType(Node node)
+        public static Node GetDeclarationType(Node node, HashSet<Node> visited = null)
         {
             Node parent = node?.Parent;
             if (parent == null)
@@ -1288,7 +1359,7 @@ namespace TypeScript.Syntax
 
                 case NodeKind.CallExpression:
                     CallExpression callExpressionParent = (CallExpression)parent;
-                    List<Node> parameters = GetParameters(callExpressionParent);
+                    List<Node> parameters = GetParameters(callExpressionParent, visited);
                     int index = callExpressionParent.Arguments.IndexOf(node);
                     if (0 <= index && index < parameters.Count)
                     {
@@ -1303,12 +1374,12 @@ namespace TypeScript.Syntax
                     BinaryExpression binaryParent = (BinaryExpression)parent;
                     if (binaryParent.OperatorToken.Kind == NodeKind.EqualsToken && binaryParent.Right == node) //assign
                     {
-                        return GetNodeType(binaryParent.Left);
+                        return GetNodeType(binaryParent.Left, visited);
                     }
                     return null;
 
                 case NodeKind.ConditionalExpression:
-                    return GetDeclarationType(parent);
+                    return GetDeclarationType(parent, visited);
 
                 case NodeKind.NewExpression:
                     NewExpression newParent = (NewExpression)parent;
@@ -1329,7 +1400,7 @@ namespace TypeScript.Syntax
                     if (objLiteralParent != null)
                     {
                         string memberName = propertyAssignParent.Name.Text;
-                        Node objLiteralType = GetNodeType(objLiteralParent);
+                        Node objLiteralType = GetNodeType(objLiteralParent, visited);
                         if (objLiteralType != null && objLiteralType.Kind == NodeKind.TypeLiteral)
                         {
                             PropertySignature propSignatureMember = (objLiteralType as TypeLiteral).Members.Find(n => (n as PropertySignature).Name.Text == memberName) as PropertySignature;
@@ -1342,7 +1413,7 @@ namespace TypeScript.Syntax
                     return null;
 
                 case NodeKind.ParenthesizedExpression:
-                    return GetDeclarationType(parent);
+                    return GetDeclarationType(parent, visited);
 
                 default:
                     return null;
