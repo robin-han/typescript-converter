@@ -26,7 +26,7 @@ namespace TypeScript.Converter.CSharp
                 AnonymousObjectCreationExpressionSyntax csAnonyNewExpr = SyntaxFactory.AnonymousObjectCreationExpression();
                 foreach (Node property in node.Properties)
                 {
-                    string propName = null;
+                    Node propName = null;
                     Node initValue = null;
                     ExpressionSyntax valueExpr = null;
 
@@ -34,16 +34,16 @@ namespace TypeScript.Converter.CSharp
                     {
                         case NodeKind.PropertyAssignment:
                             var prop = (PropertyAssignment)property;
-                            propName = prop.Name.Text;
+                            propName = prop.Name;
                             initValue = prop.Initializer;
                             valueExpr = initValue.ToCsSyntaxTree<ExpressionSyntax>();
                             break;
 
                         case NodeKind.ShorthandPropertyAssignment:
                             var shortProp = (ShorthandPropertyAssignment)property;
-                            propName = shortProp.Name.Text;
-                            initValue = type; 
-                            valueExpr = SyntaxFactory.ParseName(propName);
+                            propName = shortProp.Name;
+                            initValue = type;
+                            valueExpr = SyntaxFactory.ParseName(NormalizeTypeName(propName));
                             break;
 
                         case NodeKind.SpreadAssignment:
@@ -56,7 +56,7 @@ namespace TypeScript.Converter.CSharp
 
                     if (type.Kind == NodeKind.TypeLiteral && initValue.Kind == NodeKind.NullKeyword)
                     {
-                        Node memType = TypeHelper.GetTypeLiteralMemberType((TypeLiteral)type, propName);
+                        Node memType = TypeHelper.GetTypeLiteralMemberType((TypeLiteral)type, NormalizeTypeName(propName));
                         if (memType != null)
                         {
                             valueExpr = SyntaxFactory.CastExpression(memType.ToCsSyntaxTree<TypeSyntax>(), valueExpr);
@@ -64,7 +64,7 @@ namespace TypeScript.Converter.CSharp
                     }
 
                     csAnonyNewExpr = csAnonyNewExpr.AddInitializers(SyntaxFactory.AnonymousObjectMemberDeclarator(
-                        SyntaxFactory.NameEquals(propName),
+                        SyntaxFactory.NameEquals(NormalizeTypeName(propName)),
                         valueExpr));
                 }
                 return csAnonyNewExpr;
@@ -75,21 +75,21 @@ namespace TypeScript.Converter.CSharp
                 List<ExpressionSyntax> initItemExprs = new List<ExpressionSyntax>();
                 foreach (Node property in node.Properties)
                 {
-                    string propName = null;
+                    Node propName = null;
                     ExpressionSyntax valueExpr = null;
 
                     switch (property.Kind)
                     {
                         case NodeKind.PropertyAssignment:
                             var prop = (PropertyAssignment)property;
-                            propName = prop.Name.Text;
+                            propName = prop.Name;
                             valueExpr = prop.Initializer.ToCsSyntaxTree<ExpressionSyntax>();
                             break;
-                            
+
                         case NodeKind.ShorthandPropertyAssignment:
                             var shortProp = (ShorthandPropertyAssignment)property;
-                            propName = shortProp.Name.Text;
-                            valueExpr = SyntaxFactory.ParseName(propName);
+                            propName = shortProp.Name;
+                            valueExpr = SyntaxFactory.ParseName(NormalizeTypeName(propName));
                             break;
 
                         case NodeKind.SpreadAssignment:
@@ -97,12 +97,12 @@ namespace TypeScript.Converter.CSharp
                             continue;
 
                         default:
-                            continue;                            
+                            continue;
                     }
 
                     ExpressionSyntax csNameExpression = SyntaxFactory.LiteralExpression(
                         SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(propName));
+                        SyntaxFactory.Literal(NormalizeTypeName(propName)));
                     InitializerExpressionSyntax itemInitExpr = SyntaxFactory
                         .InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
                         .AddExpressions(csNameExpression, valueExpr);

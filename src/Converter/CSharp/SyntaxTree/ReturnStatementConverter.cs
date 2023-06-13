@@ -25,7 +25,8 @@ namespace TypeScript.Converter.CSharp
                 MethodDeclaration method = node.Ancestor<MethodDeclaration>();
                 if (method != null && method.IsGenericType)
                 {
-                    return SyntaxFactory.ReturnStatement(SyntaxFactory.DefaultExpression(SyntaxFactory.IdentifierName(method.Type.Text)));
+                    return SyntaxFactory.ReturnStatement(
+                        SyntaxFactory.DefaultExpression(SyntaxFactory.IdentifierName(NormalizeTypeName(method.Type))));
                 }
             }
 
@@ -33,4 +34,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

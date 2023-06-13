@@ -19,10 +19,9 @@ namespace TypeScript.Converter.CSharp
                 node.Comment.TrimStart(' ', '-'),
                 new List<KeyValuePair<string, string>>()
                 {
-                    new KeyValuePair<string, string>("name", node.Name.Text)
+                    new KeyValuePair<string, string>("name", NormalizeTypeName(node.Name))
                 }));
         }
 
     }
 }
-

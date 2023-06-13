@@ -18,13 +18,19 @@ namespace TypeScript.Converter.CSharp
             { "ref", "@ref" },
             { "private", "@private"},
             { "public", "@public" },
-            { "string", "@string" }
+            { "static", "@static" },
+            { "string", "@string" },
+            { "short", "@short" },
+            { "catch", "@catch" },
         };
 
         public static string Map(string id) {
             if (IdentifierMappings.ContainsKey(id))
             {
                 return IdentifierMappings[id];
+            }
+            if (id.StartsWith("$")) {
+                return "@" + id.Substring(1);
             }
             return id;
         }
@@ -78,4 +84,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

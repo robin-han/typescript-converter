@@ -37,11 +37,10 @@ namespace TypeScript.Converter.CSharp
             ModuleDeclaration md = module;
             while (md != null)
             {
-                parts.Add(md.Name.Text);
+                parts.Add(NormalizeTypeName(md.Name));
                 md = md.Body as ModuleDeclaration;
             }
             return string.Join('.', parts);
         }
     }
 }
-

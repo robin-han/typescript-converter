@@ -78,6 +78,16 @@ namespace TypeScript.Converter.CSharp
         }
 
         /// <summary>
+        /// Formats identifiers with @ because of reserved keywords 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        protected string NormalizeTypeName(Node name)
+        {
+            return IdentifierConverter.Map(name.Text);
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="type"></param>

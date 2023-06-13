@@ -19,7 +19,7 @@ namespace TypeScript.Converter.CSharp
                 return null;
             }
 
-            ConstructorDeclarationSyntax csCtor = SyntaxFactory.ConstructorDeclaration(tsClassNode.Name.Text);
+            ConstructorDeclarationSyntax csCtor = SyntaxFactory.ConstructorDeclaration(NormalizeTypeName(tsClassNode.Name));
             csCtor = csCtor.AddModifiers(node.Modifiers.ToCsSyntaxTrees<SyntaxToken>());
             csCtor = csCtor.AddParameterListParameters(node.Parameters.ToCsSyntaxTrees<ParameterSyntax>());
 
@@ -49,4 +49,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

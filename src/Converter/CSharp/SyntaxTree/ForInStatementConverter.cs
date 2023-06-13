@@ -17,17 +17,16 @@ namespace TypeScript.Converter.CSharp
             var init = node.Initializer as VariableDeclarationList;
             if (init == null || init.Declarations.Count != 1)
             {
-                //TODO: not support now multiple vars
+                //TODO: not support multiple vars for now
                 return SyntaxFactory.ParseStatement(this.CommentText(node.Text));
             }
 
             var varName = init.Declarations[0] as VariableDeclaration;
             return SyntaxFactory.ForEachStatement(
                 SyntaxFactory.IdentifierName("var"),
-                varName.Name.Text,
+                NormalizeTypeName(varName.Name),
                 node.Expression.ToCsSyntaxTree<ExpressionSyntax>(),
                 node.Statement.ToCsSyntaxTree<StatementSyntax>());
         }
     }
 }
-

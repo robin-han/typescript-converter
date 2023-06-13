@@ -20,7 +20,7 @@ namespace TypeScript.Converter.CSharp
             }
 
             PropertyDeclarationSyntax csProperty = SyntaxFactory
-                .PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), node.Name.Text)
+                .PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name))
                 .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
                 .AddModifiers(node.Modifiers.ToCsSyntaxTrees<SyntaxToken>())
                 .AddAttributeLists(node.Decorators.ToCsSyntaxTrees<AttributeListSyntax>());
@@ -42,7 +42,7 @@ namespace TypeScript.Converter.CSharp
             List<Node> modifiers = node.Modifiers.FindAll(n => n.Kind != NodeKind.ReadonlyKeyword);
 
             PropertyDeclarationSyntax csProperty = SyntaxFactory
-                .PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), node.Name.Text)
+                .PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name))
                 .AddModifiers(modifiers.ToCsSyntaxTrees<SyntaxToken>());
 
             if (node.JsDoc.Count > 0)
@@ -78,4 +78,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

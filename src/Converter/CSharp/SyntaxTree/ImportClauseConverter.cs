@@ -28,7 +28,7 @@ namespace TypeScript.Converter.CSharp
                     if (package != definitionPackage || name != propertyName)
                     {
                         UsingDirectiveSyntax usingSyntax = SyntaxFactory.UsingDirective(
-                            SyntaxFactory.NameEquals(name),
+                            SyntaxFactory.NameEquals(NormalizeTypeName(node.Name)),
                             SyntaxFactory.ParseName($"{definitionPackage}.{propertyName}"));
                         usings = usings.Add(usingSyntax);
                     }

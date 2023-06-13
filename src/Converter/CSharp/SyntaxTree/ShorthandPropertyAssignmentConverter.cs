@@ -15,8 +15,8 @@ namespace TypeScript.Converter.CSharp
         public CSharpSyntaxNode Convert(ShorthandPropertyAssignment node)
         {
             return SyntaxFactory
-                .Argument(SyntaxFactory.ParseName(node.Name.Text))
-                .WithNameColon(SyntaxFactory.NameColon(node.Name.Text));
+                .Argument(SyntaxFactory.ParseName(NormalizeTypeName(node.Name)))
+                .WithNameColon(SyntaxFactory.NameColon(NormalizeTypeName(node.Name)));
         }
     }
 }

@@ -14,7 +14,7 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(Parameter node)
         {
-            ParameterSyntax csParameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier(IdentifierConverter.Map(node.Name.Text)));
+            ParameterSyntax csParameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier(NormalizeTypeName(node.Name)));
             TypeSyntax csType = null;
             if (node.IsVariable)
             {

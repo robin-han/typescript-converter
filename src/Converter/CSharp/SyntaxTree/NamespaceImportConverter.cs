@@ -15,7 +15,7 @@ namespace TypeScript.Converter.CSharp
             if (fromDoc != null)
             {
                 return SyntaxFactory.UsingDirective(
-                    SyntaxFactory.NameEquals(node.Name.Text),
+                    SyntaxFactory.NameEquals(NormalizeTypeName(node.Name)),
                     SyntaxFactory.ParseName(fromDoc.GetPackageName()));
             }
             return null;

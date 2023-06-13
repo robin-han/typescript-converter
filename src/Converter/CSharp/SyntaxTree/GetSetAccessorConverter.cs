@@ -14,7 +14,7 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(GetSetAccessor node)
         {
-            PropertyDeclarationSyntax csProperty = SyntaxFactory.PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), node.Name.Text);
+            PropertyDeclarationSyntax csProperty = SyntaxFactory.PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name));
             csProperty = csProperty.AddModifiers(node.Modifiers.ToCsSyntaxTrees<SyntaxToken>());
 
             csProperty = csProperty.AddAttributeLists(node.GetAccessor.Decorators.ToCsSyntaxTrees<AttributeListSyntax>());

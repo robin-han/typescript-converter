@@ -23,12 +23,11 @@ namespace TypeScript.Converter.CSharp
             else
             {
                 CatchDeclarationSyntax csCatchDeclaration = SyntaxFactory.CatchDeclaration(
-                   SyntaxFactory.IdentifierName(node.VariableDeclaration.Type.Text),
-                   SyntaxFactory.Identifier(IdentifierConverter.Map(node.VariableDeclaration.Name.Text)));
+                   SyntaxFactory.IdentifierName(NormalizeTypeName(node.VariableDeclaration.Type)),
+                   SyntaxFactory.Identifier(NormalizeTypeName(node.VariableDeclaration.Name)));
 
                 return SyntaxFactory.CatchClause().WithDeclaration(csCatchDeclaration).WithBlock(csCatchBlock);
             }
         }
     }
 }
-

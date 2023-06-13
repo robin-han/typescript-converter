@@ -23,7 +23,7 @@ namespace TypeScript.Converter.CSharp
 
         private MethodDeclarationSyntax CreateFunctionDeclaration(FunctionDeclaration node)
         {
-            MethodDeclarationSyntax methodDeclaration = SyntaxFactory.MethodDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), node.Name.Text);
+            MethodDeclarationSyntax methodDeclaration = SyntaxFactory.MethodDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name));
 
             methodDeclaration = methodDeclaration.AddModifiers(node.Modifiers.ToCsSyntaxTrees<SyntaxToken>());
             methodDeclaration = methodDeclaration.AddParameterListParameters(node.Parameters.ToCsSyntaxTrees<ParameterSyntax>());
@@ -42,7 +42,7 @@ namespace TypeScript.Converter.CSharp
 
         private LocalFunctionStatementSyntax CreateFunctionStatement(FunctionDeclaration node)
         {
-            LocalFunctionStatementSyntax funStatement = SyntaxFactory.LocalFunctionStatement(node.Type.ToCsSyntaxTree<TypeSyntax>(), node.Name.Text);
+            LocalFunctionStatementSyntax funStatement = SyntaxFactory.LocalFunctionStatement(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name));
 
             funStatement = funStatement.AddModifiers(node.Modifiers.ToCsSyntaxTrees<SyntaxToken>());
             funStatement = funStatement.AddParameterListParameters(node.Parameters.ToCsSyntaxTrees<ParameterSyntax>());
@@ -61,4 +61,3 @@ namespace TypeScript.Converter.CSharp
 
     }
 }
-
