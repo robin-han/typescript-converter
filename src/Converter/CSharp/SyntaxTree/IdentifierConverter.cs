@@ -22,6 +22,8 @@ namespace TypeScript.Converter.CSharp
             { "string", "@string" },
             { "short", "@short" },
             { "catch", "@catch" },
+            { "event", "@event" },
+            { "object", "@object" },
         };
 
         public static string Map(string id) {

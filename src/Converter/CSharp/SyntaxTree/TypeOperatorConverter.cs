@@ -14,7 +14,9 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(TypeOperator node)
         {
-            return SyntaxFactory.ParseExpression(this.CommentText(node.Text));
+            //keyof
+            return SyntaxFactory.IdentifierName("dynamic")
+                .WithLeadingTrivia(SyntaxFactory.Comment($"/*{node.Text}*/"));
         }
     }
 }

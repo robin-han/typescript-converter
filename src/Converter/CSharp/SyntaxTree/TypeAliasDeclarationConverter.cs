@@ -24,7 +24,8 @@ namespace TypeScript.Converter.CSharp
             }
             if (node.Type.Kind == NodeKind.TypeLiteral)
             {
-                return SyntaxFactory.PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name));
+                return SyntaxFactory.PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name))
+                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
             }
             return SyntaxFactory.UsingDirective(SyntaxFactory.NameEquals(NormalizeTypeName(node.Name)), node.Type.ToCsSyntaxTree<NameSyntax>());
         }
