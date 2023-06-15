@@ -1,4 +1,4 @@
-﻿using TypeScript.Syntax;
+using TypeScript.Syntax;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -41,7 +41,7 @@ namespace TypeScript.Converter.CSharp
             CSharpSyntaxNode csNode = node?.ToCsSyntaxTree<CSharpSyntaxNode>();
             if (csNode != null)
             {
-                return csNode.NormalizeWhitespace("    ", Environment.NewLine,  false).ToFullString();
+                return csNode.NormalizeWhitespace("    ", Environment.NewLine, false).ToFullString();
             }
 
             return string.Empty;
@@ -118,8 +118,8 @@ namespace TypeScript.Converter.CSharp
             }
             catch (TargetInvocationException ex)
             {
-                LogError($"Fail to convert {node.Kind}: { node.Text}");
-                PrintExecption(ex);
+                LogError($"Fail to convert {node.Kind}: {node.Text}");
+                PrintException(ex);
                 return null;
             }
         }
@@ -161,7 +161,7 @@ namespace TypeScript.Converter.CSharp
             }
         }
 
-        private static void PrintExecption(Exception ex)
+        private static void PrintException(Exception ex)
         {
             Exception e = ex;
             while (e.InnerException != null)

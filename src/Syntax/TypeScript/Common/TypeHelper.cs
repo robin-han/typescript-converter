@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -388,7 +388,8 @@ namespace TypeScript.Syntax
                 {
                     type = NodeHelper.CreateNode(NodeKind.StringKeyword);
                 }
-                else if (typeRef.TypeArguments.Count == 0) {
+                else if (typeRef.TypeArguments.Count == 0)
+                {
                     type = GetPropertyAccessMemberFromParts(typeRef, typeText.Split('.').ToList());
                 }
                 else
@@ -444,11 +445,14 @@ namespace TypeScript.Syntax
 
         public static Node GetNodeType(Node node, HashSet<Node> visited = null)
         {
-            try {
-                if (visited == null) {
+            try
+            {
+                if (visited == null)
+                {
                     visited = new HashSet<Node>();
                 }
-                if (visited.Contains(node)) {
+                if (visited.Contains(node))
+                {
                     return NodeHelper.CreateNode(NodeKind.AnyKeyword);
                 }
                 visited.Add(node);
@@ -516,7 +520,9 @@ namespace TypeScript.Syntax
                     default:
                         return node.GetValue("Type") as Node;
                 }
-            } finally {
+            }
+            finally
+            {
                 visited.Remove(node);
             }
         }
@@ -969,7 +975,8 @@ namespace TypeScript.Syntax
             Project project = accessNode.Document?.Project;
             var parts = accessNode.Parts;
 
-            if (accessNode.Expression.Kind == NodeKind.ArrayLiteralExpression) {
+            if (accessNode.Expression.Kind == NodeKind.ArrayLiteralExpression)
+            {
                 parts = parts.Select(p => string.Join(',', p.Split(',').Select(t => t.Trim()))).ToList();
             }
             else if (project.Converter != null)
@@ -1128,7 +1135,7 @@ namespace TypeScript.Syntax
         private static Node GetObjectLiteralType(ObjectLiteralExpression objectLiteral, HashSet<Node> visited = null)
         {
             Node type = GetDeclarationType(objectLiteral, visited);
-            if (type != null)
+            if (type != null && type.Kind != NodeKind.AnyKeyword)
             {
                 return type;
             }
@@ -1188,7 +1195,8 @@ namespace TypeScript.Syntax
                     }
                     
                     elementType = elementType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
-                    if (elementType.Parent != null) {
+                    if (elementType.Parent != null)
+                    {
                         elementType = NodeHelper.CreateNode(elementType.TsNode);
                     }
                     elementType.NodeName = "type";
@@ -1283,10 +1291,12 @@ namespace TypeScript.Syntax
                 if (arrarrType != null)
                 {
                     elementType = arrarrType;
-                    if (elementType is ArrayType arrType) {
+                    if (elementType is ArrayType arrType)
+                    {
                         elementType = arrType.ElementType;
                     }
-                    if (elementType is ArrayType arrType2) {
+                    if (elementType is ArrayType arrType2)
+                    {
                         elementType = arrType2.ElementType;
                     }
                 }

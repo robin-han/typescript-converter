@@ -183,6 +183,7 @@ namespace TypeScript.Converter.CSharp
                 this.Project = null;
                 this.Namespace = "";
                 this.TypeScriptType = false;
+                this.TypeScriptAdvancedType = false;
                 this.Usings = new List<string>();
                 this.QualifiedNames = new List<string>();
                 this.ExcludeTypes = new List<string>();
@@ -190,6 +191,7 @@ namespace TypeScript.Converter.CSharp
             public IProject Project { get; private set; }
             public string Namespace { get; set; }
             public bool TypeScriptType { get; set; }
+            public bool TypeScriptAdvancedType { get; set; }
             public List<string> Usings { get; set; }
             public List<string> QualifiedNames { get; set; }
             public List<string> ExcludeTypes { get; set; }

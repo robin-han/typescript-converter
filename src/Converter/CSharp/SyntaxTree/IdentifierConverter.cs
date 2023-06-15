@@ -34,7 +34,7 @@ namespace TypeScript.Converter.CSharp
             if (id.StartsWith("$")) {
                 return "@" + id.Substring(1);
             }
-            return id;
+            return id.Replace("-", "_");
         }
 
         public CSharpSyntaxNode Convert(Identifier node)

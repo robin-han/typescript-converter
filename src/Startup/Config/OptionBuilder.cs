@@ -126,11 +126,18 @@ namespace TypeScript.Converter
                     output.Flat = bool.Parse(flatOutput);
                 }
 
-                // perfer typescript type
+                // prefer typescript type
                 var typeScriptType = outputConfig["typeScriptType"];
                 if (!string.IsNullOrEmpty(typeScriptType))
                 {
                     output.TypeScriptType = bool.Parse(typeScriptType);
+                }
+
+                // prefer advanced typescript types (Intersection/Union)
+                var typeScriptAdvancedType = outputConfig["typeScriptAdvancedType"];
+                if (!string.IsNullOrEmpty(typeScriptAdvancedType))
+                {
+                    output.TypeScriptAdvancedType = bool.Parse(typeScriptAdvancedType);
                 }
 
                 // namesapce
