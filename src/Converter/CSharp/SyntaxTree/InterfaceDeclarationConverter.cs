@@ -20,7 +20,7 @@ namespace TypeScript.Converter.CSharp
             }
 
             InterfaceDeclarationSyntax csInterface = SyntaxFactory
-                .InterfaceDeclaration(node.Name.Text)
+                .InterfaceDeclaration(NormalizeTypeName(node.Name))
                 .AddModifiers(node.Modifiers.ToCsSyntaxTrees<SyntaxToken>())
                 .AddMembers(node.Members.ToCsSyntaxTrees<MemberDeclarationSyntax>());
 
@@ -42,7 +42,7 @@ namespace TypeScript.Converter.CSharp
                         }
 
                         csInterface = csInterface.AddConstraintClauses(SyntaxFactory
-                            .TypeParameterConstraintClause(typeParameter.Name.Text)
+                            .TypeParameterConstraintClause(NormalizeTypeName(typeParameter.Name))
                             .AddConstraints(constrains.ToArray())
                         );
                     }
@@ -61,7 +61,7 @@ namespace TypeScript.Converter.CSharp
             CallSignature callSignature = node.Members[0] as CallSignature;
 
             DelegateDeclarationSyntax csDelegateDeclaration = SyntaxFactory
-                .DelegateDeclaration(callSignature.Type.ToCsSyntaxTree<TypeSyntax>(), node.Name.Text)
+                .DelegateDeclaration(callSignature.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name))
                 .AddParameterListParameters(callSignature.Parameters.ToCsSyntaxTrees<ParameterSyntax>());
 
             if (node.TypeParameters.Count > 0)
@@ -73,4 +73,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

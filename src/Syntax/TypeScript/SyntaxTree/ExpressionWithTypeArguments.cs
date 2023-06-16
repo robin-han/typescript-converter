@@ -14,7 +14,7 @@ namespace TypeScript.Syntax
         private Node _type = null;
         #endregion
 
-        #region Propertie
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.ExpressionWithTypeArguments; }
@@ -75,13 +75,5 @@ namespace TypeScript.Syntax
             }
         }
 
-        public void SetBase(Node baseNode, bool changeParent = true)
-        {
-            this.Expression = baseNode;
-            if (changeParent && this.Expression != null)
-            {
-                this.Expression.Parent = this;
-            }
-        }
     }
 }

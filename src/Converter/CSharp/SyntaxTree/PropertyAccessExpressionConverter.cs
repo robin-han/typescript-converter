@@ -40,8 +40,8 @@ namespace TypeScript.Converter.CSharp
                 if (expression != null && expression == node && typeArguments != null && typeArguments.Count > 0)
                 {
                     csName = SyntaxFactory
-                   .GenericName(node.Name.Text)
-                   .AddTypeArgumentListArguments(typeArguments.ToCsSyntaxTrees<TypeSyntax>());
+                        .GenericName(NormalizeTypeName(node.Name))
+                        .AddTypeArgumentListArguments(typeArguments.ToCsSyntaxTrees<TypeSyntax>());
                 }
             }
             if (csName == null)
@@ -81,4 +81,3 @@ namespace TypeScript.Converter.CSharp
 
     }
 }
-

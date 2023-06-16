@@ -29,6 +29,12 @@ namespace TypeScript.Syntax
             internal set;
         }
 
+        public Node QuestionDotToken
+        {
+            get;
+            private set;
+        }
+
         public Node Type
         {
             // TODO:
@@ -101,6 +107,10 @@ namespace TypeScript.Syntax
 
                 case "name":
                     this.Name = childNode;
+                    break;
+
+                case "questionDotToken":
+                    this.QuestionDotToken = childNode;
                     break;
 
                 default:

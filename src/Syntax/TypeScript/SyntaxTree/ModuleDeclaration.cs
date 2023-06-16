@@ -8,6 +8,7 @@ namespace TypeScript.Syntax
         public ModuleDeclaration()
         {
             this.JsDoc = new List<Node>();
+            this.Modifiers = new List<Node>();
         }
 
         #region Properties
@@ -17,6 +18,12 @@ namespace TypeScript.Syntax
         }
 
         public List<Node> JsDoc
+        {
+            get;
+            private set;
+        }
+
+        public List<Node> Modifiers
         {
             get;
             private set;
@@ -33,6 +40,22 @@ namespace TypeScript.Syntax
             get;
             private set;
         }
+
+        public bool IsExport
+        {
+            get
+            {
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.ExportKeyword);
+            }
+        }
+
+        public bool IsDefault
+        {
+            get
+            {
+                return this.Modifiers.Exists(n => n.Kind == NodeKind.DefaultKeyword);
+            }
+        }
         #endregion
 
         public override void AddChild(Node childNode)
@@ -44,6 +67,10 @@ namespace TypeScript.Syntax
             {
                 case "jsDoc":
                     this.JsDoc.Add(childNode);
+                    break;
+
+                case "modifiers":
+                    this.Modifiers.Add(childNode);
                     break;
 
                 case "name":

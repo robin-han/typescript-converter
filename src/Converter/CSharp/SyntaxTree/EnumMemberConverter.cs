@@ -14,7 +14,7 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(EnumMember node)
         {
-            EnumMemberDeclarationSyntax csEnumMember = SyntaxFactory.EnumMemberDeclaration(node.Name.Text);
+            EnumMemberDeclarationSyntax csEnumMember = SyntaxFactory.EnumMemberDeclaration(NormalizeTypeName(node.Name));
 
             if (node.Initializer != null)
             {
@@ -30,4 +30,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

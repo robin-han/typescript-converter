@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.BarBarToken)]
     public class BarBarToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.BarBarToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

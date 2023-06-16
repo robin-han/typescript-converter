@@ -14,8 +14,7 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(TypeParameter node)
         {
-            return SyntaxFactory.TypeParameter(node.Name.Text);
+            return SyntaxFactory.TypeParameter(NormalizeTypeName(node.Name));
         }
     }
 }
-

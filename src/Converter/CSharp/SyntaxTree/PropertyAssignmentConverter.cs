@@ -16,8 +16,7 @@ namespace TypeScript.Converter.CSharp
         {
             return SyntaxFactory
                 .Argument(node.Initializer.ToCsSyntaxTree<ExpressionSyntax>())
-                .WithNameColon(SyntaxFactory.NameColon(node.Name.Text));
+                .WithNameColon(SyntaxFactory.NameColon(NormalizeTypeName(node.Name)));
         }
     }
 }
-

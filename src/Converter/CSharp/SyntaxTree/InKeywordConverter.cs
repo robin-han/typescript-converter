@@ -19,4 +19,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

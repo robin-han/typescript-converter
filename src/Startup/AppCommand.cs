@@ -241,6 +241,7 @@ namespace GrapeCity.Syntax.Converter.Console
                 context.Namespace = output.Namespace;
                 context.Usings = output.Usings;
                 context.TypeScriptType = output.TypeScriptType;
+                context.TypeScriptAdvancedType = output.TypeScriptAdvancedType;
                 string savePath = arg.GetSavePath(doc, output);
                 // Create directory
                 string dirName = Path.GetDirectoryName(savePath);

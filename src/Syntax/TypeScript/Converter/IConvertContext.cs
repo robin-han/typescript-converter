@@ -25,6 +25,11 @@ namespace TypeScript.Syntax.Converter
         bool TypeScriptType { get; }
 
         /// <summary>
+        /// Gets or sets whether convert to typescript types like intersection/union.
+        /// </summary>
+        bool TypeScriptAdvancedType { get; }
+
+        /// <summary>
         /// Gets or sets current usings or imported package.
         /// </summary>
         List<string> Usings { get; }

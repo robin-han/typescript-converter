@@ -14,15 +14,7 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(ObjectKeyword node)
         {
-            //if (this.Context.PreferTypeScriptType)
-            //{
-            //    return SyntaxFactory.IdentifierName("Object");
-            //}
-            //else
-            //{
-                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
-            //}
+            return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
         }
     }
 }
-

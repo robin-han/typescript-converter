@@ -21,42 +21,37 @@ namespace TypeScript.Converter.CSharp
             {
                 return SyntaxFactory.TupleExpression().AddArguments(properties.ToCsSyntaxTrees<ArgumentSyntax>());
             }
-            else if (type.Kind == NodeKind.AnyKeyword)
+            else if (type.Kind == NodeKind.AnyKeyword || type.Kind == NodeKind.VoidKeyword)
             {
-                AnonymousObjectCreationExpressionSyntax csAnonyNewExpr = SyntaxFactory.AnonymousObjectCreationExpression();
-                foreach (PropertyAssignment prop in node.Properties)
+                var csAnonyNewExpr = SyntaxFactory.AnonymousObjectCreationExpression();
+                foreach (Node property in node.Properties)
                 {
-                    string propName = prop.Name.Text;
-                    Node initValue = prop.Initializer;
-                    ExpressionSyntax valueExpr = initValue.ToCsSyntaxTree<ExpressionSyntax>();
-
-                    if (type.Kind == NodeKind.TypeLiteral && initValue.Kind == NodeKind.NullKeyword)
-                    {
-                        Node memType = TypeHelper.GetTypeLiteralMemberType((TypeLiteral)type, propName);
-                        if (memType != null)
-                        {
-                            valueExpr = SyntaxFactory.CastExpression(memType.ToCsSyntaxTree<TypeSyntax>(), valueExpr);
-                        }
-                    }
+                    var (propName, valueExpr) = ConvertPropertyValue(property);
+                    if (propName == null) continue;
 
                     csAnonyNewExpr = csAnonyNewExpr.AddInitializers(SyntaxFactory.AnonymousObjectMemberDeclarator(
-                        SyntaxFactory.NameEquals(propName),
+                        SyntaxFactory.NameEquals(NormalizeTypeName(propName)),
                         valueExpr));
                 }
                 return csAnonyNewExpr;
             }
             else
             {
-                ObjectCreationExpressionSyntax csObjLiteral = SyntaxFactory.ObjectCreationExpression(type.ToCsSyntaxTree<TypeSyntax>()).AddArgumentListArguments();
-                List<ExpressionSyntax> initItemExprs = new List<ExpressionSyntax>();
-                foreach (PropertyAssignment prop in properties)
+                var csType = type.ToCsSyntaxTree<TypeSyntax>();
+                var csObjLiteral = SyntaxFactory.ObjectCreationExpression(csType)
+                    .AddArgumentListArguments();
+                var initItemExprs = new List<ExpressionSyntax>();
+                foreach (Node property in node.Properties)
                 {
-                    ExpressionSyntax csNameExpression = SyntaxFactory.LiteralExpression(
+                    var (propName, valueExpr) = ConvertPropertyValue(property);
+                    if (propName == null) continue;
+
+                    var csNameExpression = SyntaxFactory.LiteralExpression(
                         SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(prop.Name.Text));
-                    InitializerExpressionSyntax itemInitExpr = SyntaxFactory
+                        SyntaxFactory.Literal(NormalizeTypeName(propName)));
+                    var itemInitExpr = SyntaxFactory
                         .InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
-                        .AddExpressions(csNameExpression, prop.Initializer.ToCsSyntaxTree<ExpressionSyntax>());
+                        .AddExpressions(csNameExpression, valueExpr);
 
                     initItemExprs.Add(itemInitExpr);
                 }
@@ -70,6 +65,34 @@ namespace TypeScript.Converter.CSharp
             }
         }
 
+        private (Node, ExpressionSyntax) ConvertPropertyValue(Node property)
+        {
+            Node propName = null;
+            ExpressionSyntax valueExpr = null;
+
+            switch (property.Kind)
+            {
+                case NodeKind.PropertyAssignment:
+                    var prop = (PropertyAssignment)property;
+                    propName = prop.Name;
+                    valueExpr = prop.Initializer.ToCsSyntaxTree<ExpressionSyntax>();
+                    break;
+
+                case NodeKind.ShorthandPropertyAssignment:
+                    var shortProp = (ShorthandPropertyAssignment)property;
+                    propName = shortProp.Name;
+                    valueExpr = SyntaxFactory.ParseName(NormalizeTypeName(propName));
+                    break;
+
+                case NodeKind.SpreadAssignment:
+                    //TODO: spread
+                    return (null, null);
+
+                default:
+                    return (null, null);
+            }
+
+            return (propName, valueExpr);
+        }
     }
 }
-

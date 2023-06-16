@@ -18,7 +18,9 @@ namespace TypeScript.Converter.CSharp
                 SyntaxFactory.XmlText(this.CreateXmlTextLiteral()),
                 SyntaxFactory.XmlEmptyElement(
                     SyntaxFactory.XmlName("see"),
-                    SyntaxFactory.SingletonList<XmlAttributeSyntax>(SyntaxFactory.XmlCrefAttribute(SyntaxFactory.NameMemberCref(SyntaxFactory.IdentifierName(node.Comment))))
+                    SyntaxFactory.SingletonList<XmlAttributeSyntax>(
+                        SyntaxFactory.XmlCrefAttribute(SyntaxFactory.NameMemberCref(
+                                SyntaxFactory.IdentifierName(IdentifierConverter.Map(node.Comment)))))
                 )
             });
         }

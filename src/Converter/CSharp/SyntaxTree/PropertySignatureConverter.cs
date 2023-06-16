@@ -14,7 +14,7 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(PropertySignature node)
         {
-            PropertyDeclarationSyntax csProperty = SyntaxFactory.PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), node.Name.Text);
+            PropertyDeclarationSyntax csProperty = SyntaxFactory.PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name));
 
             if (node.Parent != null && node.Parent.Kind == NodeKind.InterfaceDeclaration)
             {
@@ -38,4 +38,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

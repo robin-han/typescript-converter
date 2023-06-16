@@ -11,6 +11,7 @@ namespace TypeScript.Syntax
             this.Modifiers = new List<Node>();
             this.TypeParameters = new List<Node>();
             this.Parameters = new List<Node>();
+            this.Decorators = new List<Node>();
         }
 
         #region Properties
@@ -26,6 +27,12 @@ namespace TypeScript.Syntax
         }
 
         public List<Node> Modifiers
+        {
+            get;
+            private set;
+        }
+
+        public List<Node> Decorators
         {
             get;
             private set;
@@ -139,6 +146,10 @@ namespace TypeScript.Syntax
 
                 case "body":
                     this.Body = childNode as Block;
+                    break;
+
+                case "decorators":
+                    this.Decorators.Add(childNode);
                     break;
 
                 default:

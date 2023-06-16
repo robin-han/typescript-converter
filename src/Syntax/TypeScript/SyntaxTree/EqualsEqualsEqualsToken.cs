@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.EqualsEqualsEqualsToken)]
     public class EqualsEqualsEqualsToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.EqualsEqualsEqualsToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

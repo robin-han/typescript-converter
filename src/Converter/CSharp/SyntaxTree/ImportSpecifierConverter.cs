@@ -29,7 +29,7 @@ namespace TypeScript.Converter.CSharp
                 else if (package != definitionPackage || name != propertyName)
                 {
                     return SyntaxFactory.UsingDirective(
-                       SyntaxFactory.NameEquals(name),
+                       SyntaxFactory.NameEquals(NormalizeTypeName(specifier.Name)),
                        SyntaxFactory.ParseName($"{definitionPackage}.{propertyName}"));
                 }
             }

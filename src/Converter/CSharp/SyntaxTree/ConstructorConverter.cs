@@ -19,7 +19,7 @@ namespace TypeScript.Converter.CSharp
                 return null;
             }
 
-            ConstructorDeclarationSyntax csCtor = SyntaxFactory.ConstructorDeclaration(tsClassNode.Name.Text);
+            ConstructorDeclarationSyntax csCtor = SyntaxFactory.ConstructorDeclaration(NormalizeTypeName(tsClassNode.Name));
             csCtor = csCtor.AddModifiers(node.Modifiers.ToCsSyntaxTrees<SyntaxToken>());
             csCtor = csCtor.AddParameterListParameters(node.Parameters.ToCsSyntaxTrees<ParameterSyntax>());
 
@@ -40,8 +40,12 @@ namespace TypeScript.Converter.CSharp
                 csCtor = csCtor.WithLeadingTrivia(SyntaxFactory.Trivia(node.JsDoc[0].ToCsSyntaxTree<DocumentationCommentTriviaSyntax>()));
             }
 
+            if (node.Body == null)
+            { // .d.ts file
+                return csCtor.WithBody(SyntaxFactory.Block());
+            }
+
             return csCtor.WithBody(node.Body.ToCsSyntaxTree<BlockSyntax>());
         }
     }
 }
-

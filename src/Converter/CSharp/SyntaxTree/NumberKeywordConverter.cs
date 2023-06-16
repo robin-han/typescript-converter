@@ -14,17 +14,7 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(NumberKeyword node)
         {
-            //if (this.Context.Config.PreferTypeScriptType)
-            //{
-            //    return SyntaxFactory.IdentifierName("Number");
-            //}
-            //else
-            //{
-            //    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.DoubleKeyword));
-            //}
             return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.DoubleKeyword));
         }
-
     }
 }
-

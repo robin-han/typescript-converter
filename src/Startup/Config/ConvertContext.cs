@@ -14,6 +14,7 @@ namespace TypeScript.Converter
 
         private string _ns;
         private bool _preferTsType;
+        private bool _preferTsAdvancedType;
         private List<string> _usings;
         private Dictionary<string, string> _nsMappings;
         private List<string> _qualifiedNames;
@@ -27,6 +28,7 @@ namespace TypeScript.Converter
 
             this._ns = string.Empty;
             this._preferTsType = true;
+            this._preferTsAdvancedType = false;
             this._usings = new List<string>();
             this._nsMappings = new Dictionary<string, string>();
             this._qualifiedNames = new List<string>();
@@ -74,6 +76,22 @@ namespace TypeScript.Converter
             set
             {
                 this._preferTsType = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whehter convert to advanced typescript types. 
+        /// <b>true</b> will convert to a dynamic if set to false otherwise convert to a generic type adapter type.
+        /// </summary>
+        public bool TypeScriptAdvancedType
+        {
+            get
+            {
+                return _preferTsAdvancedType;
+            }
+            set
+            {
+                this._preferTsAdvancedType = value;
             }
         }
 

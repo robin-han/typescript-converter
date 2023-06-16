@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace TypeScript.Syntax
 {
@@ -8,6 +9,7 @@ namespace TypeScript.Syntax
         public ArrowFunction()
         {
             this.Parameters = new List<Node>();
+            this.Modifiers = new List<Node>();
         }
 
         #region Properties
@@ -17,6 +19,12 @@ namespace TypeScript.Syntax
         }
 
         public List<Node> Parameters
+        {
+            get;
+            private set;
+        }
+
+        public List<Node> Modifiers
         {
             get;
             private set;
@@ -41,6 +49,17 @@ namespace TypeScript.Syntax
         }
         #endregion
 
+        public override void Init(JObject jsonObj)
+        {
+            base.Init(jsonObj);
+
+            this.Parameters = new List<Node>();
+            this.Modifiers = new List<Node>();
+            this.Type = null;
+            this.EqualsGreaterThanToken = null;
+            this.Body = null;
+        }
+
         public override void AddChild(Node childNode)
         {
             base.AddChild(childNode);
@@ -50,6 +69,10 @@ namespace TypeScript.Syntax
             {
                 case "parameters":
                     this.Parameters.Add(childNode);
+                    break;
+
+                case "modifiers":
+                    this.Modifiers.Add(childNode);
                     break;
 
                 case "type":
@@ -67,6 +90,15 @@ namespace TypeScript.Syntax
                 default:
                     this.ProcessUnknownNode(childNode);
                     break;
+            }
+        }
+        
+        public void SetType(Node type, bool changeParent = true)
+        {
+            this.Type = type;
+            if (changeParent && this.Type != null)
+            {
+                this.Type.Parent = this;
             }
         }
     }

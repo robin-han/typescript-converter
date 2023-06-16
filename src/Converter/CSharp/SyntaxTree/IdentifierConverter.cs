@@ -15,16 +15,35 @@ namespace TypeScript.Converter.CSharp
         private static readonly Dictionary<string, string> IdentifierMappings = new Dictionary<string, string>()
         {
             { "as", "@as" },
-            //{ "length", "Length" },
+            { "ref", "@ref" },
+            { "private", "@private"},
+            { "public", "@public" },
+            { "static", "@static" },
+            { "string", "@string" },
+            { "short", "@short" },
+            { "catch", "@catch" },
+            { "finally", "@finally" },
+            { "event", "@event" },
+            { "object", "@object" },
+            { "default", "@default" },
+            { "namespace", "@namespace" },
+            { "params", "@params" },
         };
+
+        public static string Map(string id) {
+            if (IdentifierMappings.ContainsKey(id))
+            {
+                return IdentifierMappings[id];
+            }
+            if (id.StartsWith("$")) {
+                return "@" + id.Substring(1);
+            }
+            return id.Replace("-", "_");
+        }
 
         public CSharpSyntaxNode Convert(Identifier node)
         {
-            string text = node.Text;
-            if (IdentifierMappings.ContainsKey(text))
-            {
-                text = IdentifierMappings[text];
-            }
+            string text = Map(node.Text);
 
             if (text == "length" && node.Parent.Kind == NodeKind.PropertyAccessExpression)
             {
@@ -71,4 +90,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

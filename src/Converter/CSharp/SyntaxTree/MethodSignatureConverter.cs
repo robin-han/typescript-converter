@@ -15,7 +15,7 @@ namespace TypeScript.Converter.CSharp
         public CSharpSyntaxNode Convert(MethodSignature node)
         {
             MethodDeclarationSyntax csMethod = SyntaxFactory
-                .MethodDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), node.Name.Text)
+                .MethodDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name))
                 .AddParameterListParameters(node.Parameters.ToCsSyntaxTrees<ParameterSyntax>());
 
             if (node.JsDoc.Count > 0)
@@ -37,7 +37,7 @@ namespace TypeScript.Converter.CSharp
                         }
 
                         csMethod = csMethod.AddConstraintClauses(SyntaxFactory
-                            .TypeParameterConstraintClause(typeParameter.Name.Text)
+                            .TypeParameterConstraintClause(NormalizeTypeName(typeParameter.Name))
                             .AddConstraints(constrains.ToArray())
                         );
                     }
@@ -49,4 +49,3 @@ namespace TypeScript.Converter.CSharp
     }
 
 }
-

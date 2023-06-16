@@ -14,7 +14,7 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(EnumDeclaration node)
         {
-            EnumDeclarationSyntax csEnum = SyntaxFactory.EnumDeclaration(node.Name.Text);
+            EnumDeclarationSyntax csEnum = SyntaxFactory.EnumDeclaration(NormalizeTypeName(node.Name));
 
             csEnum = csEnum.AddModifiers(node.Modifiers.ToCsSyntaxTrees<SyntaxToken>());
             csEnum = csEnum.AddMembers(node.Members.ToCsSyntaxTrees<EnumMemberDeclarationSyntax>());
@@ -28,4 +28,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

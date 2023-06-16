@@ -41,7 +41,7 @@ namespace TypeScript.Converter.CSharp
             CSharpSyntaxNode csNode = node?.ToCsSyntaxTree<CSharpSyntaxNode>();
             if (csNode != null)
             {
-                return csNode.NormalizeWhitespace("    ", Environment.NewLine,  false).ToFullString();
+                return csNode.NormalizeWhitespace("    ", Environment.NewLine, false).ToFullString();
             }
 
             return string.Empty;
@@ -118,8 +118,8 @@ namespace TypeScript.Converter.CSharp
             }
             catch (TargetInvocationException ex)
             {
-                LogError($"Fail to convert {node.Kind}: { node.Text}");
-                PrintExecption(ex);
+                LogError($"Fail to convert {node.Kind}: {node.Text}");
+                PrintException(ex);
                 return null;
             }
         }
@@ -128,15 +128,17 @@ namespace TypeScript.Converter.CSharp
         {
             switch (node.Kind)
             {
-                //case NodeKind.UnionType:
-                case NodeKind.LiteralType:
-                case NodeKind.ForInStatement:
                 case NodeKind.ArrayBindingPattern:
                 case NodeKind.BindingElement:
                 case NodeKind.CallSignature:
-                case NodeKind.FunctionType:
-                case NodeKind.InKeyword:
                     return false;
+
+                case NodeKind.LiteralType:
+                    return
+                        (node as LiteralType).Kind != NodeKind.StringLiteral &&
+                        (node as LiteralType).Kind != NodeKind.NumericLiteral &&
+                        (node as LiteralType).Kind != NodeKind.TrueKeyword &&
+                        (node as LiteralType).Kind != NodeKind.FalseKeyword;
 
                 case NodeKind.DeleteExpression:
                     return (node as DeleteExpression).Expression.Kind == NodeKind.ElementAccessExpression;
@@ -161,7 +163,7 @@ namespace TypeScript.Converter.CSharp
             }
         }
 
-        private static void PrintExecption(Exception ex)
+        private static void PrintException(Exception ex)
         {
             Exception e = ex;
             while (e.InnerException != null)

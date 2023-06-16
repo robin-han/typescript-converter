@@ -15,7 +15,7 @@ namespace TypeScript.Converter.CSharp
         public CSharpSyntaxNode Convert(ClassDeclaration node)
         {
             ClassDeclarationSyntax csClass = SyntaxFactory
-                .ClassDeclaration(node.Name.Text)
+                .ClassDeclaration(NormalizeTypeName(node.Name))
                 .AddModifiers(node.Modifiers.ToCsSyntaxTrees<SyntaxToken>())
                 .AddMembers(node.Members.ToCsSyntaxTrees<MemberDeclarationSyntax>())
                 .AddAttributeLists(node.Decorators.ToCsSyntaxTrees<AttributeListSyntax>());
@@ -33,7 +33,7 @@ namespace TypeScript.Converter.CSharp
                     }
 
                     csClass = csClass.AddConstraintClauses(SyntaxFactory
-                        .TypeParameterConstraintClause(typeParameter.Name.Text)
+                        .TypeParameterConstraintClause(NormalizeTypeName(typeParameter.Name))
                         .AddConstraints(constrains.ToArray())
                     );
                 }
@@ -61,4 +61,3 @@ namespace TypeScript.Converter.CSharp
         }
     }
 }
-

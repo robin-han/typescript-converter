@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.BarEqualsToken)]
     public class BarEqualsToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.BarEqualsToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

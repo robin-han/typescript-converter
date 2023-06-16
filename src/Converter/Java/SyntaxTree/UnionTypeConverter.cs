@@ -25,6 +25,9 @@ namespace TypeScript.Converter.Java
                     case NodeKind.BooleanKeyword:
                         return TreeMaker.Ident(Names.fromString("Boolean"));
 
+                    case NodeKind.StringKeyword:
+                        return TreeMaker.Ident(Names.fromString("String"));
+
                     default:
                         string typeName = TypeHelper.ToShortName(type.Text);
                         switch (typeName)

@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.CaretToken)]
     public class CaretToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.CaretToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {

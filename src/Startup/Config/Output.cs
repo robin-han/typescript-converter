@@ -16,6 +16,7 @@ namespace TypeScript.Converter
             this.Flat = false;
             this.Namespace = null;
             this.TypeScriptType = true;
+            this.TypeScriptAdvancedType = false;
             this.Path = null;
             this.Patterns = new List<string>();
             this.Usings = new List<string>();
@@ -45,6 +46,15 @@ namespace TypeScript.Converter
         /// Gets or sets whether output typescript type or not.
         /// </summary>
         public bool TypeScriptType
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets whehter output advanced typescript types or not.
+        /// </summary>
+        public bool TypeScriptAdvancedType
         {
             get;
             set;

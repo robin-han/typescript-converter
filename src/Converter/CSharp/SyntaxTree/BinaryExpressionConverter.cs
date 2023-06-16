@@ -26,7 +26,7 @@ namespace TypeScript.Converter.CSharp
                     node.Right.ToCsSyntaxTree<ExpressionSyntax>());
             }
 
-            //
+            //binary
             SyntaxKind binaryKind = GetBinaryExpressionKind(operatorKind);
             if (binaryKind != SyntaxKind.None)
             {
@@ -35,7 +35,23 @@ namespace TypeScript.Converter.CSharp
                     node.Left.ToCsSyntaxTree<ExpressionSyntax>(),
                     node.Right.ToCsSyntaxTree<ExpressionSyntax>());
             }
-            
+
+            //in search, best effort convert to Linq Contains
+            if (operatorKind == NodeKind.InKeyword)
+            {
+                var left = node.Left.ToCsSyntaxTree<ExpressionSyntax>();
+                var right = node.Right.ToCsSyntaxTree<ExpressionSyntax>();
+
+                // Create an invocation of the 'Contains' method.
+                var containsMethod = SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression, right, 
+                    SyntaxFactory.IdentifierName("Contains"));
+
+                return SyntaxFactory.InvocationExpression(
+                    containsMethod,
+                    SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Argument(left))));
+            }
+
             //TODO: NOT SUPPORT
             return SyntaxFactory.ParseExpression(this.CommentText(node.Text));
         }
@@ -173,4 +189,3 @@ namespace TypeScript.Converter.CSharp
 
     }
 }
-

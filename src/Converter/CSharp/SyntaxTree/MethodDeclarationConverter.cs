@@ -22,7 +22,7 @@ namespace TypeScript.Converter.CSharp
             }
 
             MethodDeclarationSyntax csMethod = SyntaxFactory
-                .MethodDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), node.Name.Text)
+                .MethodDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name))
                 .AddModifiers(modifiers.ToCsSyntaxTrees<SyntaxToken>())
                 .AddParameterListParameters(node.Parameters.ToCsSyntaxTrees<ParameterSyntax>());
 
@@ -45,7 +45,7 @@ namespace TypeScript.Converter.CSharp
                         }
 
                         csMethod = csMethod.AddConstraintClauses(SyntaxFactory
-                            .TypeParameterConstraintClause(typeParameter.Name.Text)
+                            .TypeParameterConstraintClause(NormalizeTypeName(typeParameter.Name))
                             .AddConstraints(constrains.ToArray())
                         );
                     }
@@ -66,4 +66,3 @@ namespace TypeScript.Converter.CSharp
 
     }
 }
-

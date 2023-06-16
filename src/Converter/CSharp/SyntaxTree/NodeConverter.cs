@@ -68,13 +68,23 @@ namespace TypeScript.Converter.CSharp
         /// <returns></returns>
         protected ArgumentSyntax[] ToArgumentList(List<Node> argNodes)
         {
-            List<ArgumentSyntax> csArgumetns = new List<ArgumentSyntax>();
+            List<ArgumentSyntax> csArguments = new List<ArgumentSyntax>();
             foreach (Node node in argNodes)
             {
-                csArgumetns.Add(SyntaxFactory.Argument(node.ToCsSyntaxTree<ExpressionSyntax>()));
+                csArguments.Add(SyntaxFactory.Argument(node.ToCsSyntaxTree<ExpressionSyntax>()));
             }
 
-            return csArgumetns.ToArray();
+            return csArguments.ToArray();
+        }
+
+        /// <summary>
+        /// Formats identifiers with @ because of reserved keywords 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        protected string NormalizeTypeName(Node name)
+        {
+            return IdentifierConverter.Map(name.Text);
         }
 
         /// <summary>
@@ -162,7 +172,7 @@ namespace TypeScript.Converter.CSharp
         /// <returns></returns>
         protected string CommentText(string text)
         {
-            return "AAA___" + text + "___AAA";
+            return "AAA___ " + text.Trim() + " ___AAA";
         }
         #endregion
 
@@ -173,6 +183,7 @@ namespace TypeScript.Converter.CSharp
                 this.Project = null;
                 this.Namespace = "";
                 this.TypeScriptType = false;
+                this.TypeScriptAdvancedType = false;
                 this.Usings = new List<string>();
                 this.QualifiedNames = new List<string>();
                 this.ExcludeTypes = new List<string>();
@@ -180,6 +191,7 @@ namespace TypeScript.Converter.CSharp
             public IProject Project { get; private set; }
             public string Namespace { get; set; }
             public bool TypeScriptType { get; set; }
+            public bool TypeScriptAdvancedType { get; set; }
             public List<string> Usings { get; set; }
             public List<string> QualifiedNames { get; set; }
             public List<string> ExcludeTypes { get; set; }
@@ -195,6 +207,5 @@ namespace TypeScript.Converter.CSharp
             }
         }
     }
-
 
 }

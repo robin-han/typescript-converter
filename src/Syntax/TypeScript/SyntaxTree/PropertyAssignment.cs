@@ -1,12 +1,25 @@
+using System.Collections.Generic;
+
 namespace TypeScript.Syntax
 {
     [NodeKindAttribute(NodeKind.PropertyAssignment)]
     public class PropertyAssignment : Node
     {
+        public PropertyAssignment()
+        {
+            this.JsDoc = new List<Node>();
+        }
+
         #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.PropertyAssignment; }
+        }
+
+        public List<Node> JsDoc
+        {
+            get;
+            private set;
         }
 
         public Node Name

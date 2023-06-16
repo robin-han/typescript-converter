@@ -3,10 +3,12 @@ namespace TypeScript.Syntax
     [NodeKindAttribute(NodeKind.DotDotDotToken)]
     public class DotDotDotToken : Node
     {
+        #region Properties
         public override NodeKind Kind
         {
             get { return NodeKind.DotDotDotToken; }
         }
+        #endregion
 
         public override void AddChild(Node childNode)
         {
