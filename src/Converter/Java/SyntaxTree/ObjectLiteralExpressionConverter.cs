@@ -66,7 +66,7 @@ namespace TypeScript.Converter.Java
             int index = 0;
             foreach (Node property in node.Properties)
             {
-                var (propName, valueExpr) = ConvertPropertyValue(node, property);
+                var (propName, valueExpr) = ConvertPropertyValue(property);
                 if (propName == null) continue;
                 args[index++] = valueExpr;
             }
@@ -91,7 +91,7 @@ namespace TypeScript.Converter.Java
                 List<JCStatement> initStatements = new List<JCStatement>();
                 foreach (Node property in node.Properties)
                 {
-                    var (propName, valueExpr) = ConvertPropertyValue(node, property);
+                    var (propName, valueExpr) = ConvertPropertyValue(property);
                     if (propName == null) continue;
                     // put(Key, Value);
                     JCMethodInvocation add = TreeMaker.Apply(
@@ -136,7 +136,7 @@ namespace TypeScript.Converter.Java
                 List<JCStatement> initStats = new List<JCStatement>();
                 foreach (Node property in node.Properties)
                 {
-                    var (propName, valueExpr) = ConvertPropertyValue(node, property);
+                    var (propName, valueExpr) = ConvertPropertyValue(property);
                     if (propName == null) continue;
                     // setXXX(prop.Initializer);
                     JCMethodInvocation add = TreeMaker.Apply(
@@ -189,10 +189,9 @@ namespace TypeScript.Converter.Java
             return node.Type == null || node.Type.Kind == NodeKind.AnyKeyword || TypeHelper.GetTypeName(node.Type) == NativeTypes.JsonElement;
         }
 
-        private static (Node, JCExpression) ConvertPropertyValue(ObjectLiteralExpression parent, Node property)
+        private static (Node, JCExpression) ConvertPropertyValue(Node property)
         {
             Node propName = null;
-            Node initValue = null;
             JCExpression valueExpr = null;
 
             switch (property.Kind)
@@ -200,14 +199,12 @@ namespace TypeScript.Converter.Java
                 case NodeKind.PropertyAssignment:
                     var prop = (PropertyAssignment)property;
                     propName = prop.Name;
-                    initValue = prop.Initializer;
-                    valueExpr = initValue.ToJavaSyntaxTree<JCExpression>();
+                    valueExpr = prop.Initializer.ToJavaSyntaxTree<JCExpression>();
                     break;
 
                 case NodeKind.ShorthandPropertyAssignment:
                     var shortProp = (ShorthandPropertyAssignment)property;
                     propName = shortProp.Name;
-                    initValue = parent.Type;
                     valueExpr = TreeMaker.Ident(Names.fromString(propName.Text));
                     break;
 

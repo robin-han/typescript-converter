@@ -14,13 +14,16 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(IntersectionType node)
         {
+            if (!this.Context.TypeScriptAdvancedType) {
+                return SyntaxFactory.IdentifierName("dynamic");
+            }
             var ret = new List<TypeSyntax>();
             foreach (var type in node.Types)
             {
                 ret.Add(type.ToCsSyntaxTree<TypeSyntax>());
             }
             return SyntaxFactory
-                    .GenericName("Combine")
+                    .GenericName("AndType")
                     .AddTypeArgumentListArguments(ret.ToArray());
         }
     }
