@@ -14,10 +14,24 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(LiteralType node)
         {
+            //TODO: implement custom types instead of using the base type.
+            switch (node.Literal.Kind)
+            {
+                case NodeKind.StringLiteral:
+                    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword))
+                                    .WithTrailingTrivia(SyntaxFactory.Comment("/*" + node.Literal.Text + "*/"));
+                case NodeKind.NumericLiteral:
+                    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.DoubleKeyword))
+                                    .WithTrailingTrivia(SyntaxFactory.Comment("/*" + node.Literal.Text + "*/"));
+                case NodeKind.TrueKeyword:
+                case NodeKind.FalseKeyword:
+                    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.BoolKeyword))
+                                    .WithTrailingTrivia(SyntaxFactory.Comment("/*" + node.Literal.Text + "*/"));
+            }
+
             //TODO: NOT SUPPORT
-            //return SyntaxFactory.ParseExpression(this.CommentText(node.Text));
-            return SyntaxFactory.IdentifierName("dynamic");
+            return SyntaxFactory.IdentifierName("dynamic")
+                .WithTrailingTrivia(SyntaxFactory.Comment("/*" + node.Literal.Text + "*/"));
         }
     }
 }
-

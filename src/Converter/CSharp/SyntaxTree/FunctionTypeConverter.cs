@@ -18,8 +18,15 @@ namespace TypeScript.Converter.CSharp
             var parameters = node.Parameters.ToCsSyntaxTrees<ParameterSyntax>().Select(p => p.Type).ToList();
 
             string delegateName;
-            delegateName = (node.Type.Kind == NodeKind.VoidKeyword) ? "Action" : "Func";
-            parameters.Add(node.Type.ToCsSyntaxTree<TypeSyntax>());
+            if ((node.Type.Kind == NodeKind.VoidKeyword))
+            {
+                delegateName = "Action";
+            }
+            else
+            {
+                delegateName = "Func";
+                parameters.Add(node.Type.ToCsSyntaxTree<TypeSyntax>());
+            }            
 
             // Create delegate type syntax
             var delegateType = SyntaxFactory.GenericName(delegateName);

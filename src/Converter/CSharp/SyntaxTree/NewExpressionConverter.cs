@@ -16,11 +16,11 @@ namespace TypeScript.Converter.CSharp
         {
             if (node.Arguments.Count == 1 && node.Arguments[0].Kind == NodeKind.ObjectLiteralExpression)
             {
-                ObjectLiteralExpression literaExpression = node.Arguments[0] as ObjectLiteralExpression;
+                var literalExpression = node.Arguments[0] as ObjectLiteralExpression;
 
-                ObjectCreationExpressionSyntax csObjNewExpr = SyntaxFactory.ObjectCreationExpression(node.Type.ToCsSyntaxTree<TypeSyntax>());
-                InitializerExpressionSyntax csInitExpr = SyntaxFactory.InitializerExpression(SyntaxKind.ObjectInitializerExpression);
-                foreach (PropertyAssignment prop in literaExpression.Properties)
+                var csObjNewExpr = SyntaxFactory.ObjectCreationExpression(node.Type.ToCsSyntaxTree<TypeSyntax>());
+                var csInitExpr = SyntaxFactory.InitializerExpression(SyntaxKind.ObjectInitializerExpression);
+                foreach (PropertyAssignment prop in literalExpression.Properties)
                 {
                     csInitExpr = csInitExpr.AddExpressions(SyntaxFactory.AssignmentExpression(
                         SyntaxKind.SimpleAssignmentExpression,
@@ -34,10 +34,10 @@ namespace TypeScript.Converter.CSharp
             if (node.TypeArguments.Count > 0)
             {
                 return SyntaxFactory
-                .ObjectCreationExpression(SyntaxFactory
+                    .ObjectCreationExpression(SyntaxFactory
                     .GenericName(this.TrimTypeName(node.Type.Text))
                     .AddTypeArgumentListArguments(node.TypeArguments.ToCsSyntaxTrees<TypeSyntax>()))
-                .AddArgumentListArguments(this.ToArgumentList(node.Arguments));
+                    .AddArgumentListArguments(this.ToArgumentList(node.Arguments));
             }
             else
             {
@@ -49,4 +49,3 @@ namespace TypeScript.Converter.CSharp
 
     }
 }
-

@@ -15,6 +15,17 @@ namespace TypeScript.Converter.CSharp
         public CSharpSyntaxNode Convert(ArrayLiteralExpression node)
         {
             TypeSyntax csType = node.Type.ToCsSyntaxTree<TypeSyntax>();
+            if (node.Type.Kind == NodeKind.VoidKeyword)
+            {
+                if (this.Context.TypeScriptType)
+                {
+                    csType = SyntaxFactory.GenericName("Array");
+                }
+                else
+                {
+                    csType = SyntaxFactory.GenericName("List");
+                }
+            }
             if (node.Elements.Count == 0)
             {
                 return SyntaxFactory
@@ -41,4 +52,3 @@ namespace TypeScript.Converter.CSharp
     }
 
 }
-

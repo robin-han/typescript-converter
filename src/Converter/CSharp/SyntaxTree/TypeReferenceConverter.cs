@@ -18,18 +18,6 @@ namespace TypeScript.Converter.CSharp
 
             switch (typeText)
             {
-                //case "String":
-                //    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword));
-
-                //case "Number":
-                //    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.DoubleKeyword));
-
-                //case "Boolean":
-                //    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.BoolKeyword));
-
-                //case "Object":
-                //    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
-
                 case NativeTypes.Int:
                     return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword));
 
@@ -52,17 +40,18 @@ namespace TypeScript.Converter.CSharp
                 case "ReadonlyArray":
                     if (node.TypeArguments.Count > 0)
                     {
+                        var typeArgs = GetValidTypeArguments(node);
                         if (this.Context.TypeScriptType)
                         {
                             return SyntaxFactory
                                 .GenericName("Array")
-                                .AddTypeArgumentListArguments(node.TypeArguments[0].ToCsSyntaxTree<TypeSyntax>());
+                                .AddTypeArgumentListArguments(typeArgs[0].ToCsSyntaxTree<TypeSyntax>());
                         }
                         else
                         {
                             return SyntaxFactory
                                 .GenericName("List")
-                                .AddTypeArgumentListArguments(node.TypeArguments[0].ToCsSyntaxTree<TypeSyntax>());
+                                .AddTypeArgumentListArguments(typeArgs[0].ToCsSyntaxTree<TypeSyntax>());
                         }
                     }
                     else
@@ -79,7 +68,7 @@ namespace TypeScript.Converter.CSharp
                     {
                         return SyntaxFactory
                             .GenericName(TypeHelper.ToShortName(typeText))
-                            .AddTypeArgumentListArguments(node.TypeArguments.ToCsSyntaxTrees<TypeSyntax>());
+                            .AddTypeArgumentListArguments(GetValidTypeArguments(node).ToCsSyntaxTrees<TypeSyntax>());
                     }
                     else
                     {
@@ -88,5 +77,16 @@ namespace TypeScript.Converter.CSharp
             }
         }
 
+        private static List<Node> GetValidTypeArguments(TypeReference node)
+        {
+            var ret = new List<Node>();
+            foreach (var type in node.TypeArguments)
+            {
+                if (type.Kind == NodeKind.VoidKeyword)
+                    continue;
+                ret.Add(type);
+            }
+            return ret;
+        }
     }
 }

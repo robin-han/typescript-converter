@@ -208,5 +208,4 @@ namespace TypeScript.Converter.CSharp
         }
     }
 
-
 }

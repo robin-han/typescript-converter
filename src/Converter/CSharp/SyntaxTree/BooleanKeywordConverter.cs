@@ -14,16 +14,7 @@ namespace TypeScript.Converter.CSharp
     {
         public CSharpSyntaxNode Convert(BooleanKeyword node)
         {
-            //if (this.Context.Config.PreferTypeScriptType)
-            //{
-            //    return SyntaxFactory.IdentifierName("Boolean");
-            //}
-            //else
-            //{
-            //    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.BoolKeyword));
-            //}
             return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.BoolKeyword));
         }
     }
 }
-

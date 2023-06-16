@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -826,6 +826,15 @@ namespace TypeScript.Syntax
                 {
                     parameters = ((FunctionDeclaration)member).Parameters;
                 }
+                else if (member.Kind == NodeKind.AnyKeyword)
+                {
+                    foreach (var argument in callExpr.Arguments)
+                    {
+                        var param = (Parameter)NodeHelper.CreateNode(NodeKind.Parameter);
+                        param.SetType(GetNodeType(argument, visited));
+                        parameters.Add(param);
+                    }
+                }
             }
             return parameters;
         }
@@ -992,7 +1001,7 @@ namespace TypeScript.Syntax
         public static Node GetPropertyAccessMemberFromParts(Node accessNode, List<string> accessNames, HashSet<Node> visited = null)
         {
             Project project = accessNode.Document?.Project;
-            
+
             Node classNode = null;
             for (int i = 0; i < accessNames.Count; i++)
             {
@@ -1144,8 +1153,14 @@ namespace TypeScript.Syntax
             if (properties.Count == 0)
             {
                 TypeLiteral typeLiteral = NodeHelper.CreateNode(NodeKind.TypeLiteral) as TypeLiteral;
-                typeLiteral.Members.Add(NodeHelper.CreateNode(NodeKind.IndexSignature));
-                ((IndexSignature)typeLiteral.Members[0]).SetType(NodeHelper.CreateNode(NodeKind.AnyKeyword));
+
+                Node elementType = NodeHelper.CreateNode(NodeKind.AnyKeyword);
+                elementType.NodeName = "type";
+                
+                Node propSignature = NodeHelper.CreateNode(NodeKind.IndexSignature);
+                propSignature.AddChild(elementType);
+
+                typeLiteral.Members.Add(propSignature);
                 return typeLiteral;
             }
             else
@@ -1193,7 +1208,7 @@ namespace TypeScript.Syntax
                     {
                         elementType = GetNodeType(elementType, visited);
                     }
-                    
+
                     elementType = elementType ?? NodeHelper.CreateNode(NodeKind.AnyKeyword);
                     if (elementType.Parent != null)
                     {
@@ -1243,7 +1258,7 @@ namespace TypeScript.Syntax
                     return null;
             }
         }
-    
+
         private static Node GetTypeOfBinaryType(Node leftType, Node rightType)
         {
             // string

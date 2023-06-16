@@ -19,7 +19,7 @@ namespace TypeScript.Converter.CSharp
             if (typeArguments != null && typeArguments.Count > 0)
             {
                 csRight = SyntaxFactory
-                    .GenericName(node.Right.Text)
+                    .GenericName(NormalizeTypeName(node.Right))
                     .AddTypeArgumentListArguments(typeArguments.ToCsSyntaxTrees<TypeSyntax>());
             }
             else

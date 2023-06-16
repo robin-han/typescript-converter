@@ -52,5 +52,4 @@ namespace TypeScript.Converter.CSharp
         }
     }
 
-
 }

@@ -18,16 +18,12 @@ namespace TypeScript.Converter.CSharp
             {
                 return CreateDelegateDeclaration(node);
             }
+            var name = SyntaxFactory.NameEquals(NormalizeTypeName(node.Name));
             if (node.TypeParameters.Count > 0)
             {
-                return SyntaxFactory.UsingDirective(SyntaxFactory.NameEquals(NormalizeTypeName(node.Name)), SyntaxFactory.IdentifierName("dynamic"));
+                return SyntaxFactory.UsingDirective(name, SyntaxFactory.IdentifierName("dynamic"));
             }
-            if (node.Type.Kind == NodeKind.TypeLiteral)
-            {
-                return SyntaxFactory.PropertyDeclaration(node.Type.ToCsSyntaxTree<TypeSyntax>(), NormalizeTypeName(node.Name))
-                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
-            }
-            return SyntaxFactory.UsingDirective(SyntaxFactory.NameEquals(NormalizeTypeName(node.Name)), node.Type.ToCsSyntaxTree<NameSyntax>());
+            return SyntaxFactory.UsingDirective(name, node.Type.ToCsSyntaxTree<TypeSyntax>());
         }
 
         private DelegateDeclarationSyntax CreateDelegateDeclaration(TypeAliasDeclaration node)
